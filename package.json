@@ -1,0 +1,40 @@
+{
+  "name": "minimum-fee-job",
+  "version": "0.0.1",
+  "description": "A process to check minimum fee config with current price of tokens",
+  "repository": "@rosen-bridge/minimum-fee-job",
+  "license": "GPL-3.0",
+  "author": "",
+  "type": "module",
+  "main": "dist/src/index.js",
+  "scripts": {
+    "build": "rimraf dist && tsc",
+    "lint": "eslint --fix . && npm run prettify",
+    "prettify": "prettier --write . --ignore-path ./.gitignore",
+    "start": "node --watch --experimental-specifier-resolution=node --loader ./ts-node-esm-loader.js ./src/index.ts",
+    "start:prod": "node --experimental-specifier-resolution=node ./dist/src/index.js",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "config": "^3.3.7",
+    "winston": "^3.8.2",
+    "winston-daily-rotate-file": "^4.7.1"
+  },
+  "devDependencies": {
+    "@types/config": "^0.0.41",
+    "@types/node": "^18.11.18",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "eslint": "^8.16.0",
+    "eslint-config-prettier": "^8.5.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^13.0.3",
+    "prettier": "2.7.1",
+    "ts-node": "^10.7.0",
+    "tsconfig-paths": "^4.1.2",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18.12.0"
+  }
+}
