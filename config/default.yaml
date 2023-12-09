@@ -24,3 +24,4 @@ triggerPercent:
   bridgeFee: 10
   cardanoNetworkFee: 10
   ergoNetworkFee: 10
+discordWebHookUrl: '' # Discord webhook url for sending notifications

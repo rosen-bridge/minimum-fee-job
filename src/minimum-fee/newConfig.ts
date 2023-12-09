@@ -20,11 +20,13 @@ export const generateNewFeeConfig = async () => {
   const ergoHeight = await getErgoHeight()
   const cardanoHeight = await getCardanoHeight()
 
+  const prices = new Map<string, number>();
   for (const tokenId of minimumFeeConfigs.supportedTokens) {
     const token = supportedTokens.find(token => token.tokenId === tokenId)
     if (!token) throw Error(`Token [${tokenId}] is not found in supported tokens list`)
     logger.debug(`Generating new config for token [${token.name}]`)
     const price = await getPrice(token, ergPrice);
+    prices.set(tokenId, price)
     logger.debug(`Price of [${token.name}]: ${price}$`)
 
     const feeConfig = feeConfigFromPrice(
@@ -40,7 +42,10 @@ export const generateNewFeeConfig = async () => {
     )
     newFeeConfigs.set(token.tokenId, feeConfig)
   }
-  return newFeeConfigs;
+  return {
+    configs: newFeeConfigs,
+    prices: prices
+  };
 }
 
 export const feeConfigFromPrice = (

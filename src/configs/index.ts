@@ -90,3 +90,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   txFee: 1100000n,
   supportedTokens: config.get<Array<string>>('minimumFee.supportedTokens'),
 }
+
+export const discordWebHookUrl = config.has('discordWebHookUrl')
+  ? config.get<string>('discordWebHookUrl')
+  : undefined
