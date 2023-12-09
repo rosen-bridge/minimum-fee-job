@@ -2,9 +2,9 @@ import { minimumFeeConfigs, supportedTokens } from "../configs";
 import { fetchPriceFromCoingeckoInUSD } from "../network/fetchPriceFromCoingecko";
 import { Fee, FeeConfig, SupportedTokenConfig } from "../types";
 import { getCardanoHeight, getErgoHeight } from "../network/clients";
-import { getPrice } from "../getPrice";
+import { getPrice } from "../utils/getPrice";
 import loggerFactory from "../utils/logger";
-import { feeRatioDivisor } from "../consts";
+import { feeRatioDivisor } from "../types/consts";
 
 const logger = loggerFactory(import.meta.url)
 

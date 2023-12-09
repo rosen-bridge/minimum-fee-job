@@ -1,6 +1,6 @@
 import * as wasm from "ergo-lib-wasm-nodejs";
 import { AssetBalance, SinglePayment, TokenInfo } from "./types";
-import { feeConfigToRegisterValues } from "../utils";
+import { feeConfigToRegisterValues } from "../utils/utils";
 import { BoxInfo, ErgoBoxProxy } from "@rosen-bridge/ergo-box-selection";
 
 /**

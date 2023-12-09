@@ -1,5 +1,5 @@
-import { bridgeFeeTriggerPercent, cardanoNetworkFeeTriggerPercent, ergoNetworkFeeTriggerPercent } from "./configs";
-import { FeeConfig, Registers } from "./types";
+import { bridgeFeeTriggerPercent, cardanoNetworkFeeTriggerPercent, ergoNetworkFeeTriggerPercent } from "../configs";
+import { FeeConfig, Registers } from "../types";
 
 export const concatFeeConfigs = (feeConfig1: FeeConfig, feeConfig2: FeeConfig): FeeConfig => {
   const finalFeeConfig = structuredClone(feeConfig1);

@@ -3,7 +3,7 @@ import { explorerBaseUrl, feeGuaranteeDurationOnCardano, feeGuaranteeDurationOnE
 import { FeeConfig } from "../types";
 import loggerFactory from "../utils/logger";
 import { getCardanoHeight, getErgoHeight } from "../network/clients";
-import { concatFeeConfigs, shouldUpdateConfig } from "../utils";
+import { concatFeeConfigs, shouldUpdateConfig } from "../utils/utils";
 
 const logger = loggerFactory(import.meta.url)
 

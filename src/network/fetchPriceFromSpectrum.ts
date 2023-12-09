@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Price } from "../types";
-import { ERG_ID } from "../consts";
+import { ERG_ID } from "../types/consts";
 import { spectrumPoolTimeLength } from "../configs";
 
 const axiosSpectrum = axios.create({

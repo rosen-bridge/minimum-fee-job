@@ -2,7 +2,7 @@ import { minimumFeeConfigs } from "./configs";
 import { generateNewFeeConfig } from "./minimum-fee/newConfig";
 import { updateConfigsTransaction } from "./minimum-fee/transaction";
 import { updateAndGenerateFeeConfig } from "./minimum-fee/updateConfig";
-import { feeConfigToRegisterValues } from "./utils";
+import { feeConfigToRegisterValues } from "./utils/utils";
 import loggerFactory from "./utils/logger";
 import JsonBigInt from "@rosen-bridge/json-bigint";
 
@@ -33,9 +33,12 @@ const main = async () => {
     logger.info(`updating config for tokens [${Array.from(updatedConfig.keys())}]`)
     // transaction
     const tx = await updateConfigsTransaction(updatedConfig)
-    logger.info(`Transaction to update minimum-fee config box generated: ${JsonBigInt.stringify({
+    const csrTx = JsonBigInt.stringify({
       CSR: JSON.stringify(tx)
-    })}`)
+    })
+    logger.info(`Transaction to update minimum-fee config box generated: ${csrTx}`)
+
+
   }
 }
 

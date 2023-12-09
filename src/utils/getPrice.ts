@@ -1,7 +1,7 @@
-import { fetchPriceFromCoinMarketCapInUSD } from "./network/fetchPriceFromCoinMarketCap";
-import { fetchPriceFromCoingeckoInUSD } from "./network/fetchPriceFromCoingecko";
-import { fetchPriceFromSpectrumInERG } from "./network/fetchPriceFromSpectrum";
-import { CoinGeckoParams, CoinMarketCapParams, ManualParams, PriceBackends, SupportedTokenConfig, TokenConfig } from "./types";
+import { fetchPriceFromCoinMarketCapInUSD } from "../network/fetchPriceFromCoinMarketCap";
+import { fetchPriceFromCoingeckoInUSD } from "../network/fetchPriceFromCoingecko";
+import { fetchPriceFromSpectrumInERG } from "../network/fetchPriceFromSpectrum";
+import { CoinGeckoParams, CoinMarketCapParams, ManualParams, PriceBackends, SupportedTokenConfig, TokenConfig } from "../types";
 
 export const getPrice = async (token: SupportedTokenConfig, ergPrice: number): Promise<number> => {
   switch (token.priceBackend) {
