@@ -1,6 +1,6 @@
 {
   "name": "minimum-fee-job",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A process to check minimum fee config with current price of tokens",
   "repository": "@rosen-bridge/minimum-fee-job",
   "license": "GPL-3.0",
@@ -16,7 +16,12 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@rosen-bridge/ergo-box-selection": "^0.3.0",
+    "@rosen-bridge/json-bigint": "^0.1.0",
+    "@rosen-bridge/minimum-fee": "^0.1.13",
+    "@rosen-clients/cardano-koios": "^2.0.1",
     "config": "^3.3.7",
+    "ergo-lib-wasm-nodejs": "^0.24.1",
     "winston": "^3.8.2",
     "winston-daily-rotate-file": "^4.7.1"
   },
