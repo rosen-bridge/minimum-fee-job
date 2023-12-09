@@ -2,7 +2,7 @@ import path from 'path';
 import winston, { format } from 'winston';
 import 'winston-daily-rotate-file';
 
-import { logLevel, logsPath, maxLogFilesCount, maxLogSize } from '@/configs';
+import { logLevel, logsPath, maxLogFilesCount, maxLogSize } from '../configs';
 
 import printf = format.printf;
 

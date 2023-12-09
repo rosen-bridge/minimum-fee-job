@@ -11,7 +11,7 @@
     "build": "rimraf dist && tsc",
     "lint": "eslint --fix . && npm run prettify",
     "prettify": "prettier --write . --ignore-path ./.gitignore",
-    "start": "node --watch --experimental-specifier-resolution=node --loader ./ts-node-esm-loader.js ./src/index.ts",
+    "start": "ts-node --experimental-specifier-resolution=node ./src/index.ts",
     "start:prod": "node --experimental-specifier-resolution=node ./dist/src/index.js",
     "type-check": "tsc --noEmit"
   },
