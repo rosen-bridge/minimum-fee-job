@@ -24,15 +24,19 @@ const main = async () => {
   const updatedConfig = await updateAndGenerateFeeConfig(newConfig);
 
   updatedConfig.forEach((feeConfig, tokenId) => {
-    logger.info(`Updated fee config for token [${tokenId}]: ${JsonBigInt.stringify(feeConfig)}`)
+    logger.debug(`Updated fee config for token [${tokenId}]: ${JsonBigInt.stringify(feeConfig)}`)
     logger.debug(`Register values: ${JsonBigInt.stringify(feeConfigToRegisterValues(feeConfig))}`)
   })
-
-  // transaction
-  const tx = await updateConfigsTransaction(updatedConfig)
-  logger.info(`Transaction to update minimum-fee config box generated: ${JsonBigInt.stringify({
-    CSR: JSON.stringify(tx)
-  })}`)
+  
+  if (updatedConfig.size === 0) logger.info(`No config need update`)
+  else {
+    logger.info(`updating config for tokens [${Array.from(updatedConfig.keys())}]`)
+    // transaction
+    const tx = await updateConfigsTransaction(updatedConfig)
+    logger.info(`Transaction to update minimum-fee config box generated: ${JsonBigInt.stringify({
+      CSR: JSON.stringify(tx)
+    })}`)
+  }
 }
 
 main().then(() => null)

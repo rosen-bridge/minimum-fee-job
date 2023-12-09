@@ -15,12 +15,12 @@ const bridgeMinimumFee = new BridgeMinimumFee(
 export const updateAndGenerateFeeConfig = async (newConfigs: Map<string, FeeConfig>) => {
   const updatedFeeConfigs: Map<string, FeeConfig> = new Map();
   for (const token of supportedTokens) {
-    logger.info(`Combining old and new config of token [${token.name}]`)
+    logger.debug(`Combining old and new config of token [${token.name}]`)
     const newConfig = newConfigs.get(token.tokenId)!
 
     const feeConfig = await updateFeeConfig(token.ergoSideTokenId, newConfig)
     if (feeConfig) updatedFeeConfigs.set(token.tokenId, feeConfig)
-    else logger.info(`No need to update token [${token.name}] config`)
+    else logger.debug(`No need to update token [${token.name}] config`)
   }
   return updatedFeeConfigs;
 }
@@ -31,7 +31,7 @@ export const updateFeeConfig = async (tokenId: string, newFeeConfig: FeeConfig):
     oldConfig = await bridgeMinimumFee.search(tokenId)
     logger.debug(`Found a config for token [${tokenId}].`)
   } catch (e) {
-    logger.info(`No config found for token [${tokenId}]. Generating config with only the new one...`)
+    logger.debug(`No config found for token [${tokenId}]. Generating config with only the new one...`)
   }
 
   if (oldConfig) {

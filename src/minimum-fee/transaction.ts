@@ -6,7 +6,6 @@ import { generateTransaction } from "../transaction/generate";
 import { FeeConfig } from "../types";
 
 export const updateConfigsTransaction = async (feeConfigs: Map<string, FeeConfig>) => {
-  console.log(`generating transaction to update minimum-fee config for all supported tokens`)
   const inputs: Array<ErgoBoxProxy> = []
   const order: ConfigOrder = []
   for (const tokenId of minimumFeeConfigs.supportedTokens) {

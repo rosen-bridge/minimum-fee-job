@@ -23,9 +23,9 @@ export const generateNewFeeConfig = async () => {
   for (const tokenId of minimumFeeConfigs.supportedTokens) {
     const token = supportedTokens.find(token => token.tokenId === tokenId)
     if (!token) throw Error(`Token [${tokenId}] is not found in supported tokens list`)
-    logger.info(`Generating new config for token [${token.name}]`)
+    logger.debug(`Generating new config for token [${token.name}]`)
     const price = await getPrice(token, ergPrice);
-    logger.info(`Price of [${token.name}]: ${price}$`)
+    logger.debug(`Price of [${token.name}]: ${price}$`)
 
     const feeConfig = feeConfigFromPrice(
       ergPrice,
