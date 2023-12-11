@@ -1,11 +1,11 @@
 import { BridgeMinimumFee } from "@rosen-bridge/minimum-fee";
 import { explorerBaseUrl, feeGuaranteeDurationOnCardano, feeGuaranteeDurationOnErgo, minimumFeeConfigs, supportedTokens } from "../configs";
 import { FeeConfig } from "../types";
-import loggerFactory from "../utils/logger";
 import { getCardanoHeight, getErgoHeight } from "../network/clients";
 import { concatFeeConfigs, shouldUpdateConfig } from "../utils/utils";
+import WinstonLogger from "@rosen-bridge/winston-logger";
 
-const logger = loggerFactory(import.meta.url)
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const bridgeMinimumFee = new BridgeMinimumFee(
   explorerBaseUrl,

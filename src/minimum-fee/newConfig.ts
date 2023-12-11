@@ -3,10 +3,10 @@ import { fetchPriceFromCoingeckoInUSD } from "../network/fetchPriceFromCoingecko
 import { Fee, FeeConfig, SupportedTokenConfig } from "../types";
 import { getCardanoHeight, getErgoHeight } from "../network/clients";
 import { getPrice } from "../utils/getPrice";
-import loggerFactory from "../utils/logger";
 import { feeRatioDivisor } from "../types/consts";
+import WinstonLogger from "@rosen-bridge/winston-logger";
 
-const logger = loggerFactory(import.meta.url)
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export const generateNewFeeConfig = async () => {
   const newFeeConfigs: Map<string, FeeConfig> = new Map();

@@ -1,13 +1,14 @@
+import './bootstrap';
 import { minimumFeeConfigs, supportedTokens } from "./configs";
 import { generateNewFeeConfig } from "./minimum-fee/newConfig";
 import { updateConfigsTransaction } from "./minimum-fee/transaction";
 import { updateAndGenerateFeeConfig } from "./minimum-fee/updateConfig";
 import { feeConfigToRegisterValues } from "./utils/utils";
-import loggerFactory from "./utils/logger";
 import JsonBigInt from "@rosen-bridge/json-bigint";
 import { Notification } from "./network/Notification"
+import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = loggerFactory(import.meta.url)
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const main = async () => {
   if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
