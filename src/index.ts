@@ -40,27 +40,27 @@ const main = async () => {
     logger.info(`Transaction to update minimum-fee config box generated`)
 
     // send notification to discord
-    // const discordNotification = Notification.getInstance()
-    // discordNotification.sendMessage(`# MinimumFee configs need to be updated`)
+    const discordNotification = Notification.getInstance()
+    discordNotification.sendMessage(`# MinimumFee configs need to be updated`)
     const tokenIds = Array.from(updatedConfig.keys())
 
     // send configs
     for (const tokenId of tokenIds) {
       const token = minimumFeeConfigs.supportedTokens.find(token => token.tokenId === tokenId)!
-      // discordNotification.sendMessage(`## Token ${token.name} [${token.tokenId}]
-      //   ergo side tokenId: \`${token.ergoSideTokenId}\`
-      //   price: ${prices.get(tokenId)!}$
-      // `)
+      discordNotification.sendMessage(`## Token ${token.name} [${token.tokenId}]
+        ergo side tokenId: \`${token.ergoSideTokenId}\`
+        price: ${prices.get(tokenId)!}$
+      `)
       const tokenFeeConfig = JsonBigInt.stringify(
         updatedConfig.get(tokenId)
       )
-      // discordNotification.sendMessage(`\`\`\`json\n${tokenFeeConfig}\n\`\`\``)
+      discordNotification.sendMessage(`\`\`\`json\n${tokenFeeConfig}\n\`\`\``)
     }
 
     // send tx
     const n = Math.ceil(tx.length / 1500)
     const chunks = Array.from(tx.match(/.{1,1500}/g)!)
-    // discordNotification.sendMessage(`generated tx. chunks: ${n}`)
+    discordNotification.sendMessage(`generated tx. chunks: ${n}`)
     for (let i = 0; i < n; i++) {
       const txChunk = JsonBigInt.stringify({
         CSR: chunks[i],
@@ -69,7 +69,7 @@ const main = async () => {
       })
       logger.info(`chunk [${i}]: ${txChunk}`)
 
-      // discordNotification.sendMessage(`\`\`\`json\n${txChunk}\n\`\`\``)
+      discordNotification.sendMessage(`\`\`\`json\n${txChunk}\n\`\`\``)
     }
   }
 }
