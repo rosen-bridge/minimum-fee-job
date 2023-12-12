@@ -1,0 +1,3 @@
+export const ERG_ID = '0000000000000000000000000000000000000000000000000000000000000000'
+export const rsnRatioDivisor = 1000000000000;
+export const feeRatioDivisor = 10000;
