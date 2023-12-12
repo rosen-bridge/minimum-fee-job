@@ -5,6 +5,9 @@ import { minimumFeeConfigs } from "../configs";
 import { ErgoBoxProxy, selectErgoBoxes } from "@rosen-bridge/ergo-box-selection";
 import { getAddressBoxes, getErgoHeight, getStateContext } from "../network/clients";
 import JsonBigInt from '@rosen-bridge/json-bigint';
+import WinstonLogger from "@rosen-bridge/winston-logger";
+
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 /**
  * generates unsigned transaction for config order
@@ -16,20 +19,20 @@ export const generateTransaction = async (
   order: ConfigOrder,
   inputs: Array<ErgoBoxProxy>
 ): Promise<TransactionEIP19> => {
-  console.debug(
+  logger.debug(
     `Generating Ergo transaction for Order: ${JsonBigInt.stringify(order)}`
   );
   // calculate required assets
   const orderRequiredAssets = order
     .map((order) => order.assets)
     .reduce(sumAssetBalance, { nativeToken: 0n, tokens: [] });
-  console.debug(
+  logger.debug(
     `Order required assets: ${JsonBigInt.stringify(orderRequiredAssets)}`
   );
   const inputAssets = inputs
     .map(box => getBoxInfo(box).assets)
     .reduce(sumAssetBalance, { nativeToken: 0n, tokens: [] });
-  console.debug(
+  logger.debug(
     `Pre-selected boxes assets: ${JsonBigInt.stringify(inputAssets)}`
   );
   const requiredAssets = sumAssetBalance(
@@ -44,7 +47,7 @@ export const generateTransaction = async (
       tokens: [],
     }
   );
-  console.debug(
+  logger.debug(
     `Required assets: ${JsonBigInt.stringify(requiredAssets)}`
   );
 
@@ -86,7 +89,7 @@ export const generateTransaction = async (
       getBoxAssets(box)
     );
   });
-  console.debug(`Input assets: ${JsonBigInt.stringify(remainingAssets)}`);
+  logger.debug(`Input assets: ${JsonBigInt.stringify(remainingAssets)}`);
 
   // generate output boxes objects
   const outBoxCandidates = wasm.ErgoBoxCandidates.empty();
@@ -103,7 +106,7 @@ export const generateTransaction = async (
       minimumFeeConfigs.minBoxErg
     );
   });
-  console.debug(
+  logger.debug(
     `Remaining assets: ${JsonBigInt.stringify(remainingAssets)}`
   );
 

@@ -1,21 +1,21 @@
-import { minimumFeeConfigs, supportedTokens } from "../configs";
+import { minimumFeeConfigs } from "../configs";
 import { getMinimumFeeConfigBox } from "../network/clients";
 import { ErgoBoxProxy } from "@rosen-bridge/ergo-box-selection";
 import { ConfigOrder } from "../transaction/types";
 import { generateTransaction } from "../transaction/generate";
 import { FeeConfig } from "../types";
+import WinstonLogger from "@rosen-bridge/winston-logger";
+
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export const updateConfigsTransaction = async (feeConfigs: Map<string, FeeConfig>) => {
   const inputs: Array<ErgoBoxProxy> = []
   const order: ConfigOrder = []
-  for (const tokenId of minimumFeeConfigs.supportedTokens) {
-    const token = supportedTokens.find(token => token.tokenId === tokenId)
-    if (!token) throw Error(`Token [${tokenId}] is not found in supported tokens list`)
-
-    const feeConfig = feeConfigs.get(tokenId)!;
+  for (const token of minimumFeeConfigs.supportedTokens) {
+    const feeConfig = feeConfigs.get(token.tokenId)!;
     const currentConfigBox = await getMinimumFeeConfigBox(token.ergoSideTokenId)
 
-    if (!currentConfigBox) console.log(`found no current config box for token [${tokenId}]`)
+    if (!currentConfigBox) logger.warn(`found no current config box for token [${token.tokenId}]`)
     else inputs.push(currentConfigBox)
 
     const requiredTokens = [
@@ -24,7 +24,7 @@ export const updateConfigsTransaction = async (feeConfigs: Map<string, FeeConfig
         value: 1n
       }
     ]
-    if (tokenId !== 'erg') requiredTokens.push(
+    if (token.tokenId !== 'erg') requiredTokens.push(
       {
         id: token.ergoSideTokenId,
         value: 1n

@@ -78,5 +78,5 @@ export interface ConfigInterface {
   feeAddress: string,
   minBoxErg: bigint,
   txFee: bigint,
-  supportedTokens: Array<string>
+  supportedTokens: Array<SupportedTokenConfig>
 }

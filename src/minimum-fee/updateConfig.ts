@@ -1,5 +1,5 @@
 import { BridgeMinimumFee } from "@rosen-bridge/minimum-fee";
-import { explorerBaseUrl, feeGuaranteeDurationOnCardano, feeGuaranteeDurationOnErgo, minimumFeeConfigs, supportedTokens } from "../configs";
+import { explorerBaseUrl, feeGuaranteeDurationOnCardano, feeGuaranteeDurationOnErgo, minimumFeeConfigs } from "../configs";
 import { FeeConfig } from "../types";
 import { getCardanoHeight, getErgoHeight } from "../network/clients";
 import { concatFeeConfigs, shouldUpdateConfig } from "../utils/utils";
@@ -14,7 +14,7 @@ const bridgeMinimumFee = new BridgeMinimumFee(
 
 export const updateAndGenerateFeeConfig = async (newConfigs: Map<string, FeeConfig>) => {
   const updatedFeeConfigs: Map<string, FeeConfig> = new Map();
-  for (const token of supportedTokens) {
+  for (const token of minimumFeeConfigs.supportedTokens) {
     logger.debug(`Combining old and new config of token [${token.name}]`)
     const newConfig = newConfigs.get(token.tokenId)!
 

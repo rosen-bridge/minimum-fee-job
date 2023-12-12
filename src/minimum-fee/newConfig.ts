@@ -1,4 +1,4 @@
-import { minimumFeeConfigs, supportedTokens } from "../configs";
+import { minimumFeeConfigs } from "../configs";
 import { fetchPriceFromCoingeckoInUSD } from "../network/fetchPriceFromCoingecko";
 import { Fee, FeeConfig, SupportedTokenConfig } from "../types";
 import { getCardanoHeight, getErgoHeight } from "../network/clients";
@@ -13,7 +13,7 @@ export const generateNewFeeConfig = async () => {
   const ergPrice = await fetchPriceFromCoingeckoInUSD('ergo')
   const adaPrice = await fetchPriceFromCoingeckoInUSD('cardano')
 
-  const rsnTokenConfig = supportedTokens.find(token => token.name === 'RSN')
+  const rsnTokenConfig = minimumFeeConfigs.supportedTokens.find(token => token.name === 'RSN')
   if (!rsnTokenConfig) throw Error(`Token [RSN] is not found in config`)
   const rsnPrice = await getPrice(rsnTokenConfig, ergPrice)
 
@@ -21,12 +21,10 @@ export const generateNewFeeConfig = async () => {
   const cardanoHeight = await getCardanoHeight()
 
   const prices = new Map<string, number>();
-  for (const tokenId of minimumFeeConfigs.supportedTokens) {
-    const token = supportedTokens.find(token => token.tokenId === tokenId)
-    if (!token) throw Error(`Token [${tokenId}] is not found in supported tokens list`)
+  for (const token of minimumFeeConfigs.supportedTokens) {
     logger.debug(`Generating new config for token [${token.name}]`)
     const price = await getPrice(token, ergPrice);
-    prices.set(tokenId, price)
+    prices.set(token.tokenId, price)
     logger.debug(`Price of [${token.name}]: ${price}$`)
 
     const feeConfig = feeConfigFromPrice(

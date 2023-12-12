@@ -1,5 +1,5 @@
 import './bootstrap';
-import { minimumFeeConfigs, supportedTokens } from "./configs";
+import { minimumFeeConfigs } from "./configs";
 import { generateNewFeeConfig } from "./minimum-fee/newConfig";
 import { updateConfigsTransaction } from "./minimum-fee/transaction";
 import { updateAndGenerateFeeConfig } from "./minimum-fee/updateConfig";
@@ -37,29 +37,30 @@ const main = async () => {
     // transaction
     logger.info(`updating config for tokens [${Array.from(updatedConfig.keys())}]`)
     const tx = JsonBigInt.stringify(await updateConfigsTransaction(updatedConfig))
-    logger.info(`Transaction to update minimum-fee config box generated`)  
+    logger.info(`Transaction to update minimum-fee config box generated`)
 
     // send notification to discord
-    Notification.getInstance().sendMessage(`# MinimumFee configs need to be updated`)
+    // const discordNotification = Notification.getInstance()
+    // discordNotification.sendMessage(`# MinimumFee configs need to be updated`)
     const tokenIds = Array.from(updatedConfig.keys())
 
     // send configs
     for (const tokenId of tokenIds) {
-      const token = supportedTokens.find(token => token.tokenId === tokenId)!
-      Notification.getInstance().sendMessage(`## Token ${token.name} [${token.tokenId}]
-        ergo side tokenId: \`${token.ergoSideTokenId}\`
-        price: ${prices.get(tokenId)!}$
-      `)
+      const token = minimumFeeConfigs.supportedTokens.find(token => token.tokenId === tokenId)!
+      // discordNotification.sendMessage(`## Token ${token.name} [${token.tokenId}]
+      //   ergo side tokenId: \`${token.ergoSideTokenId}\`
+      //   price: ${prices.get(tokenId)!}$
+      // `)
       const tokenFeeConfig = JsonBigInt.stringify(
         updatedConfig.get(tokenId)
       )
-      Notification.getInstance().sendMessage(`\`\`\`json\n${tokenFeeConfig}\n\`\`\``)
+      // discordNotification.sendMessage(`\`\`\`json\n${tokenFeeConfig}\n\`\`\``)
     }
 
     // send tx
     const n = Math.ceil(tx.length / 1500)
     const chunks = Array.from(tx.match(/.{1,1500}/g)!)
-    Notification.getInstance().sendMessage(`generated tx. chunks: ${n}`)
+    // discordNotification.sendMessage(`generated tx. chunks: ${n}`)
     for (let i = 0; i < n; i++) {
       const txChunk = JsonBigInt.stringify({
         CSR: chunks[i],
@@ -68,7 +69,7 @@ const main = async () => {
       })
       logger.info(`chunk [${i}]: ${txChunk}`)
 
-      Notification.getInstance().sendMessage(`\`\`\`json\n${txChunk}\n\`\`\``)
+      // discordNotification.sendMessage(`\`\`\`json\n${txChunk}\n\`\`\``)
     }
   }
 }
