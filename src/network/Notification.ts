@@ -2,7 +2,7 @@ import { WebhookClient } from 'discord.js';
 import { discordWebHookUrl } from '../configs';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);;
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export class Notification {
   private static instance: Notification;

@@ -83,3 +83,4 @@ triggerPercent:
   cardanoNetworkFee: 10
   ergoNetworkFee: 10
 discordWebHookUrl: '' # Discord webhook url for sending notifications
+interval: 14400 # every 4 hours

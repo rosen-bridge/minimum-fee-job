@@ -1,7 +1,7 @@
-import * as wasm from "ergo-lib-wasm-nodejs";
-import { AssetBalance, SinglePayment, TokenInfo } from "./types";
-import { feeConfigToRegisterValues } from "../utils/utils";
-import { BoxInfo, ErgoBoxProxy } from "@rosen-bridge/ergo-box-selection";
+import * as wasm from 'ergo-lib-wasm-nodejs';
+import { AssetBalance, SinglePayment, TokenInfo } from './types';
+import { feeConfigToRegisterValues } from '../utils/utils';
+import { BoxInfo, ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
 
 /**
  * extracts box id and assets of a box
@@ -44,21 +44,19 @@ export const getBoxAssets = (box: wasm.ErgoBoxCandidate): AssetBalance => {
 
 /**
  * creates minimum-fee config box
- * @param currentHeight 
- * @param order 
- * @returns 
+ * @param currentHeight
+ * @param order
+ * @returns
  */
 export const createBox = (
   currentHeight: number,
-  order: SinglePayment,
+  order: SinglePayment
 ): wasm.ErgoBoxCandidate => {
   const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
     wasm.BoxValue.from_i64(
       wasm.I64.from_str(order.assets.nativeToken.toString())
     ),
-    wasm.Contract.new(
-      wasm.Address.from_base58(order.address).to_ergo_tree()
-    ),
+    wasm.Contract.new(wasm.Address.from_base58(order.address).to_ergo_tree()),
     currentHeight
   );
   // add box tokens
@@ -69,11 +67,13 @@ export const createBox = (
     )
   );
   // add box registers
-  const registers = feeConfigToRegisterValues(order.feeConfig)
+  const registers = feeConfigToRegisterValues(order.feeConfig);
   // R4
   boxBuilder.set_register_value(
     4,
-    wasm.Constant.from_coll_coll_byte(registers.R4.map(chain => Buffer.from(chain)))
+    wasm.Constant.from_coll_coll_byte(
+      registers.R4.map((chain) => Buffer.from(chain))
+    )
   );
   // R5 -> R9
   boxBuilder.set_register_value(5, wasm.Constant.from_js(registers.R5));
@@ -84,7 +84,7 @@ export const createBox = (
 
   // build and add box
   return boxBuilder.build();
-}
+};
 
 /**
  * sums two AssetBalance
@@ -92,7 +92,10 @@ export const createBox = (
  * @param b second AssetBalance object
  * @returns aggregated AssetBalance
  */
-export const sumAssetBalance = (a: AssetBalance, b: AssetBalance): AssetBalance => {
+export const sumAssetBalance = (
+  a: AssetBalance,
+  b: AssetBalance
+): AssetBalance => {
   // sum native token
   const nativeToken = a.nativeToken + b.nativeToken;
   const tokens: Array<TokenInfo> = [];
@@ -139,8 +142,7 @@ export const subtractAssetBalance = (
   b.tokens.forEach((token) => {
     const index = tokens.findIndex((item) => item.id === token.id);
     if (index !== -1) {
-      if (tokens[index].value > token.value)
-        tokens[index].value -= token.value;
+      if (tokens[index].value > token.value) tokens[index].value -= token.value;
       else if (tokens[index].value === token.value) tokens.splice(index, 1);
       else
         throw new Error(
@@ -149,9 +151,7 @@ export const subtractAssetBalance = (
           ].value.toString()}] is less than [${token.value.toString()}]`
         );
     } else
-      throw new Error(
-        `Cannot reduce token [${token.id}]: Token not found`
-      );
+      throw new Error(`Cannot reduce token [${token.id}]: Token not found`);
   });
 
   return {
