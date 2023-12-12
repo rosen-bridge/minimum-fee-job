@@ -30,18 +30,26 @@ export const logConfigs = () => {
   });
   if (wrongLogTypeIndex >= 0) {
     throw new Error(
-      `unexpected config at path logs[${wrongLogTypeIndex}]: ${JSON.stringify(logs[wrongLogTypeIndex])}`
+      `unexpected config at path logs[${wrongLogTypeIndex}]: ${JSON.stringify(
+        logs[wrongLogTypeIndex]
+      )}`
     );
   }
   return logs;
-}
+};
 
-export const bridgeFeeTriggerPercent = config.get<number>('triggerPercent.bridgeFee')
-export const cardanoNetworkFeeTriggerPercent = config.get<number>('triggerPercent.cardanoNetworkFee')
-export const ergoNetworkFeeTriggerPercent = config.get<number>('triggerPercent.ergoNetworkFee')
+export const bridgeFeeTriggerPercent = config.get<number>(
+  'triggerPercent.bridgeFee'
+);
+export const cardanoNetworkFeeTriggerPercent = config.get<number>(
+  'triggerPercent.cardanoNetworkFee'
+);
+export const ergoNetworkFeeTriggerPercent = config.get<number>(
+  'triggerPercent.ergoNetworkFee'
+);
 
-export const ERG = 'erg'
-export const ADA = 'ada'
+export const ERG = 'erg';
+export const ADA = 'ada';
 
 export const explorerBaseUrl = 'https://api.ergoplatform.com';
 export const koiosBaseUrl = 'https://api.koios.rest/api/v1';
@@ -49,6 +57,7 @@ export const koiosBaseUrl = 'https://api.koios.rest/api/v1';
 export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
 export const feeGuaranteeDurationOnErgo = 24 * 30; // 1 day,
 export const feeGuaranteeDurationOnCardano = 24 * 60 * 3; // 1 day,
+export const RunningInterval = config.get<number>('interval') * 1000; // seconds to miliseconds
 
 export const minimumFeeConfigs: ConfigInterface = {
   minimumFeeNFT: config.get<string>('minimumFee.NFT'),
@@ -56,9 +65,11 @@ export const minimumFeeConfigs: ConfigInterface = {
   feeAddress: config.get<string>('minimumFee.feeAddress'),
   minBoxErg: 200000n,
   txFee: 1100000n,
-  supportedTokens: config.get<Array<SupportedTokenConfig>>('minimumFee.supportedTokens'),
-}
+  supportedTokens: config.get<Array<SupportedTokenConfig>>(
+    'minimumFee.supportedTokens'
+  ),
+};
 
 export const discordWebHookUrl = config.has('discordWebHookUrl')
   ? config.get<string>('discordWebHookUrl')
-  : undefined
+  : undefined;

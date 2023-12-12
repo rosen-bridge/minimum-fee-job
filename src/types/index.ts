@@ -6,8 +6,8 @@ export interface TokenConfig {
 }
 
 export interface Price {
-  price: number,
-  volume: number
+  price: number;
+  volume: number;
 }
 
 export interface Fee {
@@ -38,45 +38,71 @@ export enum PriceBackends {
   CoinGecko = 'coingecko',
   CoinMarketCap = 'coinmarketcap',
   Spectrum = 'spectrum',
-  Manual = 'manual'
+  Manual = 'manual',
 }
 
 export interface CoinGeckoParams {
-  network: string
-};
+  network: string;
+}
 
 export interface CoinMarketCapParams {
-  slug: string
-};
+  slug: string;
+}
 
 export interface ManualParams {
-  price: number
-};
+  price: number;
+}
 
-export type PriceBackendParams = CoinGeckoParams | CoinMarketCapParams | ManualParams | {};
+export interface SpectrumParams {}
+
+export type PriceBackendParams =
+  | CoinGeckoParams
+  | CoinMarketCapParams
+  | ManualParams
+  | SpectrumParams;
 
 export interface SupportedTokenConfig {
-  tokenId: string,
-  ergoSideTokenId: string,
-  name: string,
-  decimals: number,
-  priceBackend: string,
-  priceBackendParams: PriceBackendParams,
+  tokenId: string;
+  ergoSideTokenId: string;
+  name: string;
+  decimals: number;
+  priceBackend: string;
+  priceBackendParams: PriceBackendParams;
   fee: {
-    ergoHeightDelay: number,
-    cardanoHeightDelay: number,
-    bridgeFeeUSD: number,
-    ergNetworkFee: number,
-    adaNetworkFee: number,
-    feeRatioFloat: number
-  }
+    ergoHeightDelay: number;
+    cardanoHeightDelay: number;
+    bridgeFeeUSD: number;
+    ergNetworkFee: number;
+    adaNetworkFee: number;
+    feeRatioFloat: number;
+  };
 }
 
 export interface ConfigInterface {
-  minimumFeeNFT: string,
-  minimumFeeAddress: string,
-  feeAddress: string,
-  minBoxErg: bigint,
-  txFee: bigint,
-  supportedTokens: Array<SupportedTokenConfig>
+  minimumFeeNFT: string;
+  minimumFeeAddress: string;
+  feeAddress: string;
+  minBoxErg: bigint;
+  txFee: bigint;
+  supportedTokens: Array<SupportedTokenConfig>;
+}
+
+interface CoinMarketCapPricePoolQuote {
+  volume24h?: number;
+  price: number;
+}
+export interface CoinMarketCapPricePool {
+  quotes: Array<CoinMarketCapPricePoolQuote>;
+}
+
+export interface SpectrumPool {
+  baseId: string;
+  quoteId: string;
+  lastPrice: number;
+  quoteVolume: {
+    value: number;
+  };
+  baseVolume: {
+    value: number;
+  };
 }
