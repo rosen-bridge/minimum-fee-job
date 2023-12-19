@@ -11,10 +11,12 @@ import WinstonLogger from '@rosen-bridge/winston-logger';
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const main = async () => {
+  logger.info(`Starting Job`)
   if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
   // new config
+  logger.info(`Generating new config`)
   const newFeeConfigs = await generateNewFeeConfig();
   const newConfig = newFeeConfigs.configs;
   const prices = newFeeConfigs.prices;
@@ -31,6 +33,7 @@ const main = async () => {
   });
 
   // updated config
+  logger.info(`Combining new config with current config`)
   const updatedConfig = await updateAndGenerateFeeConfig(newConfig);
 
   updatedConfig.forEach((feeConfig, tokenId) => {
@@ -94,12 +97,22 @@ const main = async () => {
 
 const interval = () => {
   setTimeout(() => {
-    main().then(interval).catch(interval);
+    main()
+      .then(interval)
+      .catch(e => {
+        logger.warn(`An error ocurred: ${e}`)
+        interval()
+      });
   }, RunningInterval);
 };
 
 const exec = () => {
-  main().then(interval).catch(interval);
+  main()
+    .then(interval)
+    .catch(e => {
+      logger.warn(`An error ocurred: ${e}`)
+      interval()
+    });
 };
 
 exec();
