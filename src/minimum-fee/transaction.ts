@@ -14,7 +14,9 @@ export const updateConfigsTransaction = async (
   const inputs: Array<ErgoBoxProxy> = [];
   const order: ConfigOrder = [];
   for (const token of minimumFeeConfigs.supportedTokens) {
-    const feeConfig = feeConfigs.get(token.tokenId)!;
+    const feeConfig = feeConfigs.get(token.tokenId);
+    if (!feeConfig) continue;
+
     const currentConfigBox = await getMinimumFeeConfigBox(
       token.ergoSideTokenId
     );
