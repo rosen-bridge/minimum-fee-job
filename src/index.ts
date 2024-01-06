@@ -11,12 +11,12 @@ import WinstonLogger from '@rosen-bridge/winston-logger';
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const main = async () => {
-  logger.info(`Starting Job`)
+  logger.info(`Starting Job`);
   if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
   // new config
-  logger.info(`Generating new config`)
+  logger.info(`Generating new config`);
   const newFeeConfigs = await generateNewFeeConfig();
   const newConfig = newFeeConfigs.configs;
   const prices = newFeeConfigs.prices;
@@ -33,7 +33,7 @@ const main = async () => {
   });
 
   // updated config
-  logger.info(`Combining new config with current config`)
+  logger.info(`Combining new config with current config`);
   const updatedConfig = await updateAndGenerateFeeConfig(newConfig);
 
   updatedConfig.forEach((feeConfig, tokenId) => {
@@ -93,26 +93,26 @@ const main = async () => {
       discordNotification.sendMessage(`\`\`\`json\n${txChunk}\n\`\`\``);
     }
   }
+
+  logger.info(`Job done`);
 };
 
 const interval = () => {
-  setTimeout(() => {
-    main()
-      .then(interval)
-      .catch(e => {
-        logger.warn(`An error ocurred: ${e}`)
-        interval()
-      });
-  }, RunningInterval);
-};
-
-const exec = () => {
   main()
-    .then(interval)
-    .catch(e => {
-      logger.warn(`An error ocurred: ${e}`)
-      interval()
+    .then(() => {
+      setTimeout(interval, RunningInterval);
+    })
+    .catch((e) => {
+      logger.warn(`An error ocurred: ${e}`);
+      if (e instanceof Error) logger.debug(e.stack);
+      // send alert to discord
+      const discordNotification = Notification.getInstance();
+      discordNotification.sendMessage(
+        `# :warning: An error occurred at minimum-fee-job\n` +
+          `\`\`\`json\n${e}\n\`\`\``
+      );
+      setTimeout(interval, RunningInterval);
     });
 };
 
-exec();
+interval();
