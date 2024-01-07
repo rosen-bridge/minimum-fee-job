@@ -2,6 +2,7 @@ import {
   bridgeFeeTriggerPercent,
   cardanoNetworkFeeTriggerPercent,
   ergoNetworkFeeTriggerPercent,
+  minimumFeeConfigs,
 } from '../configs';
 import { FeeConfig, Registers } from '../types';
 
@@ -106,4 +107,15 @@ export const shouldUpdateConfig = (
 export const differencePercent = (a: bigint, b: bigint): bigint => {
   const diff = a < b ? b - a : a - b;
   return (diff * 100n) / a;
+};
+
+export const pricesToString = (prices: Map<string, number>) => {
+  const result: Array<string> = [];
+  prices.forEach((value, key) => {
+    const token = minimumFeeConfigs.supportedTokens.find(
+      (token) => token.tokenId === key
+    )!;
+    result.push(`${token.name} => ${value}$`);
+  });
+  return result.join('\n');
 };
