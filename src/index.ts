@@ -3,7 +3,7 @@ import { RunningInterval, minimumFeeConfigs } from './configs';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
 import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
-import { feeConfigToRegisterValues } from './utils/utils';
+import { feeConfigToRegisterValues, pricesToString } from './utils/utils';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Notification } from './network/Notification';
 import WinstonLogger from '@rosen-bridge/winston-logger';
@@ -34,7 +34,9 @@ const main = async () => {
 
   // updated config
   logger.info(`Combining new config with current config`);
-  const updatedConfig = await updateAndGenerateFeeConfig(newConfig);
+  const updateResult = await updateAndGenerateFeeConfig(newConfig);
+  const updatedConfig = updateResult.config;
+  const bridgeFeeDifferences = updateResult.bridgeFeeDifferences;
 
   updatedConfig.forEach((feeConfig, tokenId) => {
     logger.debug(
@@ -63,6 +65,10 @@ const main = async () => {
     // send notification to discord
     const discordNotification = Notification.getInstance();
     discordNotification.sendMessage(`# MinimumFee configs need to be updated`);
+    discordNotification.sendMessage(
+      `## Prices\n` +
+        `\`\`\`json\n${pricesToString(prices, bridgeFeeDifferences)}\n\`\`\``
+    );
     const tokenIds = Array.from(updatedConfig.keys());
 
     // send configs
@@ -72,7 +78,6 @@ const main = async () => {
       )!;
       discordNotification.sendMessage(`## Token ${token.name} [${token.tokenId}]
         ergo side tokenId: \`${token.ergoSideTokenId}\`
-        price: ${prices.get(tokenId)!}$
       `);
       const tokenFeeConfig = JsonBigInt.stringify(updatedConfig.get(tokenId));
       discordNotification.sendMessage(`\`\`\`json\n${tokenFeeConfig}\n\`\`\``);
