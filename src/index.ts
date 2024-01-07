@@ -34,7 +34,9 @@ const main = async () => {
 
   // updated config
   logger.info(`Combining new config with current config`);
-  const updatedConfig = await updateAndGenerateFeeConfig(newConfig);
+  const updateResult = await updateAndGenerateFeeConfig(newConfig);
+  const updatedConfig = updateResult.config;
+  const bridgeFeeDifferences = updateResult.bridgeFeeDifferences;
 
   updatedConfig.forEach((feeConfig, tokenId) => {
     logger.debug(
@@ -63,9 +65,10 @@ const main = async () => {
     // send notification to discord
     const discordNotification = Notification.getInstance();
     discordNotification.sendMessage(`# MinimumFee configs need to be updated`);
-    discordNotification.sendMessage(`## Current Prices
-      \`\`\`json\n${pricesToString(prices)}\n\`\`\`
-    `);
+    discordNotification.sendMessage(
+      `## Prices\n` +
+        `\`\`\`json\n${pricesToString(prices, bridgeFeeDifferences)}\n\`\`\``
+    );
     const tokenIds = Array.from(updatedConfig.keys());
 
     // send configs

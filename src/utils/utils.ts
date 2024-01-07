@@ -1,9 +1,4 @@
-import {
-  bridgeFeeTriggerPercent,
-  cardanoNetworkFeeTriggerPercent,
-  ergoNetworkFeeTriggerPercent,
-  minimumFeeConfigs,
-} from '../configs';
+import { minimumFeeConfigs } from '../configs';
 import { FeeConfig, Registers } from '../types';
 
 export const concatFeeConfigs = (
@@ -56,10 +51,10 @@ export const feeConfigToRegisterValues = (feeConfig: FeeConfig): Registers => {
   };
 };
 
-export const shouldUpdateConfig = (
+export const getConfigDifferencePercent = (
   currentConfig: FeeConfig,
   updatedConfig: FeeConfig
-): boolean => {
+) => {
   const lastErgoHeight = (feeConfig: FeeConfig) =>
     Object.keys(feeConfig['ergo']).sort((a, b) =>
       Number(a) < Number(b) ? 1 : -1
@@ -74,34 +69,33 @@ export const shouldUpdateConfig = (
   const newBridgeFee =
     updatedConfig['ergo'][lastErgoHeight(updatedConfig)].bridgeFee;
 
-  if (
-    differencePercent(currentBridgeFee, newBridgeFee) > bridgeFeeTriggerPercent
-  )
-    return true;
+  const bridgeFeeDifference = differencePercent(currentBridgeFee, newBridgeFee);
 
   const currentErgoNetworkFee =
     updatedConfig['cardano'][lastCardanoHeight(currentConfig)].networkFee;
   const newErgoNetworkFee =
     updatedConfig['cardano'][lastCardanoHeight(updatedConfig)].networkFee;
 
-  if (
-    differencePercent(currentErgoNetworkFee, newErgoNetworkFee) >
-    ergoNetworkFeeTriggerPercent
-  )
-    return true;
+  const ergoNetworkFeeDifference = differencePercent(
+    currentErgoNetworkFee,
+    newErgoNetworkFee
+  );
 
   const currentCardanoNetworkFee =
     updatedConfig['ergo'][lastErgoHeight(currentConfig)].networkFee;
   const newCardanoNetworkFee =
     updatedConfig['ergo'][lastErgoHeight(updatedConfig)].networkFee;
 
-  if (
-    differencePercent(currentCardanoNetworkFee, newCardanoNetworkFee) >
-    cardanoNetworkFeeTriggerPercent
-  )
-    return true;
+  const cardanoNetworkFeeDifference = differencePercent(
+    currentCardanoNetworkFee,
+    newCardanoNetworkFee
+  );
 
-  return false;
+  return {
+    bridgeFee: bridgeFeeDifference,
+    ergoNetworkFee: ergoNetworkFeeDifference,
+    cardanoNetworkFee: cardanoNetworkFeeDifference,
+  };
 };
 
 export const differencePercent = (a: bigint, b: bigint): bigint => {
@@ -109,13 +103,20 @@ export const differencePercent = (a: bigint, b: bigint): bigint => {
   return (diff * 100n) / a;
 };
 
-export const pricesToString = (prices: Map<string, number>) => {
+export const pricesToString = (
+  prices: Map<string, number>,
+  bridgeFeeDifferences: Map<string, bigint | undefined>
+) => {
   const result: Array<string> = [];
   prices.forEach((value, key) => {
     const token = minimumFeeConfigs.supportedTokens.find(
       (token) => token.tokenId === key
     )!;
-    result.push(`${token.name} => ${value}$`);
+    const bridgeFeeDifference = bridgeFeeDifferences.get(key)!;
+    const differenceText = bridgeFeeDifference
+      ? ` (${bridgeFeeDifference}% change)`
+      : '';
+    result.push(`${token.name} => ${value}$${differenceText}`);
   });
   return result.join('\n');
 };

@@ -1,5 +1,8 @@
 import { BridgeMinimumFee } from '@rosen-bridge/minimum-fee';
 import {
+  bridgeFeeTriggerPercent,
+  cardanoNetworkFeeTriggerPercent,
+  ergoNetworkFeeTriggerPercent,
   explorerBaseUrl,
   feeGuaranteeDurationOnCardano,
   feeGuaranteeDurationOnErgo,
@@ -7,7 +10,7 @@ import {
 } from '../configs';
 import { FeeConfig } from '../types';
 import { getCardanoHeight, getErgoHeight } from '../network/clients';
-import { concatFeeConfigs, shouldUpdateConfig } from '../utils/utils';
+import { concatFeeConfigs, getConfigDifferencePercent } from '../utils/utils';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -21,21 +24,30 @@ export const updateAndGenerateFeeConfig = async (
   newConfigs: Map<string, FeeConfig>
 ) => {
   const updatedFeeConfigs: Map<string, FeeConfig> = new Map();
+  const bridgeFeeDifferences: Map<string, bigint | undefined> = new Map();
   for (const token of minimumFeeConfigs.supportedTokens) {
     logger.debug(`Combining old and new config of token [${token.name}]`);
     const newConfig = newConfigs.get(token.tokenId)!;
 
-    const feeConfig = await updateFeeConfig(token.ergoSideTokenId, newConfig);
+    const result = await updateFeeConfig(token.ergoSideTokenId, newConfig);
+    const feeConfig = result.config;
+    bridgeFeeDifferences.set(
+      token.tokenId,
+      result.differencePercent?.bridgeFee
+    );
     if (feeConfig) updatedFeeConfigs.set(token.tokenId, feeConfig);
     else logger.debug(`No need to update token [${token.name}] config`);
   }
-  return updatedFeeConfigs;
+  return {
+    config: updatedFeeConfigs,
+    bridgeFeeDifferences: bridgeFeeDifferences,
+  };
 };
 
 export const updateFeeConfig = async (
   tokenId: string,
   newFeeConfig: FeeConfig
-): Promise<FeeConfig | undefined> => {
+) => {
   let oldConfig: FeeConfig | undefined;
   try {
     oldConfig = await bridgeMinimumFee.search(tokenId);
@@ -96,8 +108,23 @@ export const updateFeeConfig = async (
   const updatedConfig = oldConfig
     ? concatFeeConfigs(newFeeConfig, oldConfig)
     : newFeeConfig;
-  if (oldConfig && !shouldUpdateConfig(oldConfig, updatedConfig))
-    return undefined;
+  let differencePercent;
+  if (oldConfig) {
+    differencePercent = getConfigDifferencePercent(oldConfig, updatedConfig);
 
-  return updatedConfig;
+    if (
+      differencePercent.bridgeFee <= bridgeFeeTriggerPercent &&
+      differencePercent.ergoNetworkFee <= ergoNetworkFeeTriggerPercent &&
+      differencePercent.cardanoNetworkFee <= cardanoNetworkFeeTriggerPercent
+    )
+      return {
+        config: undefined,
+        differencePercent: differencePercent,
+      };
+  }
+
+  return {
+    config: updatedConfig,
+    differencePercent: differencePercent,
+  };
 };
