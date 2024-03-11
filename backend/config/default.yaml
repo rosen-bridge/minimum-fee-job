@@ -84,3 +84,4 @@ triggerPercent:
   ergoNetworkFee: 10
 discordWebHookUrl: '' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours
+redisUrl: # redis://user:password@host:port/dbnum

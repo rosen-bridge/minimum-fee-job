@@ -8,6 +8,8 @@ import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Notification } from './network/Notification';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
+import { flushStore, savePrices, saveTx } from './store';
+
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const main = async () => {
@@ -51,8 +53,12 @@ const main = async () => {
     );
   });
 
-  if (updatedConfig.size === 0) logger.info(`No config need update`);
-  else {
+  if (updatedConfig.size === 0) {
+    logger.info(`No config need update`);
+
+    await flushStore();
+    logger.info('Flushed store');
+  } else {
     // transaction
     logger.info(
       `updating config for tokens [${Array.from(updatedConfig.keys())}]`
@@ -97,6 +103,20 @@ const main = async () => {
 
       discordNotification.sendMessage(`\`\`\`json\n${txChunk}\n\`\`\``);
     }
+
+    await Promise.all([
+      savePrices(prices),
+      saveTx(
+        chunks.map((chunk, index) =>
+          JsonBigInt.stringify({
+            CSR: chunk,
+            n: chunks.length,
+            p: index + 1,
+          })
+        )
+      ),
+    ]);
+    logger.info('Saved data in the store');
   }
 
   logger.info(`Job done`);
