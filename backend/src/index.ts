@@ -76,46 +76,19 @@ const main = async () => {
         `\`\`\`json\n${pricesToString(prices, bridgeFeeDifferences)}\n\`\`\``
     );
     const tokenIds = Array.from(updatedConfig.keys());
-
-    // send configs
-    for (const tokenId of tokenIds) {
-      const token = minimumFeeConfigs.supportedTokens.find(
-        (token) => token.tokenId === tokenId
-      )!;
-      discordNotification.sendMessage(`## Token ${token.name} [${token.tokenId}]
-        ergo side tokenId: \`${token.ergoSideTokenId}\`
-      `);
-      const tokenFeeConfig = JsonBigInt.stringify(updatedConfig.get(tokenId));
-      discordNotification.sendMessage(`\`\`\`json\n${tokenFeeConfig}\n\`\`\``);
-    }
-
-    // send tx
-    const n = Math.ceil(tx.length / 1500);
-    const chunks = Array.from(tx.match(/.{1,1500}/g)!);
-    discordNotification.sendMessage(`generated tx. chunks: ${n}`);
-    for (let i = 0; i < n; i++) {
-      const txChunk = JsonBigInt.stringify({
-        CSR: chunks[i],
-        n: n,
-        p: i + 1,
-      });
-      logger.info(`chunk [${i}]: ${txChunk}`);
-
-      discordNotification.sendMessage(`\`\`\`json\n${txChunk}\n\`\`\``);
-    }
-
-    await Promise.all([
-      savePrices(prices),
-      saveTx(
-        chunks.map((chunk, index) =>
-          JsonBigInt.stringify({
-            CSR: chunk,
-            n: chunks.length,
-            p: index + 1,
+    discordNotification.sendMessage(
+      `## Changed Tokens\n` +
+        tokenIds
+          .map((tokenId) => {
+            const token = minimumFeeConfigs.supportedTokens.find(
+              (token) => token.tokenId === tokenId
+            )!;
+            return `- ${token.name} [\`${token.ergoSideTokenId}\`]`;
           })
-        )
-      ),
-    ]);
+          .join('\n')
+    );
+
+    await Promise.all([savePrices(prices), saveTx(tx)]);
     logger.info('Saved data in the store');
   }
 

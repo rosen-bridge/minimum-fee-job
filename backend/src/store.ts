@@ -16,8 +16,8 @@ const savePrices = async (prices: Map<string, number>) => {
 /**
  * save tx chunks data into store
  */
-const saveTx = async (chunks: string[]) => {
-  return void (await client.hSet('tx.chunks', chunks));
+const saveTx = async (tx: string) => {
+  return void (await client.set('tx', tx));
 };
 
 /**
