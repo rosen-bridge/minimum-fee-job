@@ -73,3 +73,7 @@ export const minimumFeeConfigs: ConfigInterface = {
 export const discordWebHookUrl = config.has('discordWebHookUrl')
   ? config.get<string>('discordWebHookUrl')
   : undefined;
+
+export const redisUrl = config.has('redisUrl')
+  ? config.get<string>('redisUrl')
+  : undefined;

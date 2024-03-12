@@ -25,7 +25,8 @@
     "axios": "^1.6.2",
     "config": "^3.3.7",
     "discord.js": "^14.14.1",
-    "ergo-lib-wasm-nodejs": "^0.24.1"
+    "ergo-lib-wasm-nodejs": "^0.24.1",
+    "redis": "^4.6.13"
   },
   "devDependencies": {
     "@types/config": "^0.0.41",
