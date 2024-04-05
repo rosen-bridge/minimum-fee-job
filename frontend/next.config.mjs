@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  experimental: {
+    serverComponentsExternalPackages: ["ergo-lib-wasm-nodejs"],
+  },
+};
 
 export default nextConfig;
