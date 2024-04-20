@@ -2,6 +2,7 @@ minimumFee:
   NFT: '1ce1ea41ceaed94a6976a047645ffb3f3da3916685268c8f2d8f80f892147caa'
   minimumFeeAddress: '9fmj8dX6QFy9PS2zCqYJj4LTyDvWRS29BBuSTToy961oWf2VaQQ'
   feeAddress: '9gPqDuyxpmV2bR62zdbgxuvJAahDUpnaZw8Srv2JYHauAiHZEb4'
+  fetchBoxRetry: 3
   supportedTokens:
     - tokenId: 'erg'
       ergoSideTokenId: 'erg'

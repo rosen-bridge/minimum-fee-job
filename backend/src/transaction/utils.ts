@@ -1,6 +1,5 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { AssetBalance, SinglePayment, TokenInfo } from './types';
-import { feeConfigToRegisterValues } from '../utils/utils';
+import { AssetBalance, TokenInfo } from './types';
 import { BoxInfo, ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
 
 /**
@@ -40,50 +39,6 @@ export const getBoxAssets = (box: wasm.ErgoBoxCandidate): AssetBalance => {
     nativeToken: BigInt(box.value().as_i64().to_str()),
     tokens: tokens,
   };
-};
-
-/**
- * creates minimum-fee config box
- * @param currentHeight
- * @param order
- * @returns
- */
-export const createBox = (
-  currentHeight: number,
-  order: SinglePayment
-): wasm.ErgoBoxCandidate => {
-  const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
-    wasm.BoxValue.from_i64(
-      wasm.I64.from_str(order.assets.nativeToken.toString())
-    ),
-    wasm.Contract.new(wasm.Address.from_base58(order.address).to_ergo_tree()),
-    currentHeight
-  );
-  // add box tokens
-  order.assets.tokens.forEach((token) =>
-    boxBuilder.add_token(
-      wasm.TokenId.from_str(token.id),
-      wasm.TokenAmount.from_i64(wasm.I64.from_str(token.value.toString()))
-    )
-  );
-  // add box registers
-  const registers = feeConfigToRegisterValues(order.feeConfig);
-  // R4
-  boxBuilder.set_register_value(
-    4,
-    wasm.Constant.from_coll_coll_byte(
-      registers.R4.map((chain) => Buffer.from(chain))
-    )
-  );
-  // R5 -> R9
-  boxBuilder.set_register_value(5, wasm.Constant.from_js(registers.R5));
-  boxBuilder.set_register_value(6, wasm.Constant.from_js(registers.R6));
-  boxBuilder.set_register_value(7, wasm.Constant.from_js(registers.R7));
-  boxBuilder.set_register_value(8, wasm.Constant.from_js(registers.R8));
-  boxBuilder.set_register_value(9, wasm.Constant.from_js(registers.R9));
-
-  // build and add box
-  return boxBuilder.build();
 };
 
 /**

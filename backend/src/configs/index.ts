@@ -55,8 +55,10 @@ export const explorerBaseUrl = 'https://api.ergoplatform.com';
 export const koiosBaseUrl = 'https://api.koios.rest/api/v1';
 
 export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
-export const feeGuaranteeDurationOnErgo = 24 * 30; // 1 day,
-export const feeGuaranteeDurationOnCardano = 24 * 60 * 3; // 1 day,
+export const feeGuaranteeDuration = new Map<string, number>([
+  ['ergo', 24 * 30], // 1 day (30 blocks per hour)
+  ['cardano', 24 * 60 * 3], // 1 day (3 blocks per minute)
+]);
 export const RunningInterval = config.get<number>('interval') * 1000; // seconds to miliseconds
 
 export const minimumFeeConfigs: ConfigInterface = {
@@ -68,6 +70,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   supportedTokens: config.get<Array<SupportedTokenConfig>>(
     'minimumFee.supportedTokens'
   ),
+  fetchBoxRetry: config.get<number>('minimumFee.fetchBoxRetry') ?? 3,
 };
 
 export const discordWebHookUrl = config.has('discordWebHookUrl')

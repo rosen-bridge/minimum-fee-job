@@ -1,5 +1,5 @@
 import './bootstrap';
-import { RunningInterval, minimumFeeConfigs } from './configs';
+import { RunningInterval, minimumFeeConfigs, redisUrl } from './configs';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
 import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
@@ -9,6 +9,8 @@ import { Notification } from './network/Notification';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
 import { flushStore, savePrices, saveTx } from './store';
+import { getConfigTokenPrices } from './minimum-fee/prices';
+import { Fee } from '@rosen-bridge/minimum-fee';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -17,30 +19,32 @@ const main = async () => {
   if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
+  // fetch current prices
+  const prices = await getConfigTokenPrices();
+
   // new config
   logger.info(`Generating new config`);
-  const newFeeConfigs = await generateNewFeeConfig();
-  const newConfig = newFeeConfigs.configs;
-  const prices = newFeeConfigs.prices;
+  const newFeeConfigs = await generateNewFeeConfig(prices);
 
-  newConfig.forEach((feeConfig, tokenId) => {
+  newFeeConfigs.forEach((feeConfig, tokenId) => {
     logger.debug(
       `fee config for token [${tokenId}]: ${JsonBigInt.stringify(feeConfig)}`
     );
     logger.debug(
       `Register values: ${JsonBigInt.stringify(
-        feeConfigToRegisterValues(feeConfig)
+        feeConfigToRegisterValues([feeConfig.getConfig()])
       )}`
     );
   });
 
   // updated config
   logger.info(`Combining new config with current config`);
-  const updateResult = await updateAndGenerateFeeConfig(newConfig);
-  const updatedConfig = updateResult.config;
+  const updateResult = await updateAndGenerateFeeConfig(newFeeConfigs);
+  const updatedConfigs = updateResult.config;
   const bridgeFeeDifferences = updateResult.bridgeFeeDifferences;
 
-  updatedConfig.forEach((feeConfig, tokenId) => {
+  updatedConfigs.forEach((updatedConfig, tokenId) => {
+    const feeConfig: Fee[] = (updatedConfig.new as any).fees;
     logger.debug(
       `Updated fee config for token [${tokenId}]: ${JsonBigInt.stringify(
         feeConfig
@@ -53,18 +57,20 @@ const main = async () => {
     );
   });
 
-  if (updatedConfig.size === 0) {
+  if (updatedConfigs.size === 0) {
     logger.info(`No config need update`);
 
-    await flushStore();
-    logger.info('Flushed store');
+    if (redisUrl) {
+      await flushStore();
+      logger.info('Flushed store');
+    }
   } else {
     // transaction
     logger.info(
-      `updating config for tokens [${Array.from(updatedConfig.keys())}]`
+      `updating config for tokens [${Array.from(updatedConfigs.keys())}]`
     );
     const tx = JsonBigInt.stringify(
-      await updateConfigsTransaction(updatedConfig)
+      await updateConfigsTransaction(updatedConfigs)
     );
     logger.info(`Transaction to update minimum-fee config box generated`);
 
@@ -75,21 +81,54 @@ const main = async () => {
       `## Prices\n` +
         `\`\`\`json\n${pricesToString(prices, bridgeFeeDifferences)}\n\`\`\``
     );
-    const tokenIds = Array.from(updatedConfig.keys());
-    discordNotification.sendMessage(
-      `## Changed Tokens\n` +
-        tokenIds
-          .map((tokenId) => {
-            const token = minimumFeeConfigs.supportedTokens.find(
-              (token) => token.tokenId === tokenId
-            )!;
-            return `- ${token.name} [\`${token.ergoSideTokenId}\`]`;
-          })
-          .join('\n')
-    );
+    const tokenIds = Array.from(updatedConfigs.keys());
 
-    await Promise.all([savePrices(prices), saveTx(tx)]);
-    logger.info('Saved data in the store');
+    if (redisUrl) {
+      // send info to redis
+      discordNotification.sendMessage(
+        `## Changed Tokens\n` +
+          tokenIds
+            .map((tokenId) => {
+              const token = minimumFeeConfigs.supportedTokens.find(
+                (token) => token.tokenId === tokenId
+              )!;
+              return `- ${token.name} [\`${token.ergoSideTokenId}\`]`;
+            })
+            .join('\n')
+      );
+      await Promise.all([savePrices(prices), saveTx(tx)]);
+      logger.info('Saved data in the store');
+    } else {
+      // send info to discord
+      for (const tokenId of tokenIds) {
+        const token = minimumFeeConfigs.supportedTokens.find(
+          (token) => token.tokenId === tokenId
+        )!;
+        discordNotification.sendMessage(`## Token ${token.name} [${token.tokenId}]
+          ergo side tokenId: \`${token.ergoSideTokenId}\`
+        `);
+        const tokenFeeConfig = (updatedConfigs.get(tokenId)!.new as any).fees;
+        discordNotification.sendMessage(
+          `\`\`\`json\n${JsonBigInt.stringify(tokenFeeConfig)}\n\`\`\``
+        );
+      }
+
+      // send tx
+      const n = Math.ceil(tx.length / 1500);
+      const chunks = Array.from(tx.match(/.{1,1500}/g)!);
+      discordNotification.sendMessage(`generated tx. chunks: ${n}`);
+      for (let i = 0; i < n; i++) {
+        const txChunk = JsonBigInt.stringify({
+          CSR: chunks[i],
+          n: n,
+          p: i + 1,
+        });
+        logger.info(`chunk [${i}]: ${txChunk}`);
+
+        discordNotification.sendMessage(`\`\`\`json\n${txChunk}\n\`\`\``);
+        logger.info('Sent data to discord');
+      }
+    }
   }
 
   logger.info(`Job done`);

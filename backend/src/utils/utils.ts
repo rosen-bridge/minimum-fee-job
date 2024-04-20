@@ -1,45 +1,58 @@
+import { Fee } from '@rosen-bridge/minimum-fee';
 import { minimumFeeConfigs } from '../configs';
-import { FeeConfig, Registers } from '../types';
+import { Registers } from '../types';
 
-export const concatFeeConfigs = (
-  feeConfig1: FeeConfig,
-  feeConfig2: FeeConfig
-): FeeConfig => {
-  const finalFeeConfig = structuredClone(feeConfig1);
-  Object.keys(feeConfig2).forEach((chain) => {
-    Object.keys(feeConfig2[chain]).forEach((height) => {
-      if (Object.hasOwn(finalFeeConfig[chain], height)) return;
-      finalFeeConfig[chain][height] = feeConfig2[chain][height];
+export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
+  // generate register values
+  //  extract chains
+  const chains: Array<string> = [];
+  feeConfig.forEach((fee) => {
+    Object.keys(fee.heights).forEach((feeChain) => {
+      if (!chains.includes(feeChain)) chains.push(feeChain);
     });
   });
-  return finalFeeConfig;
-};
+  chains.sort();
+  //  extract configs
+  const heights: Array<Array<number>> = [];
+  const bridgeFees: Array<Array<string>> = [];
+  const networkFees: Array<Array<string>> = [];
+  const rsnRatios: Array<Array<Array<string>>> = [];
+  const feeRatios: Array<Array<string>> = [];
 
-export const feeConfigToRegisterValues = (feeConfig: FeeConfig): Registers => {
-  const chains = Object.keys(feeConfig);
-  const heights = chains.map((chain) =>
-    Object.keys(feeConfig[chain]).map(Number)
-  );
-  const bridgeFees = chains.map((chain) =>
-    Object.keys(feeConfig[chain]).map(
-      (height) => feeConfig[chain][height].bridgeFee
-    )
-  );
-  const networkFees = chains.map((chain) =>
-    Object.keys(feeConfig[chain]).map(
-      (height) => feeConfig[chain][height].networkFee
-    )
-  );
-  const rsnRatios = chains.map((chain) =>
-    Object.keys(feeConfig[chain]).map(
-      (height) => feeConfig[chain][height].rsnRatio
-    )
-  );
-  const feeRatios = chains.map((chain) =>
-    Object.keys(feeConfig[chain]).map(
-      (height) => feeConfig[chain][height].feeRatio
-    )
-  );
+  feeConfig.forEach((fee) => {
+    const heightsConfigs: Array<number> = [];
+    const bridgeFeesConfigs: Array<string> = [];
+    const networkFeesConfigs: Array<string> = [];
+    const rsnRatiosConfigs: Array<Array<string>> = [];
+    const feeRatiosConfigs: Array<string> = [];
+
+    chains.forEach((chain) => {
+      if (Object.hasOwn(fee.heights, chain))
+        heightsConfigs.push(fee.heights[chain]);
+      else heightsConfigs.push(-1);
+
+      if (Object.hasOwn(fee.configs, chain)) {
+        bridgeFeesConfigs.push(fee.configs[chain].bridgeFee.toString());
+        networkFeesConfigs.push(fee.configs[chain].networkFee.toString());
+        rsnRatiosConfigs.push([
+          fee.configs[chain].rsnRatio.toString(),
+          fee.configs[chain].rsnRatioDivisor.toString(),
+        ]);
+        feeRatiosConfigs.push(fee.configs[chain].feeRatio.toString());
+      } else {
+        bridgeFeesConfigs.push('-1');
+        networkFeesConfigs.push('-1');
+        rsnRatiosConfigs.push(['-1', '-1']);
+        feeRatiosConfigs.push('-1');
+      }
+    });
+
+    heights.push(heightsConfigs);
+    bridgeFees.push(bridgeFeesConfigs);
+    networkFees.push(networkFeesConfigs);
+    rsnRatios.push(rsnRatiosConfigs);
+    feeRatios.push(feeRatiosConfigs);
+  });
 
   return {
     R4: chains,
@@ -52,39 +65,28 @@ export const feeConfigToRegisterValues = (feeConfig: FeeConfig): Registers => {
 };
 
 export const getConfigDifferencePercent = (
-  currentConfig: FeeConfig,
-  updatedConfig: FeeConfig
+  currentConfig: Fee,
+  newConfig: Fee
 ) => {
-  const lastErgoHeight = (feeConfig: FeeConfig) =>
-    Object.keys(feeConfig['ergo']).sort((a, b) =>
-      Number(a) < Number(b) ? 1 : -1
-    )[0];
-  const lastCardanoHeight = (feeConfig: FeeConfig) =>
-    Object.keys(feeConfig['cardano']).sort((a, b) =>
-      Number(a) < Number(b) ? 1 : -1
-    )[0];
-
-  const currentBridgeFee =
-    updatedConfig['ergo'][lastErgoHeight(currentConfig)].bridgeFee;
-  const newBridgeFee =
-    updatedConfig['ergo'][lastErgoHeight(updatedConfig)].bridgeFee;
+  // bridge fee difference
+  const anyChain = Object.keys(currentConfig.configs)[0];
+  const currentBridgeFee = currentConfig.configs[anyChain].bridgeFee;
+  const newBridgeFee = newConfig.configs[anyChain].bridgeFee;
 
   const bridgeFeeDifference = differencePercent(currentBridgeFee, newBridgeFee);
 
-  const currentErgoNetworkFee =
-    updatedConfig['cardano'][lastCardanoHeight(currentConfig)].networkFee;
-  const newErgoNetworkFee =
-    updatedConfig['cardano'][lastCardanoHeight(updatedConfig)].networkFee;
+  // to-Ergo network fee difference
+  const currentErgoNetworkFee = currentConfig.configs['ergo'].networkFee;
+  const newErgoNetworkFee = newConfig.configs['ergo'].networkFee;
 
   const ergoNetworkFeeDifference = differencePercent(
     currentErgoNetworkFee,
     newErgoNetworkFee
   );
 
-  const currentCardanoNetworkFee =
-    updatedConfig['ergo'][lastErgoHeight(currentConfig)].networkFee;
-  const newCardanoNetworkFee =
-    updatedConfig['ergo'][lastErgoHeight(updatedConfig)].networkFee;
+  // to-Cardano fee difference
+  const currentCardanoNetworkFee = currentConfig.configs['cardano'].networkFee;
+  const newCardanoNetworkFee = newConfig.configs['cardano'].networkFee;
 
   const cardanoNetworkFeeDifference = differencePercent(
     currentCardanoNetworkFee,
@@ -113,9 +115,10 @@ export const pricesToString = (
       (token) => token.tokenId === key
     )!;
     const bridgeFeeDifference = bridgeFeeDifferences.get(key)!;
-    const differenceText = bridgeFeeDifference
-      ? ` (${bridgeFeeDifference}% change)`
-      : '';
+    const differenceText =
+      bridgeFeeDifference != undefined
+        ? ` (${bridgeFeeDifference}% change)`
+        : '';
     result.push(`${token.name} => ${value}$${differenceText}`);
   });
   return result.join('\n');

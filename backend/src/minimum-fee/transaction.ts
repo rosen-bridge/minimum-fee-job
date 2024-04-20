@@ -1,15 +1,14 @@
 import { minimumFeeConfigs } from '../configs';
-import { getMinimumFeeConfigBox } from '../network/clients';
 import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
 import { ConfigOrder } from '../transaction/types';
 import { generateTransaction } from '../transaction/generate';
-import { FeeConfig } from '../types';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { UpdatedFeeConfig } from '../types';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export const updateConfigsTransaction = async (
-  feeConfigs: Map<string, FeeConfig>
+  feeConfigs: Map<string, UpdatedFeeConfig>
 ) => {
   const inputs: Array<ErgoBoxProxy> = [];
   const order: ConfigOrder = [];
@@ -17,13 +16,11 @@ export const updateConfigsTransaction = async (
     const feeConfig = feeConfigs.get(token.tokenId);
     if (!feeConfig) continue;
 
-    const currentConfigBox = await getMinimumFeeConfigBox(
-      token.ergoSideTokenId
-    );
+    const currentConfigBox = feeConfig.current.getBox();
 
     if (!currentConfigBox)
       logger.warn(`found no current config box for token [${token.tokenId}]`);
-    else inputs.push(currentConfigBox);
+    else inputs.push(currentConfigBox.to_js_eip12());
 
     const requiredTokens = [
       {
@@ -42,7 +39,7 @@ export const updateConfigsTransaction = async (
         nativeToken: minimumFeeConfigs.minBoxErg,
         tokens: requiredTokens,
       },
-      feeConfig: feeConfig,
+      box: feeConfig.new?.build(),
     });
   }
 
