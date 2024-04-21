@@ -3,6 +3,7 @@ minimumFee:
   minimumFeeAddress: '9fmj8dX6QFy9PS2zCqYJj4LTyDvWRS29BBuSTToy961oWf2VaQQ'
   feeAddress: '9gPqDuyxpmV2bR62zdbgxuvJAahDUpnaZw8Srv2JYHauAiHZEb4'
   fetchBoxRetry: 3
+  rsnRatioPrecision: 6
   supportedTokens:
     - tokenId: 'erg'
       ergoSideTokenId: 'erg'

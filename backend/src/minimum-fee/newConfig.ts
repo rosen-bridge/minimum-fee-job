@@ -21,6 +21,7 @@ export const generateNewFeeConfig = async (prices: Map<string, number>) => {
   if (ergPrice == undefined || adaPrice == undefined || rsnPrice == undefined)
     throw Error(`Unexpected state: some required prices are missing`);
 
+  logger.debug(`Fetching network heights`);
   const ergoHeight = await getErgoHeight();
   const cardanoHeight = await getCardanoHeight();
 
@@ -76,22 +77,35 @@ export const feeConfigFromPrice = (
     )
   );
 
-  // TODO: improve rsn ratio and its divisor calculation???
   // calculating rsn ratio
-  const rsnRatioStr = (
-    (tokenPrice * 10 ** rsnDecimal) /
-    (rsnPrice * 10 ** tokenDecimal)
-  ).toString();
-  const parts = rsnRatioStr.split('.');
+  const rsnRatioRaw =
+    (tokenPrice * 10 ** rsnDecimal) / (rsnPrice * 10 ** tokenDecimal);
+  logger.debug(`rsnRatioRaw: ${rsnRatioRaw}`);
+  let rsnRatioDivisorPower;
+  const fixedRatio = rsnRatioRaw.toFixed();
+  if (fixedRatio.length >= minimumFeeConfigs.rsnRatioPrecision)
+    rsnRatioDivisorPower = fixedRatio.length;
+  else if (Number(fixedRatio) > 0)
+    rsnRatioDivisorPower = minimumFeeConfigs.rsnRatioPrecision;
+  else {
+    const parts = rsnRatioRaw.toString().split('.');
+    if (parts.length === 1)
+      throw Error(`ImpossibleBehavior: rsn ratio is zero!`);
+    let i = 0;
+    while (parts[1][i] === '0') i++;
+    rsnRatioDivisorPower = minimumFeeConfigs.rsnRatioPrecision + i;
+  }
+  const rsnRatioDivisor = BigInt(10 ** rsnRatioDivisorPower);
+
+  const parts = rsnRatioRaw.toString().split('.');
   const parts1 = (
-    (parts.length === 1 ? '' : parts[1]) + '000000000000'
-  ).substring(0, 12);
+    (parts.length === 1 ? '' : parts[1]) + '0'.repeat(rsnRatioDivisorPower)
+  ).substring(0, rsnRatioDivisorPower);
   const rsnRatio = BigInt(parts[0] + parts1);
 
   // calculating fee ratio
   const feeRatio = BigInt(configs.feeRatioFloat * feeRatioDivisor);
 
-  const rsnRatioDivisor = 1000000000000n;
   const ergoFee: ChainFee = {
     bridgeFee: bridgeFee,
     networkFee: cardanoNetworkFee,

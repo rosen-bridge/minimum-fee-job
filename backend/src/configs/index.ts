@@ -71,6 +71,7 @@ export const minimumFeeConfigs: ConfigInterface = {
     'minimumFee.supportedTokens'
   ),
   fetchBoxRetry: config.get<number>('minimumFee.fetchBoxRetry') ?? 3,
+  rsnRatioPrecision: config.get<number>('minimumFee.rsnRatioPrecision') ?? 6,
 };
 
 export const discordWebHookUrl = config.has('discordWebHookUrl')

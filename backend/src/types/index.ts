@@ -85,6 +85,7 @@ export interface ConfigInterface {
   txFee: bigint;
   supportedTokens: Array<SupportedTokenConfig>;
   fetchBoxRetry: number;
+  rsnRatioPrecision: number;
 }
 
 interface CoinMarketCapPricePoolQuote {
