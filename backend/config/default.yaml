@@ -84,6 +84,7 @@ triggerPercent:
   bridgeFee: 10
   cardanoNetworkFee: 10
   ergoNetworkFee: 10
+  rsnRatio: 10
 discordWebHookUrl: '' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours
 redisUrl: # redis://user:password@host:port/dbnum

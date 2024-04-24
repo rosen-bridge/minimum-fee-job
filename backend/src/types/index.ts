@@ -25,6 +25,7 @@ export interface FeeDifferencePercents {
   bridgeFee: bigint;
   ergoNetworkFee: bigint;
   cardanoNetworkFee: bigint;
+  rsnRatio: bigint;
 }
 
 export interface UpdatedFeeConfig {

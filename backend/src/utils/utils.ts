@@ -92,11 +92,24 @@ export const getConfigDifferencePercent = (
     currentCardanoNetworkFee,
     newCardanoNetworkFee
   );
+  // rsn ratio difference
+  const rsnRatioDivisorQuotient =
+    currentConfig.configs[anyChain].rsnRatioDivisor !==
+    newConfig.configs[anyChain].rsnRatioDivisor
+      ? currentConfig.configs[anyChain].rsnRatioDivisor /
+        newConfig.configs[anyChain].rsnRatioDivisor
+      : 1n;
+  const currentRatio = currentConfig.configs[anyChain].rsnRatio;
+  const newRatio =
+    newConfig.configs[anyChain].rsnRatio * rsnRatioDivisorQuotient;
+
+  const rsnRatioDifference = differencePercent(currentRatio, newRatio);
 
   return {
     bridgeFee: bridgeFeeDifference,
     ergoNetworkFee: ergoNetworkFeeDifference,
     cardanoNetworkFee: cardanoNetworkFeeDifference,
+    rsnRatio: rsnRatioDifference,
   };
 };
 

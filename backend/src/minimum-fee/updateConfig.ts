@@ -12,6 +12,7 @@ import {
   explorerBaseUrl,
   feeGuaranteeDuration,
   minimumFeeConfigs,
+  rsnRatioTriggerPercent,
 } from '../configs';
 import { getCardanoHeight, getErgoHeight } from '../network/clients';
 import { getConfigDifferencePercent } from '../utils/utils';
@@ -84,7 +85,8 @@ export const updateFeeConfig = async (
     if (
       differencePercent.bridgeFee <= bridgeFeeTriggerPercent &&
       differencePercent.ergoNetworkFee <= ergoNetworkFeeTriggerPercent &&
-      differencePercent.cardanoNetworkFee <= cardanoNetworkFeeTriggerPercent
+      differencePercent.cardanoNetworkFee <= cardanoNetworkFeeTriggerPercent &&
+      differencePercent.rsnRatio <= rsnRatioTriggerPercent
     ) {
       // add new config
       builder.addConfig(newFeeConfig);

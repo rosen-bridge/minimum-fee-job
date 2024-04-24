@@ -47,6 +47,9 @@ export const cardanoNetworkFeeTriggerPercent = config.get<number>(
 export const ergoNetworkFeeTriggerPercent = config.get<number>(
   'triggerPercent.ergoNetworkFee'
 );
+export const rsnRatioTriggerPercent = config.get<number>(
+  'triggerPercent.rsnRatio'
+);
 
 export const ERG = 'erg';
 export const ADA = 'ada';

@@ -86,7 +86,8 @@ export const feeConfigFromPrice = (
   if (fixedRatio.length >= minimumFeeConfigs.rsnRatioPrecision)
     rsnRatioDivisorPower = 0;
   else if (Number(fixedRatio) > 0)
-    rsnRatioDivisorPower = minimumFeeConfigs.rsnRatioPrecision - 1;
+    rsnRatioDivisorPower =
+      minimumFeeConfigs.rsnRatioPrecision - fixedRatio.length;
   else {
     const parts = rsnRatioRaw.toString().split('.');
     if (parts.length === 1)
