@@ -1,6 +1,5 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
 import {
-  createBox,
   getBoxAssets,
   getBoxInfo,
   subtractAssetBalance,
@@ -99,7 +98,7 @@ export const generateTransaction = async (
   const currentHeight = await getErgoHeight();
   order.forEach((order) => {
     // build and add box
-    const box = createBox(currentHeight, order);
+    const box = order.box;
     outBoxCandidates.add(box);
 
     // reduce box assets from `remainingAssets`
@@ -173,9 +172,5 @@ export const generateTransaction = async (
     ),
   };
 
-  // IF YOU WANT TO SUBMIT TRANSACTION
-  //  SET MNEMONIC IN `signAndSubmitTx` FUNCTION AND
-  //  UNCOMMENT NEXT LINE
-  // await signAndSubmitTx(tx, inErgoBoxes)
   return ergoTx;
 };

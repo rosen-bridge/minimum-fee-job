@@ -1,10 +1,14 @@
 import { createClient } from 'redis';
 import { redisUrl } from './configs';
+import WinstonLogger from '@rosen-bridge/winston-logger';
+
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const client = createClient({
   url: redisUrl,
 });
-await client.connect();
+if (redisUrl) await client.connect();
+else logger.warn(`Skipping redis connection: no url is specified`);
 
 /**
  * save price data into store

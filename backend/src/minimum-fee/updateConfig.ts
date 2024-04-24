@@ -1,29 +1,31 @@
-import { BridgeMinimumFee } from '@rosen-bridge/minimum-fee';
+import {
+  ErgoNetworkType,
+  Fee,
+  MinimumFeeBox,
+  MinimumFeeBoxBuilder,
+  MinimumFeeConfig,
+} from '@rosen-bridge/minimum-fee';
 import {
   bridgeFeeTriggerPercent,
   cardanoNetworkFeeTriggerPercent,
   ergoNetworkFeeTriggerPercent,
   explorerBaseUrl,
-  feeGuaranteeDurationOnCardano,
-  feeGuaranteeDurationOnErgo,
+  feeGuaranteeDuration,
   minimumFeeConfigs,
+  rsnRatioTriggerPercent,
 } from '../configs';
-import { FeeConfig } from '../types';
 import { getCardanoHeight, getErgoHeight } from '../network/clients';
-import { concatFeeConfigs, getConfigDifferencePercent } from '../utils/utils';
+import { getConfigDifferencePercent } from '../utils/utils';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { CARDANO, ERGO, SUPPORTED_CHAINS } from '../types/consts';
+import { FeeDifferencePercents, UpdatedFeeConfig } from '../types';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
-const bridgeMinimumFee = new BridgeMinimumFee(
-  explorerBaseUrl,
-  minimumFeeConfigs.minimumFeeNFT
-);
-
 export const updateAndGenerateFeeConfig = async (
-  newConfigs: Map<string, FeeConfig>
+  newConfigs: Map<string, MinimumFeeConfig>
 ) => {
-  const updatedFeeConfigs: Map<string, FeeConfig> = new Map();
+  const updatedFeeConfigs: Map<string, UpdatedFeeConfig> = new Map();
   const bridgeFeeDifferences: Map<string, bigint | undefined> = new Map();
   for (const token of minimumFeeConfigs.supportedTokens) {
     logger.debug(`Combining old and new config of token [${token.name}]`);
@@ -35,8 +37,11 @@ export const updateAndGenerateFeeConfig = async (
       token.tokenId,
       result.differencePercent?.bridgeFee
     );
-    if (feeConfig) updatedFeeConfigs.set(token.tokenId, feeConfig);
-    else logger.debug(`No need to update token [${token.name}] config`);
+    if (feeConfig.new)
+      updatedFeeConfigs.set(token.tokenId, {
+        current: feeConfig.current,
+        new: feeConfig.new,
+      });
   }
   return {
     config: updatedFeeConfigs,
@@ -46,85 +51,142 @@ export const updateAndGenerateFeeConfig = async (
 
 export const updateFeeConfig = async (
   tokenId: string,
-  newFeeConfig: FeeConfig
-) => {
-  let oldConfig: FeeConfig | undefined;
-  try {
-    oldConfig = await bridgeMinimumFee.search(tokenId);
-    logger.debug(`Found a config for token [${tokenId}].`);
-  } catch (e) {
-    logger.debug(
-      `No config found for token [${tokenId}]. Generating config with only the new one...`
+  newFeeConfig: MinimumFeeConfig
+): Promise<{
+  config: {
+    current: MinimumFeeBox;
+    new: MinimumFeeBoxBuilder | undefined;
+  };
+  differencePercent: FeeDifferencePercents | undefined;
+}> => {
+  const tokenMinimumFeeBox = new MinimumFeeBox(
+    tokenId,
+    minimumFeeConfigs.minimumFeeNFT,
+    minimumFeeConfigs.minimumFeeAddress,
+    ErgoNetworkType.explorer,
+    explorerBaseUrl,
+    logger
+  );
+  for (let i = 0; i < minimumFeeConfigs.fetchBoxRetry; i++) {
+    const res = await tokenMinimumFeeBox.fetchBox();
+    if (res) break;
+  }
+  const box = tokenMinimumFeeBox.getBox();
+  if (box) {
+    logger.debug(`Found a config for token [${tokenId}]`);
+    const builder = await cleanOldConfig(tokenMinimumFeeBox);
+
+    // calculate config differences
+    const differencePercent = getConfigDifferencePercent(
+      (builder as any).fees[0],
+      newFeeConfig.getConfig()
     );
-  }
-
-  if (oldConfig) {
-    // delete old ergo configs
-    const currentErgoHeight = await getErgoHeight();
-    const feeErgoHeights = Object.keys(oldConfig['ergo'])
-      .map(Number)
-      .sort((x: number, y: number) => y - x);
-    let heightsToRemove: string[] = [];
-    let lastPassedHeightIndex = feeErgoHeights.length - 1;
-    for (let i = 0; i < feeErgoHeights.length; i++) {
-      if (feeErgoHeights[i] > currentErgoHeight)
-        heightsToRemove.push(feeErgoHeights[i].toString());
-      else {
-        lastPassedHeightIndex = i;
-        break;
-      }
-    }
-    for (let i = lastPassedHeightIndex + 1; i < feeErgoHeights.length; i++) {
-      if (feeErgoHeights[i] < currentErgoHeight - feeGuaranteeDurationOnErgo)
-        heightsToRemove.push(feeErgoHeights[i].toString());
-    }
-    for (const height of heightsToRemove) delete oldConfig['ergo'][height];
-
-    // delete old cardano configs
-    const currentCardanoHeight = await getCardanoHeight();
-    const feeCardanoHeights = Object.keys(oldConfig['cardano'])
-      .map(Number)
-      .sort((x: number, y: number) => y - x);
-    heightsToRemove = [];
-    lastPassedHeightIndex = feeCardanoHeights.length - 1;
-    for (let i = 0; i < feeCardanoHeights.length; i++) {
-      if (feeCardanoHeights[i] > currentCardanoHeight)
-        heightsToRemove.push(feeCardanoHeights[i].toString());
-      else {
-        lastPassedHeightIndex = i;
-        break;
-      }
-    }
-    for (let i = lastPassedHeightIndex + 1; i < feeCardanoHeights.length; i++) {
-      if (
-        feeCardanoHeights[i] <
-        currentCardanoHeight - feeGuaranteeDurationOnCardano
-      )
-        heightsToRemove.push(feeCardanoHeights[i].toString());
-    }
-    for (const height of heightsToRemove) delete oldConfig['cardano'][height];
-  }
-
-  const updatedConfig = oldConfig
-    ? concatFeeConfigs(newFeeConfig, oldConfig)
-    : newFeeConfig;
-  let differencePercent;
-  if (oldConfig) {
-    differencePercent = getConfigDifferencePercent(oldConfig, updatedConfig);
 
     if (
       differencePercent.bridgeFee <= bridgeFeeTriggerPercent &&
       differencePercent.ergoNetworkFee <= ergoNetworkFeeTriggerPercent &&
-      differencePercent.cardanoNetworkFee <= cardanoNetworkFeeTriggerPercent
-    )
+      differencePercent.cardanoNetworkFee <= cardanoNetworkFeeTriggerPercent &&
+      differencePercent.rsnRatio <= rsnRatioTriggerPercent
+    ) {
+      // add new config
+      builder.addConfig(newFeeConfig);
       return {
-        config: undefined,
+        config: {
+          current: tokenMinimumFeeBox,
+          new: builder,
+        },
         differencePercent: differencePercent,
       };
+    } else {
+      logger.debug(
+        `token [${tokenId}] config difference is not sufficient for update`
+      );
+      return {
+        config: {
+          current: tokenMinimumFeeBox,
+          new: undefined,
+        },
+        differencePercent: differencePercent,
+      };
+    }
+  } else {
+    logger.debug(
+      `No config found for token [${tokenId}]. Generating config with only the new one...`
+    );
+    const currentErgoHeight = await getErgoHeight();
+
+    const builder = new MinimumFeeBoxBuilder(
+      minimumFeeConfigs.minimumFeeNFT,
+      minimumFeeConfigs.minimumFeeAddress
+    );
+    builder
+      .setHeight(currentErgoHeight)
+      .setToken(tokenId)
+      .setValue(minimumFeeConfigs.minBoxErg)
+      .addConfig(newFeeConfig);
+
+    return {
+      config: {
+        current: tokenMinimumFeeBox,
+        new: builder,
+      },
+      differencePercent: undefined,
+    };
+  }
+};
+
+const cleanOldConfig = async (tokenMinimumFeeBox: MinimumFeeBox) => {
+  // fetch current heights
+  const chainHeights = new Map<string, number>();
+  chainHeights.set(ERGO, await getErgoHeight());
+  chainHeights.set(CARDANO, await getCardanoHeight());
+
+  const getCurrentHeight = (chain: string) => {
+    const currentHeight = chainHeights.get(chain);
+    if (!currentHeight)
+      throw Error(
+        `Impossible behavior: chain [${chain}] is supported but its height is not fetched`
+      );
+    return currentHeight;
+  };
+
+  // convert to builder
+  const builder = tokenMinimumFeeBox.toBuilder();
+  const fees: Array<Fee> = (builder as any).fees;
+
+  // remove unused configs
+  let i = 0;
+  for (i = fees.length; i >= 0; i--) {
+    for (const chain of SUPPORTED_CHAINS) {
+      const currentHeight = getCurrentHeight(chain);
+      if (
+        Object.hasOwn(fees[i].heights, chain) &&
+        fees[i].heights[chain] <= currentHeight
+      )
+        break;
+    }
+    builder.removeConfig(i);
   }
 
-  return {
-    config: updatedConfig,
-    differencePercent: differencePercent,
-  };
+  // remove old configs
+  let allHeightsAreSafeToRemove = false;
+  for (; i >= 0; i--) {
+    if (allHeightsAreSafeToRemove) builder.removeConfig(i);
+
+    const heightsAreNotSafe = SUPPORTED_CHAINS.some((chain) => {
+      const currentHeight = getCurrentHeight(chain);
+      const feeGuaranteeGap = feeGuaranteeDuration.get(chain);
+      if (!feeGuaranteeGap)
+        throw Error(
+          `Impossible behavior: chain [${chain}] is supported but its fee guarantee gap is not set`
+        );
+
+      if (Object.hasOwn(fees[i].heights, chain))
+        return fees[i].heights[chain] >= currentHeight - feeGuaranteeGap;
+      else return false;
+    });
+    if (!heightsAreNotSafe) allHeightsAreSafeToRemove = true;
+  }
+
+  return builder;
 };

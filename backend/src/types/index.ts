@@ -1,3 +1,5 @@
+import { MinimumFeeBox, MinimumFeeBoxBuilder } from '@rosen-bridge/minimum-fee';
+
 export interface TokenConfig {
   tokenId: string;
   name: string;
@@ -10,28 +12,25 @@ export interface Price {
   volume: number;
 }
 
-export interface Fee {
-  bridgeFee: bigint;
-  networkFee: bigint;
-  rsnRatio: bigint;
-  feeRatio: bigint;
-}
-
-export interface ChainFee {
-  [height: string]: Fee;
-}
-
-export interface FeeConfig {
-  [chain: string]: ChainFee;
-}
-
 export interface Registers {
   R4: Array<string>;
   R5: Array<Array<number>>;
-  R6: Array<Array<bigint>>;
-  R7: Array<Array<bigint>>;
-  R8: Array<Array<bigint>>;
-  R9: Array<Array<bigint>>;
+  R6: Array<Array<string>>;
+  R7: Array<Array<string>>;
+  R8: Array<Array<Array<string>>>;
+  R9: Array<Array<string>>;
+}
+
+export interface FeeDifferencePercents {
+  bridgeFee: bigint;
+  ergoNetworkFee: bigint;
+  cardanoNetworkFee: bigint;
+  rsnRatio: bigint;
+}
+
+export interface UpdatedFeeConfig {
+  current: MinimumFeeBox;
+  new: MinimumFeeBoxBuilder;
 }
 
 export enum PriceBackends {
@@ -75,6 +74,7 @@ export interface SupportedTokenConfig {
     ergNetworkFee: number;
     adaNetworkFee: number;
     feeRatioFloat: number;
+    rsnRatioDivisor: number;
   };
 }
 
@@ -85,6 +85,8 @@ export interface ConfigInterface {
   minBoxErg: bigint;
   txFee: bigint;
   supportedTokens: Array<SupportedTokenConfig>;
+  fetchBoxRetry: number;
+  rsnRatioPrecision: number;
 }
 
 interface CoinMarketCapPricePoolQuote {

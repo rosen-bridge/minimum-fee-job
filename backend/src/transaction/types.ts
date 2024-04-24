@@ -1,4 +1,4 @@
-import { FeeConfig } from '@rosen-bridge/minimum-fee';
+import { ErgoBoxCandidate } from 'ergo-lib-wasm-nodejs';
 
 export interface TokenInfo {
   id: string;
@@ -13,7 +13,7 @@ export interface AssetBalance {
 export interface SinglePayment {
   address: string;
   assets: AssetBalance;
-  feeConfig: FeeConfig;
+  box: ErgoBoxCandidate;
 }
 
 export type ConfigOrder = Array<SinglePayment>;

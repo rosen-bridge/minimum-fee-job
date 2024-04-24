@@ -2,6 +2,8 @@ minimumFee:
   NFT: '1ce1ea41ceaed94a6976a047645ffb3f3da3916685268c8f2d8f80f892147caa'
   minimumFeeAddress: '9fmj8dX6QFy9PS2zCqYJj4LTyDvWRS29BBuSTToy961oWf2VaQQ'
   feeAddress: '9gPqDuyxpmV2bR62zdbgxuvJAahDUpnaZw8Srv2JYHauAiHZEb4'
+  fetchBoxRetry: 3
+  rsnRatioPrecision: 6
   supportedTokens:
     - tokenId: 'erg'
       ergoSideTokenId: 'erg'
@@ -82,6 +84,7 @@ triggerPercent:
   bridgeFee: 10
   cardanoNetworkFee: 10
   ergoNetworkFee: 10
+  rsnRatio: 10
 discordWebHookUrl: '' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours
 redisUrl: # redis://user:password@host:port/dbnum
