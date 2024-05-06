@@ -53,9 +53,11 @@ export const rsnRatioTriggerPercent = config.get<number>(
 
 export const ERG = 'erg';
 export const ADA = 'ada';
+export const BTC = 'btc';
 
 export const explorerBaseUrl = 'https://api.ergoplatform.com';
 export const koiosBaseUrl = 'https://api.koios.rest/api/v1';
+export const esploraBaseUrl = 'https://blockstream.info';
 
 export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
 export const feeGuaranteeDuration = new Map<string, number>([
@@ -75,6 +77,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   ),
   fetchBoxRetry: config.get<number>('minimumFee.fetchBoxRetry') ?? 3,
   rsnRatioPrecision: config.get<number>('minimumFee.rsnRatioPrecision') ?? 6,
+  bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
 };
 
 export const discordWebHookUrl = config.has('discordWebHookUrl')

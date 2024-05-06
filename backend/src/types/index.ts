@@ -60,6 +60,12 @@ export type PriceBackendParams =
   | ManualParams
   | SpectrumParams;
 
+export interface HeightDelays {
+  ergo: number;
+  cardano: number;
+  bitcoin: number;
+}
+
 export interface SupportedTokenConfig {
   tokenId: string;
   ergoSideTokenId: string;
@@ -68,11 +74,11 @@ export interface SupportedTokenConfig {
   priceBackend: string;
   priceBackendParams: PriceBackendParams;
   fee: {
-    ergoHeightDelay: number;
-    cardanoHeightDelay: number;
+    delays: HeightDelays;
     bridgeFeeUSD: number;
     ergNetworkFee: number;
     adaNetworkFee: number;
+    bitcoinConfirmation: number;
     feeRatioFloat: number;
     rsnRatioDivisor: number;
   };
@@ -87,6 +93,7 @@ export interface ConfigInterface {
   supportedTokens: Array<SupportedTokenConfig>;
   fetchBoxRetry: number;
   rsnRatioPrecision: number;
+  bitcoinTxVSize: number;
 }
 
 interface CoinMarketCapPricePoolQuote {

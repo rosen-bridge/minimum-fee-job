@@ -4,6 +4,7 @@ minimumFee:
   feeAddress: '9gPqDuyxpmV2bR62zdbgxuvJAahDUpnaZw8Srv2JYHauAiHZEb4'
   fetchBoxRetry: 3
   rsnRatioPrecision: 6
+  bitcoinTxVSize: 150
   supportedTokens:
     - tokenId: 'erg'
       ergoSideTokenId: 'erg'
@@ -19,6 +20,7 @@ minimumFee:
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
         feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
     - tokenId: 'ada'
       ergoSideTokenId: 'e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297'
       name: 'ADA'
@@ -33,6 +35,22 @@ minimumFee:
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
         feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
+    - tokenId: 'btc'
+      ergoSideTokenId: '003bd19d0187117f130b62e1bcab0939929ff5c7709f843c5c4dd158949285d0'
+      name: 'BTC'
+      decimals: 6
+      priceBackend: 'coingecko'
+      priceBackendParams:
+        network: 'bitcoin'
+      fee:
+        ergoHeightDelay: 0
+        cardanoHeightDelay: 0
+        bridgeFeeUSD: 10
+        ergNetworkFee: 0.0013
+        adaNetworkFee: 3.4
+        feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
     - tokenId: '8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'
       ergoSideTokenId: '8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'
       name: 'RSN'
@@ -46,6 +64,7 @@ minimumFee:
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
         feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
     - tokenId: '03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04'
       ergoSideTokenId: '03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04'
       name: 'SigUSD'
@@ -59,19 +78,7 @@ minimumFee:
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
         feeRatioFloat: 0.005
-    - tokenId: '003bd19d0187117f130b62e1bcab0939929ff5c7709f843c5c4dd158949285d0'
-      ergoSideTokenId: '003bd19d0187117f130b62e1bcab0939929ff5c7709f843c5c4dd158949285d0'
-      name: 'SigRSV'
-      decimals: 0
-      priceBackend: 'spectrum'
-      priceBackendParams: {}
-      fee:
-        ergoHeightDelay: 0
-        cardanoHeightDelay: 0
-        bridgeFeeUSD: 10
-        ergNetworkFee: 0.0013
-        adaNetworkFee: 3.4
-        feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
 logs:
   - type: 'file'
     path: './logs/'
