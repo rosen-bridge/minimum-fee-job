@@ -66,6 +66,7 @@ export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
 export const feeGuaranteeDuration = new Map<string, number>([
   ['ergo', 24 * 30], // 1 day (30 blocks per hour)
   ['cardano', 24 * 60 * 3], // 1 day (3 blocks per minute)
+  ['bitcoin', 24 * 6], // 1 day (6 blocks per hour)
 ]);
 export const RunningInterval = config.get<number>('interval') * 1000; // seconds to miliseconds
 
