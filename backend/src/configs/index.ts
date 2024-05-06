@@ -41,6 +41,9 @@ export const logConfigs = () => {
 export const bridgeFeeTriggerPercent = config.get<number>(
   'triggerPercent.bridgeFee'
 );
+export const bitcoinNetworkFeeTriggerPercent = config.get<number>(
+  'triggerPercent.bitcoinNetworkFee'
+);
 export const cardanoNetworkFeeTriggerPercent = config.get<number>(
   'triggerPercent.cardanoNetworkFee'
 );

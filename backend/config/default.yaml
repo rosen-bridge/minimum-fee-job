@@ -89,6 +89,7 @@ logs:
     level: 'info'
 triggerPercent:
   bridgeFee: 10
+  bitcoinNetworkFee: 10
   cardanoNetworkFee: 10
   ergoNetworkFee: 10
   rsnRatio: 10

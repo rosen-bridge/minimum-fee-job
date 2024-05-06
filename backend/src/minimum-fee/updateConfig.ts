@@ -6,6 +6,7 @@ import {
   MinimumFeeConfig,
 } from '@rosen-bridge/minimum-fee';
 import {
+  bitcoinNetworkFeeTriggerPercent,
   bridgeFeeTriggerPercent,
   cardanoNetworkFeeTriggerPercent,
   ergoNetworkFeeTriggerPercent,
@@ -86,6 +87,7 @@ export const updateFeeConfig = async (
       differencePercent.bridgeFee <= bridgeFeeTriggerPercent &&
       differencePercent.ergoNetworkFee <= ergoNetworkFeeTriggerPercent &&
       differencePercent.cardanoNetworkFee <= cardanoNetworkFeeTriggerPercent &&
+      differencePercent.bitcoinNetworkFee <= bitcoinNetworkFeeTriggerPercent &&
       differencePercent.rsnRatio <= rsnRatioTriggerPercent
     ) {
       // add new config
