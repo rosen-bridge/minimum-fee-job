@@ -1,6 +1,7 @@
 import { Fee } from '@rosen-bridge/minimum-fee';
 import { minimumFeeConfigs } from '../configs';
 import { Registers } from '../types';
+import { BITCOIN, CARDANO, ERGO } from '../types/consts';
 
 export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
   // generate register values
@@ -76,8 +77,8 @@ export const getConfigDifferencePercent = (
   const bridgeFeeDifference = differencePercent(currentBridgeFee, newBridgeFee);
 
   // to-Ergo network fee difference
-  const currentErgoNetworkFee = currentConfig.configs['ergo'].networkFee;
-  const newErgoNetworkFee = newConfig.configs['ergo'].networkFee;
+  const currentErgoNetworkFee = currentConfig.configs[ERGO].networkFee;
+  const newErgoNetworkFee = newConfig.configs[ERGO].networkFee;
 
   const ergoNetworkFeeDifference = differencePercent(
     currentErgoNetworkFee,
@@ -85,13 +86,23 @@ export const getConfigDifferencePercent = (
   );
 
   // to-Cardano fee difference
-  const currentCardanoNetworkFee = currentConfig.configs['cardano'].networkFee;
-  const newCardanoNetworkFee = newConfig.configs['cardano'].networkFee;
+  const currentCardanoNetworkFee = currentConfig.configs[CARDANO].networkFee;
+  const newCardanoNetworkFee = newConfig.configs[CARDANO].networkFee;
 
   const cardanoNetworkFeeDifference = differencePercent(
     currentCardanoNetworkFee,
     newCardanoNetworkFee
   );
+
+  // to-Bitcoin fee difference
+  const currentBitcoinNetworkFee = currentConfig.configs[BITCOIN].networkFee;
+  const newBitcoinNetworkFee = newConfig.configs[BITCOIN].networkFee;
+
+  const bitcoinNetworkFeeDifference = differencePercent(
+    currentBitcoinNetworkFee,
+    newBitcoinNetworkFee
+  );
+
   // rsn ratio difference
   const rsnRatioDivisorQuotient =
     currentConfig.configs[anyChain].rsnRatioDivisor !==
@@ -109,6 +120,7 @@ export const getConfigDifferencePercent = (
     bridgeFee: bridgeFeeDifference,
     ergoNetworkFee: ergoNetworkFeeDifference,
     cardanoNetworkFee: cardanoNetworkFeeDifference,
+    bitcoinNetworkFee: bitcoinNetworkFeeDifference,
     rsnRatio: rsnRatioDifference,
   };
 };

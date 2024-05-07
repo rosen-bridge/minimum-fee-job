@@ -6,6 +6,7 @@ import {
   MinimumFeeConfig,
 } from '@rosen-bridge/minimum-fee';
 import {
+  bitcoinNetworkFeeTriggerPercent,
   bridgeFeeTriggerPercent,
   cardanoNetworkFeeTriggerPercent,
   ergoNetworkFeeTriggerPercent,
@@ -14,10 +15,14 @@ import {
   minimumFeeConfigs,
   rsnRatioTriggerPercent,
 } from '../configs';
-import { getCardanoHeight, getErgoHeight } from '../network/clients';
+import {
+  getBitcoinHeight,
+  getCardanoHeight,
+  getErgoHeight,
+} from '../network/clients';
 import { getConfigDifferencePercent } from '../utils/utils';
 import WinstonLogger from '@rosen-bridge/winston-logger';
-import { CARDANO, ERGO, SUPPORTED_CHAINS } from '../types/consts';
+import { BITCOIN, CARDANO, ERGO, SUPPORTED_CHAINS } from '../types/consts';
 import { FeeDifferencePercents, UpdatedFeeConfig } from '../types';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -86,18 +91,9 @@ export const updateFeeConfig = async (
       differencePercent.bridgeFee <= bridgeFeeTriggerPercent &&
       differencePercent.ergoNetworkFee <= ergoNetworkFeeTriggerPercent &&
       differencePercent.cardanoNetworkFee <= cardanoNetworkFeeTriggerPercent &&
+      differencePercent.bitcoinNetworkFee <= bitcoinNetworkFeeTriggerPercent &&
       differencePercent.rsnRatio <= rsnRatioTriggerPercent
     ) {
-      // add new config
-      builder.addConfig(newFeeConfig);
-      return {
-        config: {
-          current: tokenMinimumFeeBox,
-          new: builder,
-        },
-        differencePercent: differencePercent,
-      };
-    } else {
       logger.debug(
         `token [${tokenId}] config difference is not sufficient for update`
       );
@@ -105,6 +101,16 @@ export const updateFeeConfig = async (
         config: {
           current: tokenMinimumFeeBox,
           new: undefined,
+        },
+        differencePercent: differencePercent,
+      };
+    } else {
+      // add new config
+      builder.addConfig(newFeeConfig);
+      return {
+        config: {
+          current: tokenMinimumFeeBox,
+          new: builder,
         },
         differencePercent: differencePercent,
       };
@@ -140,6 +146,7 @@ const cleanOldConfig = async (tokenMinimumFeeBox: MinimumFeeBox) => {
   const chainHeights = new Map<string, number>();
   chainHeights.set(ERGO, await getErgoHeight());
   chainHeights.set(CARDANO, await getCardanoHeight());
+  chainHeights.set(BITCOIN, await getBitcoinHeight());
 
   const getCurrentHeight = (chain: string) => {
     const currentHeight = chainHeights.get(chain);
@@ -152,19 +159,24 @@ const cleanOldConfig = async (tokenMinimumFeeBox: MinimumFeeBox) => {
 
   // convert to builder
   const builder = tokenMinimumFeeBox.toBuilder();
+  builder.setHeight(getCurrentHeight(ERGO));
   const fees: Array<Fee> = (builder as any).fees;
 
   // remove unused configs
   let i = 0;
-  for (i = fees.length; i >= 0; i--) {
+  let configIsPassed = false;
+  for (i = fees.length - 1; i >= 0; i--) {
     for (const chain of SUPPORTED_CHAINS) {
       const currentHeight = getCurrentHeight(chain);
       if (
         Object.hasOwn(fees[i].heights, chain) &&
         fees[i].heights[chain] <= currentHeight
-      )
+      ) {
+        configIsPassed = true;
         break;
+      }
     }
+    if (configIsPassed) break;
     builder.removeConfig(i);
   }
 

@@ -41,6 +41,9 @@ export const logConfigs = () => {
 export const bridgeFeeTriggerPercent = config.get<number>(
   'triggerPercent.bridgeFee'
 );
+export const bitcoinNetworkFeeTriggerPercent = config.get<number>(
+  'triggerPercent.bitcoinNetworkFee'
+);
 export const cardanoNetworkFeeTriggerPercent = config.get<number>(
   'triggerPercent.cardanoNetworkFee'
 );
@@ -53,14 +56,17 @@ export const rsnRatioTriggerPercent = config.get<number>(
 
 export const ERG = 'erg';
 export const ADA = 'ada';
+export const BTC = 'btc';
 
 export const explorerBaseUrl = 'https://api.ergoplatform.com';
 export const koiosBaseUrl = 'https://api.koios.rest/api/v1';
+export const esploraBaseUrl = 'https://blockstream.info';
 
 export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
 export const feeGuaranteeDuration = new Map<string, number>([
   ['ergo', 24 * 30], // 1 day (30 blocks per hour)
   ['cardano', 24 * 60 * 3], // 1 day (3 blocks per minute)
+  ['bitcoin', 24 * 6], // 1 day (6 blocks per hour)
 ]);
 export const RunningInterval = config.get<number>('interval') * 1000; // seconds to miliseconds
 
@@ -75,6 +81,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   ),
   fetchBoxRetry: config.get<number>('minimumFee.fetchBoxRetry') ?? 3,
   rsnRatioPrecision: config.get<number>('minimumFee.rsnRatioPrecision') ?? 6,
+  bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
 };
 
 export const discordWebHookUrl = config.has('discordWebHookUrl')

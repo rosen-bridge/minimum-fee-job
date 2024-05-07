@@ -1,6 +1,11 @@
 import cardanoKoiosClientFactory from '@rosen-clients/cardano-koios';
 import ergoExplorerClientFactory from '@rosen-clients/ergo-explorer';
-import { explorerBaseUrl, koiosBaseUrl, minimumFeeConfigs } from '../configs';
+import {
+  esploraBaseUrl,
+  explorerBaseUrl,
+  koiosBaseUrl,
+  minimumFeeConfigs,
+} from '../configs';
 import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
 import {
   BlockHeaders,
@@ -9,15 +14,22 @@ import {
   PreHeader,
 } from 'ergo-lib-wasm-nodejs';
 import JsonBigInt from '@rosen-bridge/json-bigint';
+import axios from 'axios';
 
 const explorerClient = ergoExplorerClientFactory(explorerBaseUrl);
 const koiosClient = cardanoKoiosClientFactory(koiosBaseUrl);
+const esploraClient = axios.create({
+  baseURL: esploraBaseUrl,
+});
 
 export const getErgoHeight = async (): Promise<number> =>
   Number((await explorerClient.v1.getApiV1Networkstate()).height);
 
 export const getCardanoHeight = async (): Promise<number> =>
   Number((await koiosClient.getTip())[0].block_no!);
+
+export const getBitcoinHeight = async (): Promise<number> =>
+  Number((await esploraClient.get<number>(`/api/blocks/tip/height`)).data);
 
 export const getAddressBoxes = async (
   address: string
@@ -81,4 +93,9 @@ export const getStateContext = async (): Promise<ErgoStateContext> => {
   );
 
   return stateContext;
+};
+
+export const getBitcoinFeeRatio = async (): Promise<Record<string, number>> => {
+  return (await esploraClient.get<Record<string, number>>(`/api/fee-estimates`))
+    .data;
 };
