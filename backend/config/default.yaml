@@ -14,8 +14,10 @@ minimumFee:
       priceBackendParams:
         network: 'ergo'
       fee:
-        ergoHeightDelay: 0
-        cardanoHeightDelay: 0
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
         bridgeFeeUSD: 10
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
@@ -29,8 +31,10 @@ minimumFee:
       priceBackendParams:
         network: 'cardano'
       fee:
-        ergoHeightDelay: 0
-        cardanoHeightDelay: 0
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
         bridgeFeeUSD: 10
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
@@ -44,8 +48,10 @@ minimumFee:
       priceBackendParams:
         network: 'bitcoin'
       fee:
-        ergoHeightDelay: 0
-        cardanoHeightDelay: 0
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
         bridgeFeeUSD: 10
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
@@ -58,8 +64,10 @@ minimumFee:
       priceBackend: 'spectrum'
       priceBackendParams: {}
       fee:
-        ergoHeightDelay: 0
-        cardanoHeightDelay: 0
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
         bridgeFeeUSD: 10
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
@@ -72,8 +80,10 @@ minimumFee:
       priceBackend: 'spectrum'
       priceBackendParams: {}
       fee:
-        ergoHeightDelay: 0
-        cardanoHeightDelay: 0
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
         bridgeFeeUSD: 10
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
