@@ -1,42 +1,20 @@
 import './bootstrap';
 import { RunningInterval, minimumFeeConfigs } from './configs';
-import { generateNewFeeConfig } from './minimum-fee/newConfig';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
-import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
-import { feeConfigToRegisterValues, pricesToString } from './utils/utils';
+import { feeConfigToRegisterValues } from './utils/utils';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Notification } from './network/Notification';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { replicateV1 } from './minimum-fee/replicate';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const main = async () => {
   logger.info(`Starting Job`);
-  if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
-    throw Error(`Fee address and Minimum-fee config address cannot be equal`);
-
-  // new config
-  logger.info(`Generating new config`);
-  const newFeeConfigs = await generateNewFeeConfig();
-  const newConfig = newFeeConfigs.configs;
-  const prices = newFeeConfigs.prices;
-
-  newConfig.forEach((feeConfig, tokenId) => {
-    logger.debug(
-      `fee config for token [${tokenId}]: ${JsonBigInt.stringify(feeConfig)}`
-    );
-    logger.debug(
-      `Register values: ${JsonBigInt.stringify(
-        feeConfigToRegisterValues(feeConfig)
-      )}`
-    );
-  });
 
   // updated config
-  logger.info(`Combining new config with current config`);
-  const updateResult = await updateAndGenerateFeeConfig(newConfig);
-  const updatedConfig = updateResult.config;
-  const bridgeFeeDifferences = updateResult.bridgeFeeDifferences;
+  logger.info(`Replicating V1 config into V0`);
+  const updatedConfig = await replicateV1();
 
   updatedConfig.forEach((feeConfig, tokenId) => {
     logger.debug(
@@ -64,10 +42,8 @@ const main = async () => {
 
     // send notification to discord
     const discordNotification = Notification.getInstance();
-    discordNotification.sendMessage(`# MinimumFee configs need to be updated`);
     discordNotification.sendMessage(
-      `## Prices\n` +
-        `\`\`\`json\n${pricesToString(prices, bridgeFeeDifferences)}\n\`\`\``
+      `# MinimumFee V0 configs need to be updated`
     );
     const tokenIds = Array.from(updatedConfig.keys());
 

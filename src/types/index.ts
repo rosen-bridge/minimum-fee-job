@@ -80,6 +80,7 @@ export interface SupportedTokenConfig {
 
 export interface ConfigInterface {
   minimumFeeNFT: string;
+  minimumFeeV1NFT: string;
   minimumFeeAddress: string;
   feeAddress: string;
   minBoxErg: bigint;

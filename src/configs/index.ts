@@ -61,6 +61,7 @@ export const RunningInterval = config.get<number>('interval') * 1000; // seconds
 
 export const minimumFeeConfigs: ConfigInterface = {
   minimumFeeNFT: config.get<string>('minimumFee.NFT'),
+  minimumFeeV1NFT: config.get<string>('minimumFee.V1NFT'),
   minimumFeeAddress: config.get<string>('minimumFee.minimumFeeAddress'),
   feeAddress: config.get<string>('minimumFee.feeAddress'),
   minBoxErg: 200000n,

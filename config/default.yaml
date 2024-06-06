@@ -1,7 +1,8 @@
 minimumFee:
-  NFT: '1ce1ea41ceaed94a6976a047645ffb3f3da3916685268c8f2d8f80f892147caa'
+  NFT: '405cb1483b46340ee1a111aa42eaaffa53451cab3220fe9deb752a03f2ab0b85'
+  V1NFT: '05690d3e7a8daae13495b32af8ab58aaec8a5435f5974f6adf17095d28cac1f5'
   minimumFeeAddress: '9fmj8dX6QFy9PS2zCqYJj4LTyDvWRS29BBuSTToy961oWf2VaQQ'
-  feeAddress: '9gPqDuyxpmV2bR62zdbgxuvJAahDUpnaZw8Srv2JYHauAiHZEb4'
+  feeAddress: '9eedUp4SDLsgxBiPJid55qUnCRDuXeNs1Z9fpi4vZtPgZcaBgzL'
   supportedTokens:
     - tokenId: 'erg'
       ergoSideTokenId: 'erg'
@@ -44,32 +45,6 @@ minimumFee:
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
         feeRatioFloat: 0.005
-    - tokenId: '03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04'
-      ergoSideTokenId: '03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04'
-      name: 'SigUSD'
-      decimals: 2
-      priceBackend: 'spectrum'
-      priceBackendParams: {}
-      fee:
-        ergoHeightDelay: 0
-        cardanoHeightDelay: 0
-        bridgeFeeUSD: 10
-        ergNetworkFee: 0.0013
-        adaNetworkFee: 3.4
-        feeRatioFloat: 0.005
-    - tokenId: '003bd19d0187117f130b62e1bcab0939929ff5c7709f843c5c4dd158949285d0'
-      ergoSideTokenId: '003bd19d0187117f130b62e1bcab0939929ff5c7709f843c5c4dd158949285d0'
-      name: 'SigRSV'
-      decimals: 0
-      priceBackend: 'spectrum'
-      priceBackendParams: {}
-      fee:
-        ergoHeightDelay: 0
-        cardanoHeightDelay: 0
-        bridgeFeeUSD: 10
-        ergNetworkFee: 0.0013
-        adaNetworkFee: 3.4
-        feeRatioFloat: 0.005
 logs:
   - type: 'file'
     path: './logs/'
@@ -82,5 +57,5 @@ triggerPercent:
   bridgeFee: 10
   cardanoNetworkFee: 10
   ergoNetworkFee: 10
-discordWebHookUrl: '' # Discord webhook url for sending notifications
+discordWebHookUrl: 'https://discord.com/api/webhooks/1182973774237274213/8mnQgzLzaxpKEupVS0sUR_sjLVEioWkWhkXFJmCnQOx2XO9bfOnTxKuQ_up9OD87MgQP' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours

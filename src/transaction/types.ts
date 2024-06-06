@@ -1,4 +1,4 @@
-import { FeeConfig } from '@rosen-bridge/minimum-fee';
+import { FeeConfig } from '@rosen-bridge/minimum-fee-v0';
 
 export interface TokenInfo {
   id: string;

@@ -1,4 +1,4 @@
-import { BridgeMinimumFee } from '@rosen-bridge/minimum-fee';
+import { BridgeMinimumFee } from '@rosen-bridge/minimum-fee-v0';
 import {
   bridgeFeeTriggerPercent,
   cardanoNetworkFeeTriggerPercent,
