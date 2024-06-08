@@ -167,7 +167,7 @@ const convertV1ToV0 = (v1: Array<Fee>): FeeConfig => {
     };
 
     v0.ergo[fee.heights['ergo']] = ergoFee;
-    v0.ergo[fee.heights['cardano']] = cardanoFee;
+    v0.cardano[fee.heights['cardano']] = cardanoFee;
   });
 
   return v0;
