@@ -10,6 +10,7 @@ import JsonBigInt from '@rosen-bridge/json-bigint';
 import { explorerBaseUrl, minimumFeeConfigs } from '../configs';
 import { FeeConfig, Fee as V0Fee } from '../types';
 import { ErgoBox } from 'ergo-lib-wasm-nodejs';
+import { checkArrayEquality } from '../utils/utils';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -68,7 +69,15 @@ export const updateFeeConfig = async (tokenId: string) => {
       .map((fee) => fee.heights['ergo'])
       .sort((x: number, y: number) => y - x);
 
-    if (v0ErgoHeights === v1ErgoHeights) return undefined;
+    if (checkArrayEquality(v0ErgoHeights, v1ErgoHeights)) {
+      logger.debug(
+        `No replication is needed for token [${tokenId}] since heights are updated`
+      );
+      return undefined;
+    }
+    logger.debug(
+      `Converting V1 to V0 for replication for token [${tokenId}] due to heights difference [${v0ErgoHeights} !== ${v1ErgoHeights}]`
+    );
     return convertV1ToV0(v1Config);
   } else {
     throw Error(
