@@ -103,15 +103,3 @@ interface CoinMarketCapPricePoolQuote {
 export interface CoinMarketCapPricePool {
   quotes: Array<CoinMarketCapPricePoolQuote>;
 }
-
-export interface SpectrumPool {
-  baseId: string;
-  quoteId: string;
-  lastPrice: number;
-  quoteVolume: {
-    value: number;
-  };
-  baseVolume: {
-    value: number;
-  };
-}

@@ -1,10 +1,14 @@
 import axios from 'axios';
-import { Price, SpectrumPool } from '../types';
+import { Price } from '../types';
 import { ERG_ID } from '../types/consts';
 import { spectrumPoolTimeLength } from '../configs';
+import { SpectrumPool } from '../types/spectrum';
+import WinstonLogger from '@rosen-bridge/winston-logger';
+
+const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 const axiosSpectrum = axios.create({
-  baseURL: 'https://api.spectrum.fi/v1/price-tracking/markets',
+  baseURL: 'https://api.spectrum.fi',
   timeout: 8000,
 });
 
@@ -18,33 +22,39 @@ export const fetchPriceFromSpectrumInERG = async (
     to: toDate,
   };
   const pools = await axiosSpectrum
-    .get('', { params: queryParams })
+    .get('/v1/amm/pools/stats', { params: queryParams })
     .then((res) => res.data);
 
   const prices: Array<Price> = [];
   pools.forEach((pool: SpectrumPool) => {
-    if (pool.baseId === ERG_ID && pool.quoteId === tokenId) {
-      prices.push({
-        price: 1 / pool.lastPrice,
-        volume: pool.quoteVolume.value,
-      });
-    } else if (pool.baseId === tokenId && pool.quoteId === ERG_ID) {
-      prices.push({
-        price: pool.lastPrice,
-        volume: pool.baseVolume.value,
-      });
-    }
+    let lockedErg: number;
+    let lockedToken: number;
+    let volume: number;
+    if (pool.lockedX.id === ERG_ID && pool.lockedY.id === tokenId) {
+      lockedErg = pool.lockedX.amount / 10 ** pool.lockedX.decimals;
+      lockedToken = pool.lockedY.amount / 10 ** pool.lockedY.decimals;
+      volume = pool.lockedY.amount;
+    } else if (pool.lockedX.id === tokenId && pool.lockedY.id === ERG_ID) {
+      lockedErg = pool.lockedY.amount / 10 ** pool.lockedY.decimals;
+      lockedToken = pool.lockedX.amount / 10 ** pool.lockedX.decimals;
+      volume = pool.lockedX.amount;
+    } else return;
+    prices.push({
+      price: lockedErg / lockedToken,
+      volume: volume,
+    });
   });
 
   if (prices.length === 0)
     throw Error(`No pool found between [ERG] and [${tokenId}]`);
 
+  logger.debug(`token [${tokenId}] Pool prices: ${JSON.stringify(prices)}`);
   const totalPrice = prices.reduce(
-    (total: Price, newPrice: Price) => ({
+    (total: Price, newTvl: Price) => ({
       price:
-        (total.price * total.volume + newPrice.price * newPrice.volume) /
-        (total.volume + newPrice.volume),
-      volume: total.volume + newPrice.volume,
+        (total.price * total.volume + newTvl.price * newTvl.volume) /
+        (total.volume + newTvl.volume),
+      volume: total.volume + newTvl.volume,
     }),
     { price: 0, volume: 0 }
   );

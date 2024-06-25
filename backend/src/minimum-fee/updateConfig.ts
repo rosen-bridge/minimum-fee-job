@@ -105,6 +105,9 @@ export const updateFeeConfig = async (
         differencePercent: differencePercent,
       };
     } else {
+      logger.debug(
+        `trigger condition for token [${tokenId}]: [${differencePercent.bridgeFee},${bridgeFeeTriggerPercent}], [${differencePercent.ergoNetworkFee},${ergoNetworkFeeTriggerPercent}], [${differencePercent.cardanoNetworkFee},${cardanoNetworkFeeTriggerPercent}], [${differencePercent.bitcoinNetworkFee},${bitcoinNetworkFeeTriggerPercent}], [${differencePercent.rsnRatio},${rsnRatioTriggerPercent}]`
+      );
       // add new config
       builder.addConfig(newFeeConfig);
       return {
