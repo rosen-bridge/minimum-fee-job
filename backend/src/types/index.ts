@@ -12,6 +12,11 @@ export interface Price {
   volume: number;
 }
 
+export interface ErgTokenVolumes {
+  erg: number;
+  token: number;
+}
+
 export interface Registers {
   R4: Array<string>;
   R5: Array<Array<number>>;
