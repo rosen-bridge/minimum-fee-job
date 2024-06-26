@@ -12,6 +12,11 @@ export interface Price {
   volume: number;
 }
 
+export interface ErgTokenVolumes {
+  erg: number;
+  token: number;
+}
+
 export interface Registers {
   R4: Array<string>;
   R5: Array<Array<number>>;
@@ -102,16 +107,4 @@ interface CoinMarketCapPricePoolQuote {
 }
 export interface CoinMarketCapPricePool {
   quotes: Array<CoinMarketCapPricePoolQuote>;
-}
-
-export interface SpectrumPool {
-  baseId: string;
-  quoteId: string;
-  lastPrice: number;
-  quoteVolume: {
-    value: number;
-  };
-  baseVolume: {
-    value: number;
-  };
 }
