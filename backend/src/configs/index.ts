@@ -60,7 +60,7 @@ export const BTC = 'btc';
 
 export const explorerBaseUrl = 'https://api.ergoplatform.com';
 export const koiosBaseUrl = 'https://api.koios.rest/api/v1';
-export const esploraBaseUrl = 'https://blockstream.info';
+export const esploraBaseUrl = 'https://mempool.space';
 
 export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
 export const feeGuaranteeDuration = new Map<string, number>([

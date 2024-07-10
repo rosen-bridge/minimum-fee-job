@@ -83,7 +83,7 @@ export const updateFeeConfig = async (
 
     // calculate config differences
     const differencePercent = getConfigDifferencePercent(
-      (builder as any).fees[0],
+      (builder as any).fees.at(-1),
       newFeeConfig.getConfig()
     );
 
