@@ -2,3 +2,4 @@ node_modules
 local*.yaml
 logs
 dist
+config/rosen/

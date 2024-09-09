@@ -1,6 +1,5 @@
 import {
   ErgoNetworkType,
-  Fee,
   MinimumFeeBox,
   MinimumFeeBoxBuilder,
   MinimumFeeConfig,
@@ -10,6 +9,7 @@ import {
   bridgeFeeTriggerPercent,
   cardanoNetworkFeeTriggerPercent,
   ergoNetworkFeeTriggerPercent,
+  ethereumNetworkFeeTriggerPercent,
   explorerBaseUrl,
   feeGuaranteeDuration,
   minimumFeeConfigs,
@@ -19,11 +19,19 @@ import {
   getBitcoinHeight,
   getCardanoHeight,
   getErgoHeight,
+  getEthereumHeight,
 } from '../network/clients';
 import { getConfigDifferencePercent } from '../utils/utils';
 import WinstonLogger from '@rosen-bridge/winston-logger';
-import { BITCOIN, CARDANO, ERGO, SUPPORTED_CHAINS } from '../types/consts';
+import {
+  BITCOIN,
+  CARDANO,
+  ERGO,
+  ETHEREUM,
+  SUPPORTED_CHAINS,
+} from '../types/consts';
 import { FeeDifferencePercents, UpdatedFeeConfig } from '../types';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -67,7 +75,6 @@ export const updateFeeConfig = async (
   const tokenMinimumFeeBox = new MinimumFeeBox(
     tokenId,
     minimumFeeConfigs.minimumFeeNFT,
-    minimumFeeConfigs.minimumFeeAddress,
     ErgoNetworkType.explorer,
     explorerBaseUrl,
     logger
@@ -83,16 +90,21 @@ export const updateFeeConfig = async (
 
     // calculate config differences
     const differencePercent = getConfigDifferencePercent(
-      (builder as any).fees.at(-1),
+      builder.getConfigs().at(-1)!,
       newFeeConfig.getConfig()
     );
 
     if (
       differencePercent.bridgeFee <= bridgeFeeTriggerPercent &&
+      differencePercent.rsnRatio <= rsnRatioTriggerPercent &&
+      differencePercent.ergoNetworkFee &&
       differencePercent.ergoNetworkFee <= ergoNetworkFeeTriggerPercent &&
+      differencePercent.cardanoNetworkFee &&
       differencePercent.cardanoNetworkFee <= cardanoNetworkFeeTriggerPercent &&
+      differencePercent.bitcoinNetworkFee &&
       differencePercent.bitcoinNetworkFee <= bitcoinNetworkFeeTriggerPercent &&
-      differencePercent.rsnRatio <= rsnRatioTriggerPercent
+      differencePercent.ethereumNetworkFee &&
+      differencePercent.ethereumNetworkFee <= ethereumNetworkFeeTriggerPercent
     ) {
       logger.debug(
         `token [${tokenId}] config difference is not sufficient for update`
@@ -106,10 +118,26 @@ export const updateFeeConfig = async (
       };
     } else {
       logger.debug(
-        `trigger condition for token [${tokenId}]: [${differencePercent.bridgeFee},${bridgeFeeTriggerPercent}], [${differencePercent.ergoNetworkFee},${ergoNetworkFeeTriggerPercent}], [${differencePercent.cardanoNetworkFee},${cardanoNetworkFeeTriggerPercent}], [${differencePercent.bitcoinNetworkFee},${bitcoinNetworkFeeTriggerPercent}], [${differencePercent.rsnRatio},${rsnRatioTriggerPercent}]`
+        `trigger condition for token [${tokenId}]: ${JsonBigInt.stringify([
+          [differencePercent.bridgeFee, bridgeFeeTriggerPercent],
+          [differencePercent.rsnRatio, rsnRatioTriggerPercent],
+          [differencePercent.ergoNetworkFee, ergoNetworkFeeTriggerPercent],
+          [
+            differencePercent.cardanoNetworkFee,
+            cardanoNetworkFeeTriggerPercent,
+          ],
+          [
+            differencePercent.bitcoinNetworkFee,
+            bitcoinNetworkFeeTriggerPercent,
+          ],
+          [
+            differencePercent.ethereumNetworkFee,
+            ethereumNetworkFeeTriggerPercent,
+          ],
+        ])}`
       );
       // add new config
-      builder.addConfig(newFeeConfig);
+      builder.addConfig(newFeeConfig).prune();
       return {
         config: {
           current: tokenMinimumFeeBox,
@@ -132,7 +160,8 @@ export const updateFeeConfig = async (
       .setHeight(currentErgoHeight)
       .setToken(tokenId)
       .setValue(minimumFeeConfigs.minBoxErg)
-      .addConfig(newFeeConfig);
+      .addConfig(newFeeConfig)
+      .prune();
 
     return {
       config: {
@@ -150,6 +179,7 @@ const cleanOldConfig = async (tokenMinimumFeeBox: MinimumFeeBox) => {
   chainHeights.set(ERGO, await getErgoHeight());
   chainHeights.set(CARDANO, await getCardanoHeight());
   chainHeights.set(BITCOIN, await getBitcoinHeight());
+  chainHeights.set(ETHEREUM, await getEthereumHeight());
 
   const getCurrentHeight = (chain: string) => {
     const currentHeight = chainHeights.get(chain);
@@ -163,7 +193,7 @@ const cleanOldConfig = async (tokenMinimumFeeBox: MinimumFeeBox) => {
   // convert to builder
   const builder = tokenMinimumFeeBox.toBuilder();
   builder.setHeight(getCurrentHeight(ERGO));
-  const fees: Array<Fee> = (builder as any).fees;
+  const fees = builder.getConfigs();
 
   // remove unused configs
   let i = 0;

@@ -28,8 +28,10 @@ export interface Registers {
 
 export interface FeeDifferencePercents {
   bridgeFee: bigint;
-  ergoNetworkFee: bigint;
-  cardanoNetworkFee: bigint;
+  ergoNetworkFee: bigint | undefined;
+  cardanoNetworkFee: bigint | undefined;
+  bitcoinNetworkFee: bigint | undefined;
+  ethereumNetworkFee: bigint | undefined;
   rsnRatio: bigint;
 }
 

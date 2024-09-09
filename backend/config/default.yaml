@@ -57,6 +57,23 @@ minimumFee:
         adaNetworkFee: 3.4
         feeRatioFloat: 0.005
         bitcoinConfirmation: 6
+    - tokenId: 'eth'
+      ergoSideTokenId: '6a675f7eed88401791555a861ebf3cd054ac58477b6994a39119de4da56a96fe'
+      name: 'ETH'
+      decimals: 9
+      priceBackend: 'coingecko'
+      priceBackendParams:
+        network: 'ethereum'
+      fee:
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
+        bridgeFeeUSD: 10
+        ergNetworkFee: 0.2
+        adaNetworkFee: 1
+        feeRatioFloat: 0.01
+        bitcoinConfirmation: 6
     - tokenId: '8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'
       ergoSideTokenId: '8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'
       name: 'RSN'
@@ -89,6 +106,7 @@ minimumFee:
         adaNetworkFee: 3.4
         feeRatioFloat: 0.005
         bitcoinConfirmation: 6
+tokensPath: './config/rosen/tokens.json' # path to supported tokens of bridge
 logs:
   - type: 'file'
     path: './logs/'
@@ -99,10 +117,11 @@ logs:
     level: 'info'
 triggerPercent:
   bridgeFee: 10
-  bitcoinNetworkFee: 10
-  cardanoNetworkFee: 10
-  ergoNetworkFee: 10
   rsnRatio: 10
+  bitcoinNetworkFee: 100
+  cardanoNetworkFee: 30
+  ergoNetworkFee: 50
+  ethereumNetworkFee: 150
 discordWebHookUrl: '' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours
 redisUrl: # redis://user:password@host:port/dbnum

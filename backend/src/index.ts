@@ -10,7 +10,6 @@ import WinstonLogger from '@rosen-bridge/winston-logger';
 
 import { flushStore, savePrices, saveTx } from './store';
 import { getConfigTokenPrices } from './minimum-fee/prices';
-import { Fee } from '@rosen-bridge/minimum-fee';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -44,7 +43,7 @@ const main = async () => {
   const bridgeFeeDifferences = updateResult.bridgeFeeDifferences;
 
   updatedConfigs.forEach((updatedConfig, tokenId) => {
-    const feeConfig: Fee[] = (updatedConfig.new as any).fees;
+    const feeConfig = updatedConfig.new.getConfigs();
     logger.debug(
       `Updated fee config for token [${tokenId}]: ${JsonBigInt.stringify(
         feeConfig
@@ -107,7 +106,7 @@ const main = async () => {
         discordNotification.sendMessage(`## Token ${token.name} [${token.tokenId}]
           ergo side tokenId: \`${token.ergoSideTokenId}\`
         `);
-        const tokenFeeConfig = (updatedConfigs.get(tokenId)!.new as any).fees;
+        const tokenFeeConfig = updatedConfigs.get(tokenId)!.new.getConfigs();
         discordNotification.sendMessage(
           `\`\`\`json\n${JsonBigInt.stringify(tokenFeeConfig)}\n\`\`\``
         );

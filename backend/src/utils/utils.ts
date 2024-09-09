@@ -1,7 +1,8 @@
 import { Fee } from '@rosen-bridge/minimum-fee';
 import { minimumFeeConfigs } from '../configs';
-import { Registers } from '../types';
-import { BITCOIN, CARDANO, ERGO } from '../types/consts';
+import { FeeDifferencePercents, Registers } from '../types';
+import { BITCOIN, CARDANO, ERGO, ETHEREUM } from '../types/consts';
+import { intersection } from 'lodash-es';
 
 export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
   // generate register values
@@ -68,40 +69,22 @@ export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
 export const getConfigDifferencePercent = (
   currentConfig: Fee,
   newConfig: Fee
-) => {
+): FeeDifferencePercents => {
+  const chains = intersection(
+    Object.keys(currentConfig.configs),
+    Object.keys(newConfig.configs)
+  );
+  if (chains.length === 0)
+    throw Error(
+      `impossible behavior: no intersection between the current and new config chains`
+    );
+
   // bridge fee difference
-  const anyChain = Object.keys(currentConfig.configs)[0];
+  const anyChain = chains[0];
   const currentBridgeFee = currentConfig.configs[anyChain].bridgeFee;
   const newBridgeFee = newConfig.configs[anyChain].bridgeFee;
 
   const bridgeFeeDifference = differencePercent(currentBridgeFee, newBridgeFee);
-
-  // to-Ergo network fee difference
-  const currentErgoNetworkFee = currentConfig.configs[ERGO].networkFee;
-  const newErgoNetworkFee = newConfig.configs[ERGO].networkFee;
-
-  const ergoNetworkFeeDifference = differencePercent(
-    currentErgoNetworkFee,
-    newErgoNetworkFee
-  );
-
-  // to-Cardano fee difference
-  const currentCardanoNetworkFee = currentConfig.configs[CARDANO].networkFee;
-  const newCardanoNetworkFee = newConfig.configs[CARDANO].networkFee;
-
-  const cardanoNetworkFeeDifference = differencePercent(
-    currentCardanoNetworkFee,
-    newCardanoNetworkFee
-  );
-
-  // to-Bitcoin fee difference
-  const currentBitcoinNetworkFee = currentConfig.configs[BITCOIN].networkFee;
-  const newBitcoinNetworkFee = newConfig.configs[BITCOIN].networkFee;
-
-  const bitcoinNetworkFeeDifference = differencePercent(
-    currentBitcoinNetworkFee,
-    newBitcoinNetworkFee
-  );
 
   // rsn ratio difference
   const rsnRatioDivisorQuotient =
@@ -116,12 +99,62 @@ export const getConfigDifferencePercent = (
 
   const rsnRatioDifference = differencePercent(currentRatio, newRatio);
 
+  // to-Ergo network fee difference
+  let ergoNetworkFeeDifference: bigint | undefined;
+  if (chains.includes(ERGO)) {
+    const currentErgoNetworkFee = currentConfig.configs[ERGO].networkFee;
+    const newErgoNetworkFee = newConfig.configs[ERGO].networkFee;
+
+    ergoNetworkFeeDifference = differencePercent(
+      currentErgoNetworkFee,
+      newErgoNetworkFee
+    );
+  }
+
+  // to-Cardano fee difference
+  let cardanoNetworkFeeDifference: bigint | undefined;
+  if (chains.includes(CARDANO)) {
+    const currentCardanoNetworkFee = currentConfig.configs[CARDANO].networkFee;
+    const newCardanoNetworkFee = newConfig.configs[CARDANO].networkFee;
+
+    cardanoNetworkFeeDifference = differencePercent(
+      currentCardanoNetworkFee,
+      newCardanoNetworkFee
+    );
+  }
+
+  // to-Bitcoin fee difference
+  let bitcoinNetworkFeeDifference: bigint | undefined;
+  if (chains.includes(BITCOIN)) {
+    const currentBitcoinNetworkFee = currentConfig.configs[BITCOIN].networkFee;
+    const newBitcoinNetworkFee = newConfig.configs[BITCOIN].networkFee;
+
+    bitcoinNetworkFeeDifference = differencePercent(
+      currentBitcoinNetworkFee,
+      newBitcoinNetworkFee
+    );
+  }
+
+  // to-Ethereum fee difference
+  let ethereumNetworkFeeDifference: bigint | undefined;
+  if (chains.includes(ETHEREUM)) {
+    const currentEthereumNetworkFee =
+      currentConfig.configs[ETHEREUM].networkFee;
+    const newEthereumNetworkFee = newConfig.configs[ETHEREUM].networkFee;
+
+    ethereumNetworkFeeDifference = differencePercent(
+      currentEthereumNetworkFee,
+      newEthereumNetworkFee
+    );
+  }
+
   return {
     bridgeFee: bridgeFeeDifference,
+    rsnRatio: rsnRatioDifference,
     ergoNetworkFee: ergoNetworkFeeDifference,
     cardanoNetworkFee: cardanoNetworkFeeDifference,
     bitcoinNetworkFee: bitcoinNetworkFeeDifference,
-    rsnRatio: rsnRatioDifference,
+    ethereumNetworkFee: ethereumNetworkFeeDifference,
   };
 };
 
