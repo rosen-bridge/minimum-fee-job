@@ -97,14 +97,17 @@ export const updateFeeConfig = async (
     if (
       differencePercent.bridgeFee <= bridgeFeeTriggerPercent &&
       differencePercent.rsnRatio <= rsnRatioTriggerPercent &&
-      differencePercent.ergoNetworkFee &&
-      differencePercent.ergoNetworkFee <= ergoNetworkFeeTriggerPercent &&
-      differencePercent.cardanoNetworkFee &&
-      differencePercent.cardanoNetworkFee <= cardanoNetworkFeeTriggerPercent &&
-      differencePercent.bitcoinNetworkFee &&
-      differencePercent.bitcoinNetworkFee <= bitcoinNetworkFeeTriggerPercent &&
-      differencePercent.ethereumNetworkFee &&
-      differencePercent.ethereumNetworkFee <= ethereumNetworkFeeTriggerPercent
+      (!differencePercent.ergoNetworkFee ||
+        differencePercent.ergoNetworkFee <= ergoNetworkFeeTriggerPercent) &&
+      (!differencePercent.cardanoNetworkFee ||
+        differencePercent.cardanoNetworkFee <=
+          cardanoNetworkFeeTriggerPercent) &&
+      (!differencePercent.bitcoinNetworkFee ||
+        differencePercent.bitcoinNetworkFee <=
+          bitcoinNetworkFeeTriggerPercent) &&
+      (!differencePercent.ethereumNetworkFee ||
+        differencePercent.ethereumNetworkFee <=
+          ethereumNetworkFeeTriggerPercent)
     ) {
       logger.debug(
         `token [${tokenId}] config difference is not sufficient for update`
