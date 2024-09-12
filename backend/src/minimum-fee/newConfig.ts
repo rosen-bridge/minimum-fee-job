@@ -1,12 +1,19 @@
-import { ADA, BTC, ERG, minimumFeeConfigs } from '../configs';
+import { ADA, BTC, ERG, ETH, minimumFeeConfigs, tokens } from '../configs';
 import { SupportedTokenConfig } from '../types';
 import {
   getBitcoinHeight,
   getCardanoHeight,
   getErgoHeight,
   getBitcoinFeeRatio,
+  getEthereumHeight,
 } from '../network/clients';
-import { BITCOIN, CARDANO, ERGO, feeRatioDivisor } from '../types/consts';
+import {
+  BITCOIN,
+  CARDANO,
+  ERGO,
+  ETHEREUM,
+  feeRatioDivisor,
+} from '../types/consts';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 import { ChainFee, MinimumFeeConfig } from '@rosen-bridge/minimum-fee';
 
@@ -14,50 +21,27 @@ const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
 export const generateNewFeeConfig = async (prices: Map<string, number>) => {
   const newFeeConfigs: Map<string, MinimumFeeConfig> = new Map();
-  const ergPrice = prices.get(ERG);
-  const adaPrice = prices.get(ADA);
-  const btcPrice = prices.get(BTC);
 
   const rsnTokenConfig = minimumFeeConfigs.supportedTokens.find(
     (token) => token.name === 'RSN'
   );
   if (!rsnTokenConfig) throw Error(`Token [RSN] is not found in config`);
   const rsnPrice = prices.get(rsnTokenConfig.tokenId);
-
-  if (
-    ergPrice == undefined ||
-    adaPrice == undefined ||
-    btcPrice == undefined ||
-    rsnPrice == undefined
-  )
-    throw Error(`Unexpected state: some required prices are missing`);
-
-  logger.debug(`Fetching network heights`);
-  const ergoHeight = await getErgoHeight();
-  const cardanoHeight = await getCardanoHeight();
-  const bitcoinHeight = await getBitcoinHeight();
+  if (!rsnPrice) throw Error(`RSN price is required`);
 
   logger.debug(`Fetching bitcoin fee ratio`);
   const bitcoinFeeRatioMap = await getBitcoinFeeRatio();
 
   for (const token of minimumFeeConfigs.supportedTokens) {
     logger.debug(`Generating new config for token [${token.name}]`);
-    const price = prices.get(token.tokenId);
-    if (price == undefined)
-      throw Error(`Unexpected state: token price is missing`);
 
-    const feeConfig = feeConfigFromPrice(
-      ergPrice,
-      adaPrice,
-      btcPrice,
+    const feeConfig = await feeConfigFromPrice(
+      token.tokenId,
+      prices,
       rsnPrice,
       rsnTokenConfig.decimals,
-      price,
       token.decimals,
       token.fee,
-      ergoHeight,
-      cardanoHeight,
-      bitcoinHeight,
       bitcoinFeeRatioMap
     );
     newFeeConfigs.set(token.tokenId, feeConfig);
@@ -65,50 +49,37 @@ export const generateNewFeeConfig = async (prices: Map<string, number>) => {
   return newFeeConfigs;
 };
 
-export const feeConfigFromPrice = (
-  ergPrice: number,
-  adaPrice: number,
-  btcPrice: number,
+export const feeConfigFromPrice = async (
+  tokenId: string,
+  prices: Map<string, number>,
   rsnPrice: number,
   rsnDecimal: number,
-  tokenPrice: number,
   tokenDecimal: number,
   configs: SupportedTokenConfig['fee'],
-  currentErgoHeight: number,
-  currentCardanoHeight: number,
-  currentBitcoinHeight: number,
   bitcoinFeeRatioMap: Record<string, number>
-): MinimumFeeConfig => {
+): Promise<MinimumFeeConfig> => {
+  const tokenPrice = prices.get(tokenId);
+  if (tokenPrice == undefined)
+    throw Error(`Unexpected state: token price is missing`);
+
   // calculating bridge fee
   const bridgeFee = BigInt(
     Math.ceil((configs.bridgeFeeUSD / tokenPrice) * 10 ** tokenDecimal)
   );
 
-  // calculating network fee on Ergo
-  const ergoNetworkFee = BigInt(
-    Math.ceil(
-      (configs.ergNetworkFee * ergPrice * 10 ** tokenDecimal) / tokenPrice
-    )
-  );
-
-  // calculating network fee on Cardano
-  const cardanoNetworkFee = BigInt(
-    Math.ceil(
-      (configs.adaNetworkFee * adaPrice * 10 ** tokenDecimal) / tokenPrice
-    )
-  );
-
-  // calculating network fee on Bitcoin
-  const bitcoinFeeRatio = bitcoinFeeRatioMap[configs.bitcoinConfirmation];
-  const bitcoinNetworkFee = BigInt(
-    Math.ceil(
-      (bitcoinFeeRatio *
-        minimumFeeConfigs.bitcoinTxVSize *
-        btcPrice *
-        10 ** tokenDecimal) /
-        (tokenPrice * 10 ** 8)
-    )
-  );
+  const tokenMapData = tokens();
+  const tokenSet = tokenMapData.tokens.find((set) => {
+    for (const chain of Object.keys(set)) {
+      if (set[chain][tokenMapData.idKeys[chain]] === tokenId) return true;
+    }
+    return false;
+  });
+  if (!tokenSet)
+    throw Error(
+      `Unexpected state: token [${tokenId}] is not found in token map`
+    );
+  const chains = Object.keys(tokenSet);
+  logger.debug(`supported chains for token [${tokenId}]: ${chains}`);
 
   // calculating rsn ratio
   const rsnRatioRaw =
@@ -140,32 +111,165 @@ export const feeConfigFromPrice = (
   // calculating fee ratio
   const feeRatio = BigInt(configs.feeRatioFloat * feeRatioDivisor);
 
-  const ergoFee: ChainFee = {
-    bridgeFee: bridgeFee,
-    networkFee: ergoNetworkFee,
-    rsnRatio: rsnRatio,
-    feeRatio: feeRatio,
-    rsnRatioDivisor,
-  };
-  const cardanoFee: ChainFee = {
-    bridgeFee: bridgeFee,
-    networkFee: cardanoNetworkFee,
-    rsnRatio: rsnRatio,
-    feeRatio: feeRatio,
-    rsnRatioDivisor,
-  };
-  const bitcoinFee: ChainFee = {
-    bridgeFee: bridgeFee,
-    networkFee: bitcoinNetworkFee,
-    rsnRatio: rsnRatio,
-    feeRatio: feeRatio,
-    rsnRatioDivisor,
-  };
-
+  // calculate chain-specific configs
   const newFeeConfig = new MinimumFeeConfig();
-  newFeeConfig.setChainConfig(ERGO, currentErgoHeight, ergoFee);
-  newFeeConfig.setChainConfig(CARDANO, currentCardanoHeight, cardanoFee);
-  newFeeConfig.setChainConfig(BITCOIN, currentBitcoinHeight, bitcoinFee);
+
+  //  ERGO
+  const ergoHeight = await getErgoHeight();
+  if (chains.includes(ERGO)) {
+    const ergoNetworkFee = getErgoNetworkFee(
+      prices,
+      configs,
+      tokenPrice,
+      tokenDecimal
+    );
+    const ergoFee: ChainFee = {
+      bridgeFee: bridgeFee,
+      networkFee: ergoNetworkFee,
+      rsnRatio: rsnRatio,
+      feeRatio: feeRatio,
+      rsnRatioDivisor,
+    };
+    newFeeConfig.setChainConfig(ERGO, ergoHeight, ergoFee);
+  } else {
+    newFeeConfig.setChainConfig(ERGO, ergoHeight, undefined);
+  }
+
+  //  CARDANO
+  const cardanoHeight = await getCardanoHeight();
+  if (chains.includes(CARDANO)) {
+    const cardanoNetworkFee = getCardanoNetworkFee(
+      prices,
+      configs,
+      tokenPrice,
+      tokenDecimal
+    );
+    const cardanoFee: ChainFee = {
+      bridgeFee: bridgeFee,
+      networkFee: cardanoNetworkFee,
+      rsnRatio: rsnRatio,
+      feeRatio: feeRatio,
+      rsnRatioDivisor,
+    };
+    newFeeConfig.setChainConfig(CARDANO, cardanoHeight, cardanoFee);
+  } else {
+    newFeeConfig.setChainConfig(CARDANO, cardanoHeight, undefined);
+  }
+
+  //  BITCOIN
+  const bitcoinHeight = await getBitcoinHeight();
+  if (chains.includes(BITCOIN)) {
+    const bitcoinNetworkFee = getBitcoinNetworkFee(
+      prices,
+      configs,
+      tokenPrice,
+      tokenDecimal,
+      bitcoinFeeRatioMap
+    );
+    const bitcoinFee: ChainFee = {
+      bridgeFee: bridgeFee,
+      networkFee: bitcoinNetworkFee,
+      rsnRatio: rsnRatio,
+      feeRatio: feeRatio,
+      rsnRatioDivisor,
+    };
+    newFeeConfig.setChainConfig(BITCOIN, bitcoinHeight, bitcoinFee);
+  } else {
+    newFeeConfig.setChainConfig(BITCOIN, bitcoinHeight, undefined);
+  }
+
+  //  ETHEREUM
+  const ethereumHeight = await getEthereumHeight();
+  if (chains.includes(ETHEREUM)) {
+    const ethereumNetworkFee = getEthereumNetworkFee(
+      prices,
+      configs,
+      tokenPrice,
+      tokenDecimal
+    );
+    const ethereumFee: ChainFee = {
+      bridgeFee: bridgeFee,
+      networkFee: ethereumNetworkFee,
+      rsnRatio: rsnRatio,
+      feeRatio: feeRatio,
+      rsnRatioDivisor,
+    };
+    newFeeConfig.setChainConfig(ETHEREUM, ethereumHeight, ethereumFee);
+  } else {
+    newFeeConfig.setChainConfig(ETHEREUM, ethereumHeight, undefined);
+  }
 
   return newFeeConfig;
+};
+
+const getErgoNetworkFee = (
+  prices: Map<string, number>,
+  configs: SupportedTokenConfig['fee'],
+  tokenPrice: number,
+  tokenDecimal: number
+) => {
+  const ergPrice = prices.get(ERG);
+  if (!ergPrice) throw Error(`Erg price is required`);
+
+  // calculating network fee on Ergo
+  return BigInt(
+    Math.ceil(
+      (configs.ergNetworkFee * ergPrice * 10 ** tokenDecimal) / tokenPrice
+    )
+  );
+};
+
+const getCardanoNetworkFee = (
+  prices: Map<string, number>,
+  configs: SupportedTokenConfig['fee'],
+  tokenPrice: number,
+  tokenDecimal: number
+) => {
+  const adaPrice = prices.get(ADA);
+  if (!adaPrice) throw Error(`Ada price is required`);
+
+  // calculating network fee on Cardano
+  return BigInt(
+    Math.ceil(
+      (configs.adaNetworkFee * adaPrice * 10 ** tokenDecimal) / tokenPrice
+    )
+  );
+};
+
+const getBitcoinNetworkFee = (
+  prices: Map<string, number>,
+  configs: SupportedTokenConfig['fee'],
+  tokenPrice: number,
+  tokenDecimal: number,
+  bitcoinFeeRatioMap: Record<string, number>
+) => {
+  const btcPrice = prices.get(BTC);
+  if (!btcPrice) throw Error(`Btc price is required`);
+
+  // calculating network fee on Bitcoin
+  const bitcoinFeeRatio = bitcoinFeeRatioMap[configs.bitcoinConfirmation];
+  return BigInt(
+    Math.ceil(
+      (bitcoinFeeRatio *
+        minimumFeeConfigs.bitcoinTxVSize *
+        btcPrice *
+        10 ** tokenDecimal) /
+        (tokenPrice * 10 ** 8)
+    )
+  );
+};
+
+const getEthereumNetworkFee = (
+  prices: Map<string, number>,
+  configs: SupportedTokenConfig['fee'],
+  tokenPrice: number,
+  tokenDecimal: number
+) => {
+  const ethPrice = prices.get(ETH);
+  if (!ethPrice) throw Error(`Eth price is required`);
+
+  // calculating network fee on Ethereum
+  return BigInt(
+    Math.ceil((0.001 * ethPrice * 10 ** tokenDecimal) / tokenPrice)
+  );
 };

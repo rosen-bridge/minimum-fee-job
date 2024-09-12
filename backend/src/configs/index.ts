@@ -1,6 +1,8 @@
+import fs from 'fs';
 import config from 'config';
 import { ConfigInterface, SupportedTokenConfig } from '../types';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
+import { RosenTokens } from '@rosen-bridge/tokens';
 
 export const logConfigs = () => {
   const logs = config.get<TransportOptions[]>('logs');
@@ -50,6 +52,9 @@ export const cardanoNetworkFeeTriggerPercent = config.get<number>(
 export const ergoNetworkFeeTriggerPercent = config.get<number>(
   'triggerPercent.ergoNetworkFee'
 );
+export const ethereumNetworkFeeTriggerPercent = config.get<number>(
+  'triggerPercent.ethereumNetworkFee'
+);
 export const rsnRatioTriggerPercent = config.get<number>(
   'triggerPercent.rsnRatio'
 );
@@ -57,16 +62,19 @@ export const rsnRatioTriggerPercent = config.get<number>(
 export const ERG = 'erg';
 export const ADA = 'ada';
 export const BTC = 'btc';
+export const ETH = 'eth';
 
 export const explorerBaseUrl = 'https://api.ergoplatform.com';
 export const koiosBaseUrl = 'https://api.koios.rest/api/v1';
 export const esploraBaseUrl = 'https://mempool.space';
+export const ethereumRpcBaseUrl = 'https://eth-mainnet.public.blastapi.io';
 
 export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
 export const feeGuaranteeDuration = new Map<string, number>([
   ['ergo', 24 * 30], // 1 day (30 blocks per hour)
   ['cardano', 24 * 60 * 3], // 1 day (3 blocks per minute)
   ['bitcoin', 24 * 6], // 1 day (6 blocks per hour)
+  ['ethereum', 24 * 60 * 5], // 1 day (5 blocks per minute)
 ]);
 export const RunningInterval = config.get<number>('interval') * 1000; // seconds to miliseconds
 
@@ -91,3 +99,13 @@ export const discordWebHookUrl = config.has('discordWebHookUrl')
 export const redisUrl = config.has('redisUrl')
   ? config.get<string>('redisUrl')
   : undefined;
+
+export const tokens = (): RosenTokens => {
+  const tokensPath = config.get<string>('tokensPath');
+  if (!fs.existsSync(tokensPath)) {
+    throw new Error(`Tokens config file with path ${tokensPath} doesn't exist`);
+  } else {
+    const configJson: string = fs.readFileSync(tokensPath, 'utf8');
+    return JSON.parse(configJson);
+  }
+};

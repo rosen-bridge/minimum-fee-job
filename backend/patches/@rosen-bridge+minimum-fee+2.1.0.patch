@@ -1,0 +1,53 @@
+diff --git a/node_modules/@rosen-bridge/minimum-fee/dist/lib/MinimumFeeBoxBuilder.d.ts b/node_modules/@rosen-bridge/minimum-fee/dist/lib/MinimumFeeBoxBuilder.d.ts
+index 4036a32..433d1ba 100644
+--- a/node_modules/@rosen-bridge/minimum-fee/dist/lib/MinimumFeeBoxBuilder.d.ts
++++ b/node_modules/@rosen-bridge/minimum-fee/dist/lib/MinimumFeeBoxBuilder.d.ts
+@@ -43,6 +43,10 @@ export declare class MinimumFeeBoxBuilder {
+      * validates some of specified configs
+      */
+     protected validate: () => void;
++    /**
++     * removes heights and configs of all chains which don't have any configs
++     */
++    prune: () => void;
+     /**
+      * validates specified configs and builds ErgoBoxCandidate of config box using them
+      */
+diff --git a/node_modules/@rosen-bridge/minimum-fee/dist/lib/MinimumFeeBoxBuilder.js b/node_modules/@rosen-bridge/minimum-fee/dist/lib/MinimumFeeBoxBuilder.js
+index 45f6caf..4217b36 100644
+--- a/node_modules/@rosen-bridge/minimum-fee/dist/lib/MinimumFeeBoxBuilder.js
++++ b/node_modules/@rosen-bridge/minimum-fee/dist/lib/MinimumFeeBoxBuilder.js
+@@ -83,6 +83,33 @@ export class MinimumFeeBoxBuilder {
+             });
+         }
+     };
++    /**
++     * removes heights and configs of all chains which don't have any configs
++     */
++    prune = () => {
++        const activeChains = [];
++        for (let i = 0; i < this.fees.length; i++) {
++            const chains = Object.keys(this.fees[i].heights);
++            chains.forEach((chain) => {
++                const feeConfig = this.fees[i].configs[chain];
++                if (feeConfig && (feeConfig.bridgeFee !== -1n ||
++                    feeConfig.networkFee !== -1n ||
++                    feeConfig.rsnRatio !== -1n ||
++                    feeConfig.rsnRatioDivisor !== -1n ||
++                    feeConfig.feeRatio !== -1n))
++                    activeChains.push(chain);
++            });
++        }
++        for (let i = 0; i < this.fees.length; i++) {
++            const chains = Object.keys(this.fees[i].heights);
++            chains.forEach(chain => {
++                if (!activeChains.includes(chain)) {
++                    delete this.fees[i].heights[chain];
++                    delete this.fees[i].configs[chain];
++                }
++            });
++        }
++    };
+     /**
+      * validates specified configs and builds ErgoBoxCandidate of config box using them
+      */
