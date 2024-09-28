@@ -61,7 +61,10 @@ const Validations = async () => {
   const renderTableBody = () => (
     <TableBody>
       {tokens.map((token) => (
-        <TableRow key={token}>
+        <TableRow
+          key={token}
+          sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+        >
           <TableCell align="left">{token}</TableCell>
           {validations.map((validation) => (
             <TableCell align="center" key={validation.id}>
@@ -77,7 +80,7 @@ const Validations = async () => {
 
   return (
     <>
-      <TableContainer component={Paper}>
+      <TableContainer>
         <Table>
           {renderTableHead()}
           {renderTableBody()}

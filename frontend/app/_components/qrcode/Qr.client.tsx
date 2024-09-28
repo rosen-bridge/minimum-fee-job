@@ -71,7 +71,7 @@ export const QrDisplay = ({ tx }: { tx: string }) => {
 
   return (
     <Box width={380} display="flex" flexDirection="column" alignItems="stretch">
-      <QRCodeSVG value={value} size={380} includeMargin />
+      <QRCodeSVG value={value} size={380} includeMargin bgColor="transparent" />
       {renderStepper()}
       {renderSlider()}
     </Box>
