@@ -6,7 +6,7 @@ import Validations from "./Validations";
 const Home = () => {
   return (
     <main className="flex flex-row items-center justify-center h-screen gap-16">
-      <div className="border-2 border-solid border-blue-300 w-[48rem] h-128">
+      <div className="border-2 border-solid border-blue-300 w-[48rem] max-h-[80vh]">
         <Suspense fallback="Loading prices...">
           <Validations />
         </Suspense>
