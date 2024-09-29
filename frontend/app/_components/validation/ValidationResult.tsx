@@ -1,5 +1,6 @@
 import { GppBad, Help, VerifiedUser } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
+import { ReactElement } from "react";
 
 import { ValidationResult as ValidationResultType } from "@/app/_validations/types";
 
@@ -10,15 +11,42 @@ const ValidationResult = ({
   validationResult,
 }: {
   validationResult: ValidationResultType;
-}) =>
-  validationResult.error ? (
-    <Tooltip title={validationResult.error.message}>
-      <Help sx={{ cursor: "pointer" }} color="warning" />
-    </Tooltip>
-  ) : validationResult.value!.isValid ? (
-    <VerifiedUser color="success" />
-  ) : (
-    <GppBad color="error" />
+}) => {
+  /**
+   * Render an element and wrap it in a tooltip if a reason provided
+   * @param element
+   * @param reason
+   */
+  const renderWithReasonOption = (
+    element: ReactElement,
+    reason: string | null
+  ) =>
+    reason ? (
+      <Tooltip sx={{ cursor: "pointer" }} title={reason}>
+        {element}
+      </Tooltip>
+    ) : (
+      element
+    );
+
+  if (validationResult.error) {
+    return renderWithReasonOption(
+      <Help color="warning" />,
+      validationResult.error.message
+    );
+  }
+
+  if (validationResult.value.isValid) {
+    return renderWithReasonOption(
+      <VerifiedUser color="success" />,
+      validationResult.value.reason
+    );
+  }
+
+  return renderWithReasonOption(
+    <GppBad color="error" />,
+    validationResult.value.reason
   );
+};
 
 export default ValidationResult;

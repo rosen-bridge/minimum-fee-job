@@ -1,3 +1,5 @@
+import { difference, initial } from "lodash-es";
+
 import getFeesByToken from "../_utils/get-fees-by-token";
 import getTokenMinimumFeeBox from "../_utils/get-token-minimum-fee-box";
 
@@ -28,12 +30,16 @@ const validateTokenHeights: Validate = async (tokenId) => {
       (feeConfig) => Object.values(feeConfig.heights).toString() // convert to string to simplify comparison
     );
 
+    const heightsDiff = difference(initial(nextHeights), currentHeights);
+
     return {
       error: null,
       value: {
-        isValid: nextHeights
-          .slice(0, -1) // Omit the new heights added in the tx
-          .every((heights) => currentHeights.includes(heights)),
+        isValid: heightsDiff.length === 0,
+        reason:
+          heightsDiff.length !== 0
+            ? `Missing heights: ${JSON.stringify(heightsDiff)}`
+            : null,
       },
     };
   } catch (error) {

@@ -1,6 +1,9 @@
 import { Result } from "../_types/result";
 
-export type ValidationResult = Result<{ isValid: boolean }, Error>;
+export type ValidationResult = Result<
+  { isValid: boolean; reason: string | null },
+  Error
+>;
 
 export interface Validate {
   (tokenId: string): Promise<ValidationResult>;
