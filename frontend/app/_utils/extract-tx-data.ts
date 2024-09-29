@@ -41,9 +41,7 @@ const extractTxData = (tx: string) => {
    * @param output
    */
   const getTokenAssociatedWithOutput = (output: wasm.ErgoBoxCandidate) =>
-    output.tokens().len() === 1
-      ? output.tokens().get(0).id().to_str()
-      : output.tokens().get(1).id().to_str();
+    output.tokens().len() === 1 ? "erg" : output.tokens().get(1).id().to_str();
 
   const feesByToken = Array.from({
     length: unsignedTx.output_candidates().len(),
