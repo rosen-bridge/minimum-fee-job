@@ -12,5 +12,6 @@ export interface Validate {
 export interface Validation {
   id: string;
   title: string;
+  hint: string;
   validate: Validate;
 }

@@ -1,13 +1,14 @@
 import {
   CircularProgress,
   Grid,
-  Paper,
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { Suspense } from "react";
@@ -16,6 +17,7 @@ import Validation from "./_components/validation/Validation";
 
 import getFeesByToken from "./_utils/get-fees-by-token";
 
+import { Info } from "@mui/icons-material";
 import validations from "./_validations";
 
 /**
@@ -51,7 +53,16 @@ const Validations = async () => {
         <TableCell>Token</TableCell>
         {validations.map((validation) => (
           <TableCell align="center" key={validation.id}>
-            {validation.title}
+            <Grid container flexWrap="nowrap" alignItems="center">
+              <Grid item>{validation.title}</Grid>
+              <Grid item>
+                <Tooltip title={validation.hint} placement="top">
+                  <IconButton size="small">
+                    <Info fontSize="inherit" />
+                  </IconButton>
+                </Tooltip>
+              </Grid>
+            </Grid>
           </TableCell>
         ))}
       </TableRow>
