@@ -4,8 +4,7 @@ import { Result } from "../_types/result";
 import { PartialSupportedTokenConfig } from "../_types/token-config";
 
 /**
- * Get a Result object containing either fees config indexed by token id, or an
- * error
+ * Get a Result object containing either tokens config, or an error
  */
 const getTokensConfigWrapped = async (): Promise<
   Result<PartialSupportedTokenConfig[], Error>

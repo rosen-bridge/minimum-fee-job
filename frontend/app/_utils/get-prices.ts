@@ -3,8 +3,7 @@ import { getPrices } from "@/app/_store";
 import { Result } from "../_types/result";
 
 /**
- * Get a Result object containing either fees config indexed by token id, or an
- * error
+ * Get a Result object containing either prices, or an error
  */
 const getPricesWrapped = async (): Promise<
   Result<Record<string, string>, Error>
