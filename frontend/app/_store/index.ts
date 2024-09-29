@@ -22,6 +22,18 @@ const connectRedisClient = async () => {
 };
 
 /**
+ * get backend tokens config from the store
+ */
+export const getTokensConfig = cache(async () => {
+  await using client = await connectRedisClient();
+
+  const config = (await client.get("tokens-config").catch((error) => {
+    throw new RedisDataFetchingError(error)
+  }))
+  return config ? JSON.parse(config) : null;
+}, ["tokens-config"], { revalidate: +process.env.CACHE_REVALIDATION_SECONDS!, tags: ['tokens-config'] });
+
+/**
  * get price data from the store
  */
 export const getPrices = cache(async () => {
