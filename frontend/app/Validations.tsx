@@ -26,7 +26,7 @@ import validations from "./_validations";
 const Validations = async () => {
   const feesByTokenResult = await getFeesByToken();
 
-  if (feesByTokenResult.error) {
+  if (feesByTokenResult.isErr()) {
     return (
       <Grid
         container
