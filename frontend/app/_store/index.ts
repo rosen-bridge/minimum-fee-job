@@ -1,7 +1,9 @@
-import { unstable_cache as cache } from "next/cache";
 import { createClient } from "redis";
+import { Err, Ok, Result } from "ts-results-es";
 
-import { RedisConnectionError, RedisDataFetchingError } from "../_error/store";
+import { EmptyBackendConfigError, EmptyTxError, RedisConnectionError, RedisDataFetchingError, BackendConfigParseError } from '@/app/_error/store';
+
+import { PartialSupportedTokenConfig } from "../_types/token-config";
 
 /**
  * connect to the redis client
@@ -12,45 +14,82 @@ const connectRedisClient = async () => {
       url: process.env.REDIS_URL,
     });
     await client.connect();
-
-    return Object.assign(client, {
-      [Symbol.asyncDispose]: client.disconnect
-    }) satisfies AsyncDisposable;
+    return Ok(Object.assign(client, {
+      [Symbol.asyncDispose]: client.disconnect,
+    }));
   } catch (error) {
-    throw new RedisConnectionError(error);
+    return Err(new RedisConnectionError(error));
   }
 };
 
 /**
  * get backend tokens config from the store
  */
-export const getTokensConfig = cache(async () => {
-  await using client = await connectRedisClient();
+export const getTokensConfig = async (): Promise<Result<PartialSupportedTokenConfig[], RedisDataFetchingError | RedisConnectionError | BackendConfigParseError | EmptyBackendConfigError>> => {
+  const clientResult = await connectRedisClient();
 
-  const config = (await client.get("tokens-config").catch((error) => {
-    throw new RedisDataFetchingError(error)
-  }))
-  return config ? JSON.parse(config) : null;
-}, ["tokens-config"], { revalidate: +process.env.CACHE_REVALIDATION_SECONDS!, tags: ['tokens-config'] });
+  if (clientResult.isErr()) {
+    return clientResult;
+  }
+
+  await using client = clientResult.value;
+
+  try {
+    const config = await client.get("tokens-config");
+    if (config) {
+      try {
+        return Ok(JSON.parse(config));
+      } catch {
+        return Err(new BackendConfigParseError());
+      }
+    } else {
+      return Err(new EmptyBackendConfigError())
+    }
+  } catch (error) {
+    return Err(new RedisDataFetchingError(error));
+  }
+};
 
 /**
  * get price data from the store
  */
-export const getPrices = cache(async () => {
-  await using client = await connectRedisClient();
+export const getPrices = async (): Promise<Result<Record<string, string>, RedisDataFetchingError | RedisConnectionError>> => {
+  const clientResult = await connectRedisClient();
 
-  return await client.hGetAll("prices").catch((error) => {
-    throw new RedisDataFetchingError(error)
-  });
-}, ["prices"], { revalidate: +process.env.CACHE_REVALIDATION_SECONDS!, tags: ['prices'] });
+  if (clientResult.isErr()) {
+    return clientResult;
+  }
+
+  await using client = clientResult.value;
+
+  try {
+    const prices = await client.hGetAll("prices");
+    return Ok(prices);
+  } catch (error) {
+    return Err(new RedisDataFetchingError(error))
+  }
+};
 
 /**
  * get tx data from the store
  */
-export const getTx = cache(async () => {
-  await using client = await connectRedisClient();
+export const getTx = async (): Promise<Result<string, RedisDataFetchingError | RedisConnectionError | EmptyTxError>> => {
+  const clientResult = await connectRedisClient();
 
-  return await client.get("tx").catch((error) => {
-    throw new RedisDataFetchingError(error)
-  });
-}, ["tx"], { revalidate: +process.env.CACHE_REVALIDATION_SECONDS!, tags: ['tx'] });
+  if (clientResult.isErr()) {
+    return clientResult;
+  }
+
+  await using client = clientResult.value;
+
+  try {
+    const tx = await client.get("tx");
+
+    if (!tx) {
+      return Err(new EmptyTxError());
+    }
+    return Ok(tx);
+  } catch (error) {
+    return Err(new RedisDataFetchingError(error))
+  }
+};

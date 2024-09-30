@@ -29,7 +29,7 @@ const ValidationResult = ({
       element
     );
 
-  if (validationResult.error) {
+  if (validationResult.isErr()) {
     return renderWithReasonOption(
       <Help color="warning" />,
       validationResult.error.message
