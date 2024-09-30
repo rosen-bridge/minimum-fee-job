@@ -11,13 +11,14 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { Info } from "@mui/icons-material";
 import { Suspense } from "react";
+import { Result } from "ts-results-es";
 
 import Validation from "./_components/validation/Validation";
 
 import getFeesByToken from "./_utils/get-fees-by-token";
-
-import { Info } from "@mui/icons-material";
+import { getTokensConfig } from "./_store";
 import validations from "./_validations";
 
 /**
@@ -25,8 +26,11 @@ import validations from "./_validations";
  */
 const Validations = async () => {
   const feesByTokenResult = await getFeesByToken();
+  const tokensConfigResult = await getTokensConfig();
 
-  if (feesByTokenResult.isErr()) {
+  const requirementsResults = Result.all(feesByTokenResult, tokensConfigResult);
+
+  if (requirementsResults.isErr()) {
     return (
       <Grid
         container
@@ -36,16 +40,26 @@ const Validations = async () => {
       >
         <Grid item sx={{ p: 2 }}>
           <Typography color="error" align="center" variant="h5">
-            An error occurred during extraction of tokens from the tx:
+            An error occurred during extraction of tokens from the tx, or
+            fetching tokens config:
             <br />
-            {feesByTokenResult.error.message || "Unknown"}
+            {requirementsResults.error.message || "Unknown"}
           </Typography>
         </Grid>
       </Grid>
     );
   }
 
-  const tokens = Object.keys(feesByTokenResult.value);
+  const [feesByToken, tokensConfig] = requirementsResults.value;
+
+  const tokens = Object.keys(feesByToken);
+  const tokenNamesMap = tokensConfig.reduce(
+    (partialTokenNamesMap, tokenConfig) => ({
+      ...partialTokenNamesMap,
+      [tokenConfig.ergoSideTokenId]: tokenConfig.name,
+    }),
+    {} as Record<string, string>
+  );
 
   const renderTableHead = () => (
     <TableHead>
@@ -53,7 +67,12 @@ const Validations = async () => {
         <TableCell>Token</TableCell>
         {validations.map((validation) => (
           <TableCell align="center" key={validation.id}>
-            <Grid container flexWrap="nowrap" alignItems="center">
+            <Grid
+              container
+              flexWrap="nowrap"
+              alignItems="center"
+              justifyContent="center"
+            >
               <Grid item>{validation.title}</Grid>
               <Grid item>
                 <Tooltip title={validation.hint} placement="top">
@@ -76,7 +95,7 @@ const Validations = async () => {
           key={token}
           sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
         >
-          <TableCell align="left">{token}</TableCell>
+          <TableCell align="left">{tokenNamesMap[token]}</TableCell>
           {validations.map((validation) => (
             <TableCell align="center" key={validation.id}>
               <Suspense fallback={<CircularProgress size={10} />}>
