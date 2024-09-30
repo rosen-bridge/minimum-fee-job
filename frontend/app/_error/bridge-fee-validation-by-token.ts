@@ -1,8 +1,8 @@
 import { AppError, AppErrorWithCause } from "./app";
 
-export class BridgeFeeValidationError extends AppErrorWithCause {
+export class BridgeFeeValidationByTokenError extends AppErrorWithCause {
   constructor(cause: Error["cause"]) {
-    super("Bridge fee validation failed", cause);
+    super("Bridge fee validation by token failed", cause);
   }
 }
 

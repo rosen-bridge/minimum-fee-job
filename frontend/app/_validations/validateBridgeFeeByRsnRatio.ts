@@ -5,32 +5,34 @@ import calculateErrorPercent from "../_utils/calculate-error-percent";
 import getFeesByToken from "../_utils/get-fees-by-token";
 
 import {
-  BridgeFeeValidationError,
+  BridgeFeeValidationByRsnRatioError,
+  RsnConfigMissing,
   TokenConfigMissing,
-} from "../_error/bridge-fee-validation";
+} from "../_error/bridge-fee-validation-by-rsn-ratio";
 
 import { VALID_ERROR_PERCENT_THRESHOLD } from "../constants";
 
 import { Validate } from "./types";
 
 /**
- * Bridge fee calculation formula
+ * Rsn ratio calculation formula
  * @param bridgeFee
- * @param price
- * @param decimals
+ * @param rsnRatio
+ * @param rsnPrice
  */
-const calculateTokenBridgeFee = (
+const calculateTokenRsnRatio = (
   bridgeFee: number,
-  price: number,
-  decimals: number
-) => (bridgeFee * price) / 10 ** decimals;
+  rsnRatio: number,
+  rsnPrice: number,
+  rsnRatioDivisor: number
+) => (bridgeFee * rsnRatio * rsnPrice) / (10 ** 3 * rsnRatioDivisor);
 
 /**
- * Validate that bridgeFee, feeRatio, rsnRatio, and rsnRatioDivisor is the same
- * in the new config for all chains
+ * Validate that bridge fee calculation by rsn ratio results in the predefined
+ * expected value
  * @param tokenId
  */
-const validateBridgeFee: Validate = async (tokenId) => {
+const validateBridgeFeeByRsnRatio: Validate = async (tokenId) => {
   const feesByTokenResult = await getFeesByToken();
   const tokensConfigResult = await getTokensConfig();
   const pricesResult = await getPrices();
@@ -51,19 +53,26 @@ const validateBridgeFee: Validate = async (tokenId) => {
     const fees = feesByToken[tokenId];
     const newFeeConfigs = fees.at(-1)!.configs;
     const bridgeFee = newFeeConfigs.ergo.bridgeFee; // pick bridge fee from any chain, they should be all the same
+    const rsnRatio = newFeeConfigs.ergo.rsnRatio; // pick rsn ratio from any chain, they should be all the same
+    const rsnRatioDivisor = newFeeConfigs.ergo.rsnRatioDivisor; // pick rsn ratio divisor from any chain, they should be all the same
 
     const tokenConfig = tokensConfig.find(
       (token) => token.ergoSideTokenId === tokenId
     );
-
     if (!tokenConfig) {
       return Err(new TokenConfigMissing());
     }
 
-    const actual = calculateTokenBridgeFee(
+    const rsnConfig = tokensConfig.find((token) => token.name === "RSN");
+    if (!rsnConfig) {
+      return Err(new RsnConfigMissing());
+    }
+
+    const actual = calculateTokenRsnRatio(
       Number(bridgeFee),
-      +prices[tokenConfig.tokenId],
-      tokenConfig.decimals
+      Number(rsnRatio),
+      +prices[rsnConfig?.tokenId],
+      Number(rsnRatioDivisor)
     );
     const expected = tokenConfig.fee.bridgeFeeUSD;
 
@@ -77,8 +86,8 @@ const validateBridgeFee: Validate = async (tokenId) => {
       )}% error)`,
     });
   } catch (error) {
-    return Err(new BridgeFeeValidationError(error));
+    return Err(new BridgeFeeValidationByRsnRatioError(error));
   }
 };
 
-export default validateBridgeFee;
+export default validateBridgeFeeByRsnRatio;
