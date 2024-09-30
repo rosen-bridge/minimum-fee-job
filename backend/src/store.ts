@@ -1,6 +1,7 @@
 import { createClient } from 'redis';
 import { redisUrl } from './configs';
 import WinstonLogger from '@rosen-bridge/winston-logger';
+import { SupportedTokenConfig } from './types';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
 
@@ -9,6 +10,13 @@ const client = createClient({
 });
 if (redisUrl) await client.connect();
 else logger.warn(`Skipping redis connection: no url is specified`);
+
+/**
+ * save tokens config into store
+ */
+const saveTokensConfig = async (config: SupportedTokenConfig[]) => {
+  return void (await client.set('tokens-config', JSON.stringify(config)));
+};
 
 /**
  * save price data into store
@@ -31,4 +39,4 @@ const flushStore = async () => {
   return void (await client.flushDb());
 };
 
-export { flushStore, savePrices, saveTx };
+export { flushStore, saveTokensConfig, savePrices, saveTx };

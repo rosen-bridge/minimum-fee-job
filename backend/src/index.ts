@@ -8,7 +8,7 @@ import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Notification } from './network/Notification';
 import WinstonLogger from '@rosen-bridge/winston-logger';
 
-import { flushStore, savePrices, saveTx } from './store';
+import { flushStore, saveTokensConfig, savePrices, saveTx } from './store';
 import { getConfigTokenPrices } from './minimum-fee/prices';
 
 const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
@@ -95,7 +95,11 @@ const main = async () => {
             })
             .join('\n')
       );
-      await Promise.all([savePrices(prices), saveTx(tx)]);
+      await Promise.all([
+        saveTokensConfig(minimumFeeConfigs.supportedTokens),
+        savePrices(prices),
+        saveTx(tx),
+      ]);
       logger.info('Saved data in the store');
     } else {
       // send info to discord

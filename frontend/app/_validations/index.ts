@@ -1,3 +1,4 @@
+import validateBridgeFee from "./validateBridgeFee";
 import validateConfigSameness from "./validateConfigSameness";
 import validateTokenHeights from "./validateTokenHeights";
 
@@ -18,6 +19,12 @@ const validations: Validation[] = [
     title: "Sameness",
     id: "sameness",
     hint: "bridgeFee, feeRatio, rsnRatio, and rsnRatioDivisor should be the same for all chains in the new config",
+  },
+  {
+    validate: validateBridgeFee,
+    title: "Bridge fee",
+    id: "bridge-fee",
+    hint: "Bridge fee should be the expected predefined number",
   },
 ];
 
