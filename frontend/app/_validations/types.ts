@@ -1,8 +1,10 @@
-import { Result } from "../_types/result";
+import { Result } from "ts-results-es";
+
+import { AppError } from "../_error/app";
 
 export type ValidationResult = Result<
   { isValid: boolean; reason: string | null },
-  Error
+  AppError
 >;
 
 export interface Validate {

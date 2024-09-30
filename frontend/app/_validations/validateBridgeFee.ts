@@ -1,7 +1,13 @@
+import { Err, Ok, Result } from "ts-results-es";
+
+import { getPrices, getTokensConfig } from "../_store";
 import calculateErrorPercent from "../_utils/calculate-error-percent";
 import getFeesByToken from "../_utils/get-fees-by-token";
-import getPrices from "../_utils/get-prices";
-import getTokensConfig from "../_utils/get-tokens-config";
+
+import {
+  BridgeFeeValidationError,
+  TokenConfigMissing,
+} from "../_error/bridge-fee-validation";
 
 import { VALID_ERROR_PERCENT_THRESHOLD } from "../constants";
 
@@ -26,22 +32,20 @@ const calculateTokenBridgeFee = (
  */
 const validateBridgeFee: Validate = async (tokenId) => {
   const feesByTokenResult = await getFeesByToken();
-  if (feesByTokenResult.error) {
-    return feesByTokenResult;
-  }
-  const feesByToken = feesByTokenResult.value;
-
   const tokensConfigResult = await getTokensConfig();
-  if (tokensConfigResult.error) {
-    return tokensConfigResult;
-  }
-  const tokensConfig = tokensConfigResult.value;
-
   const pricesResult = await getPrices();
-  if (pricesResult.error) {
-    return pricesResult;
+
+  const requirementsResult = Result.all(
+    feesByTokenResult,
+    tokensConfigResult,
+    pricesResult
+  );
+
+  if (requirementsResult.isErr()) {
+    return requirementsResult;
   }
-  const prices = pricesResult.value;
+
+  const [feesByToken, tokensConfig, prices] = requirementsResult.value;
 
   try {
     const fees = feesByToken[tokenId];
@@ -53,10 +57,7 @@ const validateBridgeFee: Validate = async (tokenId) => {
     );
 
     if (!tokenConfig) {
-      return {
-        value: null,
-        error: new Error("Token was not found in backend tokens config"),
-      };
+      return Err(new TokenConfigMissing());
     }
 
     const actual = calculateTokenBridgeFee(
@@ -69,23 +70,14 @@ const validateBridgeFee: Validate = async (tokenId) => {
     const errorPercent = calculateErrorPercent(actual, expected);
     const isValid = errorPercent < VALID_ERROR_PERCENT_THRESHOLD;
 
-    return {
-      error: null,
-      value: {
-        isValid,
-        reason: `${actual}:${expected} (actual:expected) (~${+errorPercent.toFixed(
-          2
-        )}% error)`,
-      },
-    };
+    return Ok({
+      isValid,
+      reason: `${actual}:${expected} (actual:expected) (~${+errorPercent.toFixed(
+        2
+      )}% error)`,
+    });
   } catch (error) {
-    return {
-      error:
-        error instanceof Error
-          ? error
-          : new Error("An unknown error occurred during bridge fee validation"),
-      value: null,
-    };
+    return Err(new BridgeFeeValidationError(error));
   }
 };
 

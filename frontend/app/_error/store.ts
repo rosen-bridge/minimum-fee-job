@@ -1,13 +1,31 @@
-import { AppError } from "./app";
+import { AppError, AppErrorWithCause } from "./app";
 
-export class RedisConnectionError extends AppError {
+export class RedisConnectionError extends AppErrorWithCause {
   constructor(cause: ErrorOptions["cause"]) {
-    super("Cannot connect to Redis server", { cause });
+    super("Connection to Redis server failed", cause);
   }
 }
 
-export class RedisDataFetchingError extends AppError {
+export class RedisDataFetchingError extends AppErrorWithCause {
   constructor(cause: ErrorOptions["cause"]) {
-    super("Cannot fetch data from Redis server", { cause });
+    super("Fetching data from Redis server failed", cause);
+  }
+}
+
+export class BackendConfigParseError extends AppError {
+  constructor() {
+    super("Parsing tokens config of backend service failed");
+  }
+}
+
+export class EmptyBackendConfigError extends AppError {
+  constructor() {
+    super("Backend config is empty");
+  }
+}
+
+export class EmptyTxError extends AppError {
+  constructor() {
+    super("Tx is empty");
   }
 }

@@ -1,6 +1,9 @@
 import { every, map, mapValues, omitBy, uniq } from "lodash-es";
+import { Err, Ok } from "ts-results-es";
 
 import getFeesByToken from "../_utils/get-fees-by-token";
+
+import { ConfigSamenessValidationError } from "../_error/config-sameness-validation";
 
 import { Validate } from "./types";
 
@@ -10,31 +13,30 @@ import { Validate } from "./types";
  * @param tokenId
  */
 const validateConfigSameness: Validate = async (tokenId) => {
-  const feesByTokenResult = await getFeesByToken();
+  try {
+    const feesByTokenResult = await getFeesByToken();
 
-  if (feesByTokenResult.error) {
-    return feesByTokenResult;
-  }
+    if (feesByTokenResult.isErr()) {
+      return feesByTokenResult;
+    }
 
-  const feesByToken = feesByTokenResult.value;
+    const feesByToken = feesByTokenResult.value;
 
-  const fees = feesByToken[tokenId];
-  const newFeeConfigs = fees.at(-1)!.configs;
+    const fees = feesByToken[tokenId];
+    const newFeeConfigs = fees.at(-1)!.configs;
 
-  const configs = {
-    bridgeFees: map(newFeeConfigs, "bridgeFee"),
-    feeRatios: map(newFeeConfigs, "feeRatio"),
-    rsnRatios: map(newFeeConfigs, "rsnRatio"),
-    rsnRatioDivisors: map(newFeeConfigs, "rsnRatioDivisor"),
-  };
+    const configs = {
+      bridgeFees: map(newFeeConfigs, "bridgeFee"),
+      feeRatios: map(newFeeConfigs, "feeRatio"),
+      rsnRatios: map(newFeeConfigs, "rsnRatio"),
+      rsnRatioDivisors: map(newFeeConfigs, "rsnRatioDivisor"),
+    };
 
-  const uniqConfigs = mapValues(configs, uniq);
+    const uniqConfigs = mapValues(configs, uniq);
 
-  const isValid = every(uniqConfigs, ["length", 1]);
+    const isValid = every(uniqConfigs, ["length", 1]);
 
-  return {
-    error: null,
-    value: {
+    return Ok({
       isValid,
       reason: !isValid
         ? `Inter-chain differences: ${JSON.stringify(
@@ -43,8 +45,10 @@ const validateConfigSameness: Validate = async (tokenId) => {
             )
           )}`
         : null,
-    },
-  };
+    });
+  } catch (error) {
+    return Err(new ConfigSamenessValidationError(error));
+  }
 };
 
 export default validateConfigSameness;

@@ -1,7 +1,10 @@
 import { difference, initial } from "lodash-es";
+import { Err, Ok, Result } from "ts-results-es";
 
 import getFeesByToken from "../_utils/get-fees-by-token";
-import getTokenMinimumFeeBox from "../_utils/get-token-minimum-fee-box";
+import getUnfetchedTokenMinimumFeeBox from "../_utils/get-token-minimum-fee-box";
+
+import { HeightValidationError } from "../_error/height-validation";
 
 import { Validate } from "./types";
 
@@ -12,16 +15,22 @@ import { Validate } from "./types";
  */
 const validateTokenHeights: Validate = async (tokenId) => {
   const feesByTokenResult = await getFeesByToken();
+  const tokenMinimumFeeBoxResult = await getUnfetchedTokenMinimumFeeBox(
+    tokenId
+  );
 
-  if (feesByTokenResult.error) {
-    return feesByTokenResult;
+  const requirementsResult = Result.all(
+    feesByTokenResult,
+    tokenMinimumFeeBoxResult
+  );
+
+  if (requirementsResult.isErr()) {
+    return requirementsResult;
   }
 
-  const feesByToken = feesByTokenResult.value;
+  const [feesByToken, tokenMinimumFeeBox] = requirementsResult.value;
 
   try {
-    const tokenMinimumFeeBox = await getTokenMinimumFeeBox(tokenId);
-
     const currentHeights = tokenMinimumFeeBox
       .getConfigs()
       .map((feeConfig) => Object.values(feeConfig.heights).toString());
@@ -32,28 +41,15 @@ const validateTokenHeights: Validate = async (tokenId) => {
 
     const heightsDiff = difference(initial(nextHeights), currentHeights);
 
-    return {
-      error: null,
-      value: {
-        isValid: heightsDiff.length === 0,
-        reason:
-          heightsDiff.length !== 0
-            ? `Missing heights: ${JSON.stringify(heightsDiff)}`
-            : null,
-      },
-    };
+    return Ok({
+      isValid: heightsDiff.length === 0,
+      reason:
+        heightsDiff.length !== 0
+          ? `Missing heights: ${JSON.stringify(heightsDiff)}`
+          : null,
+    });
   } catch (error) {
-    return {
-      error:
-        error instanceof Error
-          ? error
-          : new Error(
-              typeof error === "string"
-                ? error
-                : "An unknown error occurred during height validation"
-            ),
-      value: null,
-    };
+    return Err(new HeightValidationError(error));
   }
 };
 

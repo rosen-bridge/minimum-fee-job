@@ -1,7 +1,13 @@
-import { AppError } from "./app";
+import { AppError, AppErrorWithCause } from "./app";
+
+export class MinimumFeeBoxInstantiationError extends AppErrorWithCause {
+  constructor(cause: Error["cause"]) {
+    super("Instantiating minimum fee box failed", cause);
+  }
+}
 
 export class MinimumFeeBoxFetchFailedError extends AppError {
   constructor() {
-    super("fetching minimum fee box failed for some reason");
+    super("Fetching minimum fee box from blockchain failed");
   }
 }
