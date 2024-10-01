@@ -27,6 +27,7 @@ export const QrDisplay = ({ tx }: { tx: string }) => {
         steps={pagesCount}
         position="static"
         activeStep={pageIndex}
+        sx={{ marginRight: 1 }}
         nextButton={
           <Button
             size="small"

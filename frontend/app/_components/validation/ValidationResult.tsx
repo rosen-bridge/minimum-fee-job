@@ -1,4 +1,4 @@
-import { GppBad, Help, VerifiedUser } from "@mui/icons-material";
+import { GppBad, GppMaybe, VerifiedUser } from "@mui/icons-material";
 import { Tooltip } from "@mui/material";
 import { ReactElement } from "react";
 
@@ -31,7 +31,7 @@ const ValidationResult = ({
 
   if (validationResult.isErr()) {
     return renderWithReasonOption(
-      <Help color="warning" />,
+      <GppMaybe color="warning" />,
       validationResult.error.message
     );
   }
