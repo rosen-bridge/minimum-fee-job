@@ -1,3 +1,4 @@
+import { Info } from "@mui/icons-material";
 import {
   CircularProgress,
   Grid,
@@ -11,14 +12,14 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { Info } from "@mui/icons-material";
+import { keyBy } from "lodash-es";
 import { Suspense } from "react";
 import { Result } from "ts-results-es";
 
 import Validation from "./_components/validation/Validation";
 
+import { getPrices, getTokensConfig } from "./_store";
 import getFeesByToken from "./_utils/get-fees-by-token";
-import { getTokensConfig } from "./_store";
 import validations from "./_validations";
 
 /**
@@ -27,8 +28,13 @@ import validations from "./_validations";
 const Validations = async () => {
   const feesByTokenResult = await getFeesByToken();
   const tokensConfigResult = await getTokensConfig();
+  const pricesResult = await getPrices();
 
-  const requirementsResults = Result.all(feesByTokenResult, tokensConfigResult);
+  const requirementsResults = Result.all(
+    feesByTokenResult,
+    tokensConfigResult,
+    pricesResult
+  );
 
   if (requirementsResults.isErr()) {
     return (
@@ -40,8 +46,7 @@ const Validations = async () => {
       >
         <Grid item sx={{ p: 2 }}>
           <Typography color="error" align="center" variant="h5">
-            An error occurred during extraction of tokens from the tx, or
-            fetching tokens config:
+            An error occurred before validation requirements are fulfilled:
             <br />
             {requirementsResults.error.message || "Unknown"}
           </Typography>
@@ -50,21 +55,18 @@ const Validations = async () => {
     );
   }
 
-  const [feesByToken, tokensConfig] = requirementsResults.value;
+  const [feesByToken, tokensConfig, prices] = requirementsResults.value;
 
   const tokens = Object.keys(feesByToken);
-  const tokenNamesMap = tokensConfig.reduce(
-    (partialTokenNamesMap, tokenConfig) => ({
-      ...partialTokenNamesMap,
-      [tokenConfig.ergoSideTokenId]: tokenConfig.name,
-    }),
-    {} as Record<string, string>
-  );
+  const tokensData = keyBy(tokensConfig, "ergoSideTokenId");
 
   const renderTableHead = () => (
     <TableHead>
       <TableRow>
         <TableCell>Token</TableCell>
+        <TableCell className="border-l border-solid border-slate-300">
+          Price ($USD)
+        </TableCell>
         {validations.map((validation) => (
           <TableCell
             align="center"
@@ -99,7 +101,10 @@ const Validations = async () => {
           key={token}
           sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
         >
-          <TableCell align="left">{tokenNamesMap[token]}</TableCell>
+          <TableCell align="left">{tokensData[token].name}</TableCell>
+          <TableCell align="left">
+            {+(+prices[tokensData[token].tokenId]).toFixed(6)}
+          </TableCell>
           {validations.map((validation) => (
             <TableCell align="center" key={validation.id}>
               <Suspense fallback={<CircularProgress size={10} />}>

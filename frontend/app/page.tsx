@@ -7,7 +7,7 @@ import { Box, CircularProgress } from "@mui/material";
 const Home = () => {
   return (
     <main className="flex flex-row items-center justify-center h-screen gap-16">
-      <div className="border-2 border-solid border-slate-300 shadow-xl rounded-2xl w-[50vw] min-h-[380px] max-h-[80vh]">
+      <div className="border-2 border-solid border-slate-300 shadow-xl rounded-2xl w-[60vw] min-h-[380px] max-h-[80vh]">
         <Suspense
           fallback={
             <Box
