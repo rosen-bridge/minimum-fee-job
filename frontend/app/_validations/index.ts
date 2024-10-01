@@ -1,6 +1,6 @@
 import validateBridgeFee from "./validateBridgeFee";
-import validateConfigSameness from "./validateConfigSameness";
-import validateTokenHeights from "./validateTokenHeights";
+import validateChainConfigsSameness from "./validateChainConfigsSameness";
+import validateOldFeesConsistency from "./validateOldFeesConsistency";
 
 import { Validation } from "./types";
 
@@ -9,20 +9,20 @@ import { Validation } from "./types";
  */
 const validations: Validation[] = [
   {
-    validate: validateTokenHeights,
-    title: "Heights",
-    id: "heights",
-    hint: "All heights should exist in the old config, except the last one",
+    validate: validateOldFeesConsistency,
+    title: "Old Fees Consistency",
+    id: "old-fees-consistency",
+    hint: "All fees except the new one should exist in the box on the blockchain and be exactly the same",
   },
   {
-    validate: validateConfigSameness,
-    title: "Sameness",
-    id: "sameness",
+    validate: validateChainConfigsSameness,
+    title: "Chain Configs Sameness",
+    id: "chain-configs-sameness",
     hint: "bridgeFee, feeRatio, rsnRatio, and rsnRatioDivisor should be the same for all chains in the new config",
   },
   {
     validate: validateBridgeFee,
-    title: "Bridge fee",
+    title: "Bridge Fee",
     id: "bridge-fee",
     hint: "Bridge fee should be the expected predefined number",
   },

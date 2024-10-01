@@ -3,7 +3,7 @@ import { Err, Ok } from "ts-results-es";
 
 import getFeesByToken from "../_utils/get-fees-by-token";
 
-import { ConfigSamenessValidationError } from "../_error/config-sameness-validation";
+import { ChainConfigsSamenessValidationError } from "../_error/chain-configs-sameness-validation";
 
 import { Validate } from "./types";
 
@@ -12,7 +12,7 @@ import { Validate } from "./types";
  * in the new config for all chains
  * @param tokenId
  */
-const validateConfigSameness: Validate = async (tokenId) => {
+const validateChainConfigsSameness: Validate = async (tokenId) => {
   try {
     const feesByTokenResult = await getFeesByToken();
 
@@ -47,8 +47,8 @@ const validateConfigSameness: Validate = async (tokenId) => {
         : null,
     });
   } catch (error) {
-    return Err(new ConfigSamenessValidationError(error));
+    return Err(new ChainConfigsSamenessValidationError(error));
   }
 };
 
-export default validateConfigSameness;
+export default validateChainConfigsSameness;
