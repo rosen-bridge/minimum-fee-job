@@ -1,6 +1,7 @@
 import validateBridgeFeeByRsnRatio from "./validateBridgeFeeByRsnRatio";
 import validateBridgeFeeByToken from "./validateBridgeFeeByToken";
 import validateChainConfigsSameness from "./validateChainConfigsSameness";
+import validateNetworkFeeFactory from "./validateNetworkFeeFactory";
 import validateOldFeesConsistency from "./validateOldFeesConsistency";
 
 import { Validation } from "./types";
@@ -32,6 +33,24 @@ const validations: Validation[] = [
     title: "Bridge Fee (RSN ratio)",
     id: "bridge-fee-rsn-ratio",
     hint: "Bridge fee calculation using rsn ratio should be the expected predefined number",
+  },
+  {
+    validate: validateNetworkFeeFactory(
+      "ergo",
+      (tokenConfig) => tokenConfig.fee.ergNetworkFee
+    ),
+    title: "Network Fee (Ergo)",
+    id: "network-fee-ergo",
+    hint: "Ergo network fee calculation should be the expected predefined number",
+  },
+  {
+    validate: validateNetworkFeeFactory(
+      "cardano",
+      (tokenConfig) => tokenConfig.fee.adaNetworkFee
+    ),
+    title: "Network Fee (Cardano)",
+    id: "network-fee-cardano",
+    hint: "Cardano network fee calculation should be the expected predefined number",
   },
 ];
 
