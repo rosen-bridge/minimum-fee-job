@@ -66,7 +66,11 @@ const Validations = async () => {
       <TableRow>
         <TableCell>Token</TableCell>
         {validations.map((validation) => (
-          <TableCell align="center" key={validation.id}>
+          <TableCell
+            align="center"
+            className="border-l border-solid border-slate-300"
+            key={validation.id}
+          >
             <Grid
               container
               flexWrap="nowrap"

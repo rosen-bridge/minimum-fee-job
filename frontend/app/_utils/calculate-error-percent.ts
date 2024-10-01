@@ -4,6 +4,6 @@
  * @param expected
  */
 const calculateErrorPercent = (actual: number, expected: number) =>
-  (Math.abs(actual - expected) / actual) * 100;
+  (Math.abs(actual - expected) / expected) * 100;
 
 export default calculateErrorPercent;

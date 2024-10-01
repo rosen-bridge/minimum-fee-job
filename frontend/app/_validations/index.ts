@@ -1,4 +1,5 @@
-import validateBridgeFee from "./validateBridgeFee";
+import validateBridgeFeeByRsnRatio from "./validateBridgeFeeByRsnRatio";
+import validateBridgeFeeByToken from "./validateBridgeFeeByToken";
 import validateChainConfigsSameness from "./validateChainConfigsSameness";
 import validateOldFeesConsistency from "./validateOldFeesConsistency";
 
@@ -21,10 +22,16 @@ const validations: Validation[] = [
     hint: "bridgeFee, feeRatio, rsnRatio, and rsnRatioDivisor should be the same for all chains in the new config",
   },
   {
-    validate: validateBridgeFee,
-    title: "Bridge Fee",
-    id: "bridge-fee",
-    hint: "Bridge fee should be the expected predefined number",
+    validate: validateBridgeFeeByToken,
+    title: "Bridge Fee (Token)",
+    id: "bridge-fee-token",
+    hint: "Bridge fee calculation using token should be the expected predefined number",
+  },
+  {
+    validate: validateBridgeFeeByRsnRatio,
+    title: "Bridge Fee (RSN ratio)",
+    id: "bridge-fee-rsn-ratio",
+    hint: "Bridge fee calculation using rsn ratio should be the expected predefined number",
   },
 ];
 

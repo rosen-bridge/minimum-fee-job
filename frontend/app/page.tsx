@@ -11,7 +11,7 @@ const Home = () => {
           <Validations />
         </Suspense>
       </div>
-      <div className="border-2 border-solid border-slate-300 shadow-xl rounded-2xl">
+      <div className="border-2 border-solid border-slate-300 shadow-xl rounded-2xl w-[380px]">
         <Suspense fallback="Loading tx...">
           <Qr />
         </Suspense>
