@@ -1,7 +1,13 @@
-import { createClient } from "redis";
+import { createClient } from "@vercel/kv";
 import { Err, Ok, Result } from "ts-results-es";
 
-import { EmptyBackendConfigError, EmptyTxError, RedisConnectionError, RedisDataFetchingError, BackendConfigParseError } from '@/app/_error/store';
+import {
+  BackendConfigParseError,
+  EmptyBackendConfigError,
+  EmptyTxError,
+  RedisConnectionError,
+  RedisDataFetchingError,
+} from "@/app/_error/store";
 
 import { PartialSupportedTokenConfig } from "../_types/token-config";
 
@@ -11,12 +17,10 @@ import { PartialSupportedTokenConfig } from "../_types/token-config";
 const connectRedisClient = async () => {
   try {
     const client = createClient({
-      url: process.env.REDIS_URL,
+      url: process.env.KV_REST_API_URL,
+      token: process.env.KV_REST_API_TOKEN,
     });
-    await client.connect();
-    return Ok(Object.assign(client, {
-      [Symbol.asyncDispose]: client.disconnect,
-    }));
+    return Ok(client);
   } catch (error) {
     return Err(new RedisConnectionError(error));
   }
@@ -25,25 +29,35 @@ const connectRedisClient = async () => {
 /**
  * get backend tokens config from the store
  */
-export const getTokensConfig = async (): Promise<Result<PartialSupportedTokenConfig[], RedisDataFetchingError | RedisConnectionError | BackendConfigParseError | EmptyBackendConfigError>> => {
+export const getTokensConfig = async (): Promise<
+  Result<
+    PartialSupportedTokenConfig[],
+    | RedisDataFetchingError
+    | RedisConnectionError
+    | BackendConfigParseError
+    | EmptyBackendConfigError
+  >
+> => {
   const clientResult = await connectRedisClient();
 
   if (clientResult.isErr()) {
     return clientResult;
   }
 
-  await using client = clientResult.value;
+  const client = clientResult.value;
 
   try {
-    const config = await client.get("tokens-config");
+    const config = await client.get<PartialSupportedTokenConfig[]>(
+      "tokens-config"
+    );
     if (config) {
       try {
-        return Ok(JSON.parse(config));
+        return Ok(config);
       } catch {
         return Err(new BackendConfigParseError());
       }
     } else {
-      return Err(new EmptyBackendConfigError())
+      return Err(new EmptyBackendConfigError());
     }
   } catch (error) {
     return Err(new RedisDataFetchingError(error));
@@ -53,43 +67,47 @@ export const getTokensConfig = async (): Promise<Result<PartialSupportedTokenCon
 /**
  * get price data from the store
  */
-export const getPrices = async (): Promise<Result<Record<string, string>, RedisDataFetchingError | RedisConnectionError>> => {
+export const getPrices = async (): Promise<
+  Result<Record<string, string>, RedisDataFetchingError | RedisConnectionError>
+> => {
   const clientResult = await connectRedisClient();
 
   if (clientResult.isErr()) {
     return clientResult;
   }
 
-  await using client = clientResult.value;
+  const client = clientResult.value;
 
   try {
-    const prices = await client.hGetAll("prices");
-    return Ok(prices);
+    const prices = await client.hgetall<Record<string, string>>("prices");
+    return Ok(prices ?? {});
   } catch (error) {
-    return Err(new RedisDataFetchingError(error))
+    return Err(new RedisDataFetchingError(error));
   }
 };
 
 /**
  * get tx data from the store
  */
-export const getTx = async (): Promise<Result<string, RedisDataFetchingError | RedisConnectionError | EmptyTxError>> => {
+export const getTx = async (): Promise<
+  Result<string, RedisDataFetchingError | RedisConnectionError | EmptyTxError>
+> => {
   const clientResult = await connectRedisClient();
 
   if (clientResult.isErr()) {
     return clientResult;
   }
 
-  await using client = clientResult.value;
+  const client = clientResult.value;
 
   try {
-    const tx = await client.get("tx");
+    const tx = await client.get<Record<string, string>>("tx");
 
     if (!tx) {
       return Err(new EmptyTxError());
     }
-    return Ok(tx);
+    return Ok(JSON.stringify(tx));
   } catch (error) {
-    return Err(new RedisDataFetchingError(error))
+    return Err(new RedisDataFetchingError(error));
   }
 };

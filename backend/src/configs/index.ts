@@ -96,8 +96,12 @@ export const discordWebHookUrl = config.has('discordWebHookUrl')
   ? config.get<string>('discordWebHookUrl')
   : undefined;
 
-export const redisUrl = config.has('redisUrl')
-  ? config.get<string>('redisUrl')
+export const kvRestApiUrl = config.has('kv.restApiUrl')
+  ? config.get<string>('kv.restApiUrl')
+  : undefined;
+
+export const kvRestApiToken = config.has('kv.restApiToken')
+  ? config.get<string>('kv.restApiToken')
   : undefined;
 
 export const tokens = (): RosenTokens => {
