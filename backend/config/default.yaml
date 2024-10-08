@@ -1,0 +1,129 @@
+minimumFee:
+  NFT: '1ce1ea41ceaed94a6976a047645ffb3f3da3916685268c8f2d8f80f892147caa'
+  minimumFeeAddress: '9fmj8dX6QFy9PS2zCqYJj4LTyDvWRS29BBuSTToy961oWf2VaQQ'
+  feeAddress: '9gPqDuyxpmV2bR62zdbgxuvJAahDUpnaZw8Srv2JYHauAiHZEb4'
+  fetchBoxRetry: 3
+  rsnRatioPrecision: 6
+  bitcoinTxVSize: 150
+  supportedTokens:
+    - tokenId: 'erg'
+      ergoSideTokenId: 'erg'
+      name: 'ERG'
+      decimals: 9
+      priceBackend: 'coingecko'
+      priceBackendParams:
+        network: 'ergo'
+      fee:
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
+        bridgeFeeUSD: 10
+        ergNetworkFee: 0.0013
+        adaNetworkFee: 3.4
+        feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
+    - tokenId: 'ada'
+      ergoSideTokenId: 'e023c5f382b6e96fbd878f6811aac73345489032157ad5affb84aefd4956c297'
+      name: 'ADA'
+      decimals: 6
+      priceBackend: 'coingecko'
+      priceBackendParams:
+        network: 'cardano'
+      fee:
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
+        bridgeFeeUSD: 10
+        ergNetworkFee: 0.0013
+        adaNetworkFee: 3.4
+        feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
+    - tokenId: 'btc'
+      ergoSideTokenId: '003bd19d0187117f130b62e1bcab0939929ff5c7709f843c5c4dd158949285d0'
+      name: 'BTC'
+      decimals: 6
+      priceBackend: 'coingecko'
+      priceBackendParams:
+        network: 'bitcoin'
+      fee:
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
+        bridgeFeeUSD: 10
+        ergNetworkFee: 0.0013
+        adaNetworkFee: 3.4
+        feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
+    - tokenId: 'eth'
+      ergoSideTokenId: '6a675f7eed88401791555a861ebf3cd054ac58477b6994a39119de4da56a96fe'
+      name: 'ETH'
+      decimals: 9
+      priceBackend: 'coingecko'
+      priceBackendParams:
+        network: 'ethereum'
+      fee:
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
+        bridgeFeeUSD: 10
+        ergNetworkFee: 0.2
+        adaNetworkFee: 1
+        feeRatioFloat: 0.01
+        bitcoinConfirmation: 6
+    - tokenId: '8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'
+      ergoSideTokenId: '8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'
+      name: 'RSN'
+      decimals: 3
+      priceBackend: 'spectrum'
+      priceBackendParams: {}
+      fee:
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
+        bridgeFeeUSD: 10
+        ergNetworkFee: 0.0013
+        adaNetworkFee: 3.4
+        feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
+    - tokenId: '03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04'
+      ergoSideTokenId: '03faf2cb329f2e90d6d23b58d91bbb6c046aa143261cc21f52fbe2824bfcbf04'
+      name: 'SigUSD'
+      decimals: 2
+      priceBackend: 'spectrum'
+      priceBackendParams: {}
+      fee:
+        delays:
+          ergo: 5
+          cardano: 30
+          bitcoin: 2
+        bridgeFeeUSD: 10
+        ergNetworkFee: 0.0013
+        adaNetworkFee: 3.4
+        feeRatioFloat: 0.005
+        bitcoinConfirmation: 6
+tokensPath: './config/rosen/tokens.json' # path to supported tokens of bridge
+logs:
+  - type: 'file'
+    path: './logs/'
+    maxSize: '20m'
+    maxFiles: '14d'
+    level: 'debug'
+  - type: 'console'
+    level: 'info'
+triggerPercent:
+  bridgeFee: 10
+  rsnRatio: 10
+  bitcoinNetworkFee: 100
+  cardanoNetworkFee: 30
+  ergoNetworkFee: 50
+  ethereumNetworkFee: 150
+discordWebHookUrl: '' # Discord webhook url for sending notifications
+interval: 14400 # every 4 hours
+kv:
+  restApiUrl: # Upstash URL
+  restApiToken: # Upstash token
