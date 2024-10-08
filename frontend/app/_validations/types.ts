@@ -2,10 +2,9 @@ import { Result } from "ts-results-es";
 
 import { AppError } from "../_error/app";
 
-export type ValidationResult = Result<
-  { isValid: boolean; reason: string | null },
-  AppError
->;
+export type ValidationResultOk = { isValid: boolean; reason: string | null };
+
+export type ValidationResult = Result<ValidationResultOk, AppError>;
 
 export interface Validate {
   (tokenId: string): Promise<ValidationResult>;

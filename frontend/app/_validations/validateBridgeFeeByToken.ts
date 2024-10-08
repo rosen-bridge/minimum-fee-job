@@ -1,15 +1,13 @@
 import { Err, Ok, Result } from "ts-results-es";
 
 import { getPrices, getTokensConfig } from "../_store";
-import calculateErrorPercent from "../_utils/calculate-error-percent";
 import getFeesByToken from "../_utils/get-fees-by-token";
+import validateActualAgainstExpected from "../_utils/validate-actual-against-expected";
 
 import {
   BridgeFeeValidationByTokenError,
   TokenConfigMissing,
 } from "../_error/bridge-fee-validation-by-token";
-
-import { VALID_ERROR_PERCENT_THRESHOLD } from "../constants";
 
 import { Validate } from "./types";
 
@@ -67,15 +65,7 @@ const validateBridgeFeeByToken: Validate = async (tokenId) => {
     );
     const expected = tokenConfig.fee.bridgeFeeUSD;
 
-    const errorPercent = calculateErrorPercent(actual, expected);
-    const isValid = errorPercent < VALID_ERROR_PERCENT_THRESHOLD;
-
-    return Ok({
-      isValid,
-      reason: `${actual}:${expected} (actual:expected) (~${+errorPercent.toFixed(
-        2
-      )}% error)`,
-    });
+    return Ok(validateActualAgainstExpected(actual, expected));
   } catch (error) {
     return Err(new BridgeFeeValidationByTokenError(error));
   }

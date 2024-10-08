@@ -39,11 +39,9 @@ const validateChainConfigsSameness: Validate = async (tokenId) => {
     return Ok({
       isValid,
       reason: !isValid
-        ? `Inter-chain differences: ${JSON.stringify(
-            mapValues(omitBy(uniqConfigs, ["length", 1]), (config) =>
-              config.map(String)
-            )
-          )}`
+        ? Object.entries(omitBy(uniqConfigs, ["length", 1]))
+            .map(([key, value]) => `${key}: ${value}`)
+            .join("\n")
         : null,
     });
   } catch (error) {
