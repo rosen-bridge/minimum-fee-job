@@ -1,5 +1,5 @@
 import './bootstrap';
-import { RunningInterval, minimumFeeConfigs, redisUrl } from './configs';
+import { RunningInterval, minimumFeeConfigs, kvRestApiUrl } from './configs';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
 import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
@@ -59,7 +59,7 @@ const main = async () => {
   if (updatedConfigs.size === 0) {
     logger.info(`No config need update`);
 
-    if (redisUrl) {
+    if (kvRestApiUrl) {
       await flushStore();
       logger.info('Flushed store');
     }
@@ -82,7 +82,7 @@ const main = async () => {
     );
     const tokenIds = Array.from(updatedConfigs.keys());
 
-    if (redisUrl) {
+    if (kvRestApiUrl) {
       // send info to redis
       discordNotification.sendMessage(
         `## Changed Tokens\n` +

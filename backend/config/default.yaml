@@ -124,4 +124,6 @@ triggerPercent:
   ethereumNetworkFee: 150
 discordWebHookUrl: '' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours
-redisUrl: # redis://user:password@host:port/dbnum
+kv:
+  restApiUrl: # Upstash URL
+  restApiToken: # Upstash token
