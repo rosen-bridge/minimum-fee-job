@@ -45,4 +45,6 @@ const Home = () => {
   );
 };
 
+export const revalidate = +process.env.REVALIDATION_INTERVAL_SECONDS!;
+
 export default Home;
