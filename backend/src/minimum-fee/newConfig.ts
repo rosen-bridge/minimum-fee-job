@@ -115,7 +115,7 @@ export const feeConfigFromPrice = async (
   const newFeeConfig = new MinimumFeeConfig();
 
   //  ERGO
-  const ergoHeight = await getErgoHeight();
+  const ergoHeight = (await getErgoHeight()) + configs.delays.ergo;
   if (chains.includes(ERGO)) {
     const ergoNetworkFee = getErgoNetworkFee(
       prices,
@@ -136,7 +136,7 @@ export const feeConfigFromPrice = async (
   }
 
   //  CARDANO
-  const cardanoHeight = await getCardanoHeight();
+  const cardanoHeight = (await getCardanoHeight()) + configs.delays.cardano;
   if (chains.includes(CARDANO)) {
     const cardanoNetworkFee = getCardanoNetworkFee(
       prices,
@@ -157,7 +157,7 @@ export const feeConfigFromPrice = async (
   }
 
   //  BITCOIN
-  const bitcoinHeight = await getBitcoinHeight();
+  const bitcoinHeight = (await getBitcoinHeight()) + configs.delays.bitcoin;
   if (chains.includes(BITCOIN)) {
     const bitcoinNetworkFee = getBitcoinNetworkFee(
       prices,
@@ -179,7 +179,7 @@ export const feeConfigFromPrice = async (
   }
 
   //  ETHEREUM
-  const ethereumHeight = await getEthereumHeight();
+  const ethereumHeight = (await getEthereumHeight()) + configs.delays.ethereum;
   if (chains.includes(ETHEREUM)) {
     const ethereumNetworkFee = getEthereumNetworkFee(
       prices,
@@ -270,6 +270,9 @@ const getEthereumNetworkFee = (
 
   // calculating network fee on Ethereum
   return BigInt(
-    Math.ceil((0.001 * ethPrice * 10 ** tokenDecimal) / tokenPrice)
+    Math.ceil(
+      (minimumFeeConfigs.ethereumTxFee * ethPrice * 10 ** tokenDecimal) /
+        tokenPrice
+    )
   );
 };

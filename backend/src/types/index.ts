@@ -71,6 +71,7 @@ export interface HeightDelays {
   ergo: number;
   cardano: number;
   bitcoin: number;
+  ethereum: number;
 }
 
 export interface SupportedTokenConfig {
@@ -101,6 +102,7 @@ export interface ConfigInterface {
   fetchBoxRetry: number;
   rsnRatioPrecision: number;
   bitcoinTxVSize: number;
+  ethereumTxFee: number;
 }
 
 interface CoinMarketCapPricePoolQuote {
