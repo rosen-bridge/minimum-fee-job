@@ -90,6 +90,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   fetchBoxRetry: config.get<number>('minimumFee.fetchBoxRetry') ?? 3,
   rsnRatioPrecision: config.get<number>('minimumFee.rsnRatioPrecision') ?? 6,
   bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
+  ethereumTxFee: config.get<number>('minimumFee.ethereumTxFee') ?? 0.001,
 };
 
 export const discordWebHookUrl = config.has('discordWebHookUrl')
