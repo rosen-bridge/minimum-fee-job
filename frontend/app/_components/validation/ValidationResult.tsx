@@ -1,5 +1,5 @@
 import { GppBad, GppMaybe, VerifiedUser } from "@mui/icons-material";
-import { Tooltip } from "@mui/material";
+import { Box, Tooltip } from "@mui/material";
 import { ReactElement } from "react";
 
 import { ValidationResult as ValidationResultType } from "@/app/_validations/types";
@@ -22,7 +22,7 @@ const ValidationResult = ({
     reason: string | null
   ) =>
     reason ? (
-      <Tooltip sx={{ cursor: "pointer" }} title={reason}>
+      <Tooltip sx={{ cursor: "pointer" }} title={<Box whiteSpace="pre-line">{reason}</Box>}>
         {element}
       </Tooltip>
     ) : (

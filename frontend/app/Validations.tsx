@@ -103,7 +103,8 @@ const Validations = async () => {
         >
           <TableCell align="left">{tokensData[token].name}</TableCell>
           <TableCell align="left">
-            {+(+prices[tokensData[token].tokenId]).toFixed(6)}
+            {+(+prices[tokensData[token].tokenId]).toFixed(6) ||
+              +(+prices[tokensData[token].tokenId]).toExponential(3)}
           </TableCell>
           {validations.map((validation) => (
             <TableCell align="center" key={validation.id}>

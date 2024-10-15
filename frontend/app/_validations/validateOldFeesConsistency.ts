@@ -46,7 +46,7 @@ const validateOldFeesConsistency: Validate = async (tokenId) => {
       isValid: unexpectedFees.length === 0,
       reason:
         unexpectedFees.length !== 0
-          ? `Unexpected fees: ${JsonBigInt.stringify(unexpectedFees)}`
+          ? `Unexpected fees:\n${JsonBigInt.stringify(unexpectedFees)}`
           : null,
     });
   } catch (error) {
