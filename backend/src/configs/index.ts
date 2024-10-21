@@ -1,6 +1,6 @@
 import fs from 'fs';
 import config from 'config';
-import { ConfigInterface, SupportedTokenConfig } from '../types';
+import { ConfigInterface, FeeParameters, SupportedTokenConfig } from '../types';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 import { RosenTokens } from '@rosen-bridge/tokens';
 
@@ -78,15 +78,19 @@ export const feeGuaranteeDuration = new Map<string, number>([
 ]);
 export const RunningInterval = config.get<number>('interval') * 1000; // seconds to miliseconds
 
+const defaultFeeParameters = config.get<FeeParameters>('minimumFee.defaultFee');
 export const minimumFeeConfigs: ConfigInterface = {
   minimumFeeNFT: config.get<string>('minimumFee.NFT'),
   minimumFeeAddress: config.get<string>('minimumFee.minimumFeeAddress'),
   feeAddress: config.get<string>('minimumFee.feeAddress'),
   minBoxErg: 200000n,
   txFee: 1100000n,
-  supportedTokens: config.get<Array<SupportedTokenConfig>>(
-    'minimumFee.supportedTokens'
-  ),
+  supportedTokens: config
+    .get<Array<SupportedTokenConfig>>('minimumFee.supportedTokens')
+    .map((supportedToken) => ({
+      ...supportedToken,
+      fee: supportedToken.fee ? supportedToken.fee : defaultFeeParameters,
+    })),
   fetchBoxRetry: config.get<number>('minimumFee.fetchBoxRetry') ?? 3,
   rsnRatioPrecision: config.get<number>('minimumFee.rsnRatioPrecision') ?? 6,
   bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
