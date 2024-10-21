@@ -7,13 +7,13 @@ const axiosCoingecko = axios.create({
 });
 
 export const fetchPriceFromCoingeckoInUSD = async (
-  network: string
-): Promise<number> => {
+  network: string[]
+): Promise<Record<string, { usd: number }>> => {
   const queryParams = {
-    ids: network,
+    ids: network.join(','),
     vs_currencies: 'usd',
   };
   return await axiosCoingecko
     .get('', { params: queryParams })
-    .then((res) => res.data[network].usd);
+    .then((res) => res.data);
 };
