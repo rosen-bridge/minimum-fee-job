@@ -1,3 +1,11 @@
+urls:
+  coinMarketCap: 'https://api.coinmarketcap.com'
+  coingecko: 'https://api.coingecko.com'
+  spectrum: 'https://api.spectrum.fi'
+  ergoExplorer: 'https://api.ergoplatform.com'
+  cardanoKoios: 'https://api.koios.rest/api/v1'
+  bitcoinEsplora: 'https://mempool.space'
+  ethereumRpc: 'https://eth-mainnet.public.blastapi.io'
 minimumFee:
   NFT: '1ce1ea41ceaed94a6976a047645ffb3f3da3916685268c8f2d8f80f892147caa'
   minimumFeeAddress: '9fmj8dX6QFy9PS2zCqYJj4LTyDvWRS29BBuSTToy961oWf2VaQQ'

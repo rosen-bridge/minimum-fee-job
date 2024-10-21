@@ -1,7 +1,8 @@
 import axios from 'axios';
+import { urls } from '../configs';
 
 const axiosCoingecko = axios.create({
-  baseURL: 'https://api.coingecko.com/api/v3/simple/price',
+  baseURL: `${urls.coingecko}/api/v3/simple/price`,
   timeout: 8000,
 });
 

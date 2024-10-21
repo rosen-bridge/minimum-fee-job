@@ -10,10 +10,10 @@ import {
   cardanoNetworkFeeTriggerPercent,
   ergoNetworkFeeTriggerPercent,
   ethereumNetworkFeeTriggerPercent,
-  explorerBaseUrl,
   feeGuaranteeDuration,
   minimumFeeConfigs,
   rsnRatioTriggerPercent,
+  urls,
 } from '../configs';
 import {
   getBitcoinHeight,
@@ -76,7 +76,7 @@ export const updateFeeConfig = async (
     tokenId,
     minimumFeeConfigs.minimumFeeNFT,
     ErgoNetworkType.explorer,
-    explorerBaseUrl,
+    urls.ergoExplorer,
     logger
   );
   for (let i = 0; i < minimumFeeConfigs.fetchBoxRetry; i++) {
