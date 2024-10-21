@@ -2,6 +2,7 @@ urls:
   coinMarketCap: 'https://api.coinmarketcap.com'
   coingecko: 'https://api.coingecko.com'
   spectrum: 'https://api.spectrum.fi'
+  dexHunter: 'https://api-us.dexhunterv3.app'
   ergoExplorer: 'https://api.ergoplatform.com'
   cardanoKoios: 'https://api.koios.rest/api/v1'
   bitcoinEsplora: 'https://mempool.space'
@@ -26,14 +27,14 @@ minimumFee:
     feeRatioFloat: 0.005
     bitcoinConfirmation: 6
   supportedTokens:
-    - tokenId: 'erg'
-      ergoSideTokenId: 'erg'
-      name: 'ERG'
-      decimals: 9
-      priceBackend: 'coingecko'
-      priceBackendParams:
-        network: 'ergo'
-      fee:
+    - tokenId: ''
+      ergoSideTokenId: ''
+      name: ''
+      decimals: 0
+      priceBackend: ''
+      priceBackendParams: # depends on priceBackend
+        network: ''
+      fee: # will use defaultFee if this is not provided
         delays:
           ergo: 5
           cardano: 30

@@ -44,6 +44,7 @@ export enum PriceBackends {
   CoinGecko = 'coingecko',
   CoinMarketCap = 'coinmarketcap',
   Spectrum = 'spectrum',
+  DexHunter = 'dexhunter',
   Manual = 'manual',
 }
 

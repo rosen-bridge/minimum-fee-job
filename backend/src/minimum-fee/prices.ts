@@ -1,6 +1,7 @@
 import { minimumFeeConfigs } from '../configs';
 import { fetchPriceFromCoingeckoInUSD } from '../network/fetchPriceFromCoingecko';
 import { fetchPriceFromCoinMarketCapInUSD } from '../network/fetchPriceFromCoinMarketCap';
+import { fetchPriceFromDexHunterInADA } from '../network/fetchPriceFromDexHunter';
 import { fetchPriceFromSpectrumInERG } from '../network/fetchPriceFromSpectrum';
 import {
   CoinGeckoParams,
@@ -18,6 +19,7 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
   const coingeckoTokens: SupportedTokenConfig[] = [];
   const coinMarketCapTokens: SupportedTokenConfig[] = [];
   const spectrumTokens: SupportedTokenConfig[] = [];
+  const dexHunterTokens: SupportedTokenConfig[] = [];
 
   for (const token of minimumFeeConfigs.supportedTokens) {
     switch (token.priceBackend) {
@@ -31,6 +33,10 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
       }
       case PriceBackends.Spectrum: {
         spectrumTokens.push(token);
+        break;
+      }
+      case PriceBackends.DexHunter: {
+        dexHunterTokens.push(token);
         break;
       }
       case PriceBackends.Manual: {
@@ -73,6 +79,16 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
   if (!ergPrice) throw Error(`Erg price is not fetched yet!`);
   for (const token of spectrumTokens) {
     const price = (await fetchPriceFromSpectrumInERG(token.tokenId)) * ergPrice;
+    logger.debug(`Price of [${token.name}]: ${price}$`);
+    prices.set(token.tokenId, price);
+  }
+
+  // fetch price from dexhunter
+  const adaPrice = prices.get('ada');
+  if (!adaPrice) throw Error(`Ada price is not fetched yet!`);
+  for (const token of dexHunterTokens) {
+    const price =
+      (await fetchPriceFromDexHunterInADA(token.tokenId)) * adaPrice;
     logger.debug(`Price of [${token.name}]: ${price}$`);
     prices.set(token.tokenId, price);
   }

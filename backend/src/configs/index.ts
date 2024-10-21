@@ -68,6 +68,7 @@ export const urls = {
   coinMarketCap: config.get<string>('urls.coinMarketCap'),
   coingecko: config.get<string>('urls.coingecko'),
   spectrum: config.get<string>('urls.spectrum'),
+  dexHunter: config.get<string>('urls.dexHunter'),
   ergoExplorer: config.get<string>('urls.ergoExplorer'),
   cardanoKoios: config.get<string>('urls.cardanoKoios'),
   bitcoinEsplora: config.get<string>('urls.bitcoinEsplora'),
