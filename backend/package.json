@@ -18,12 +18,13 @@
     "prepare": "cd .. && husky install backend/.husky"
   },
   "dependencies": {
-    "@rosen-bridge/ergo-box-selection": "^0.3.0",
+    "@rosen-bridge/abstract-logger": "^2.0.1",
+    "@rosen-bridge/ergo-box-selection": "^0.5.2",
     "@rosen-bridge/json-bigint": "^0.1.0",
-    "@rosen-bridge/minimum-fee": "^2.2.0",
+    "@rosen-bridge/minimum-fee": "^2.2.2",
     "@rosen-bridge/tokens": "^1.2.1",
-    "@rosen-bridge/winston-logger": "^0.2.1",
-    "@rosen-clients/cardano-koios": "^2.0.1",
+    "@rosen-bridge/winston-logger": "^1.0.2",
+    "@rosen-clients/cardano-koios": "^2.0.3",
     "@vercel/kv": "^3.0.0",
     "axios": "^1.6.2",
     "bip32": "^4.0.0",

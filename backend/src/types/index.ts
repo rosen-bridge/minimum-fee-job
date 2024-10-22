@@ -44,6 +44,7 @@ export enum PriceBackends {
   CoinGecko = 'coingecko',
   CoinMarketCap = 'coinmarketcap',
   Spectrum = 'spectrum',
+  DexHunter = 'dexhunter',
   Manual = 'manual',
 }
 
@@ -74,6 +75,16 @@ export interface HeightDelays {
   ethereum: number;
 }
 
+export interface FeeParameters {
+  delays: HeightDelays;
+  bridgeFeeUSD: number;
+  ergNetworkFee: number;
+  adaNetworkFee: number;
+  bitcoinConfirmation: number;
+  feeRatioFloat: number;
+  rsnRatioDivisor: number;
+}
+
 export interface SupportedTokenConfig {
   tokenId: string;
   ergoSideTokenId: string;
@@ -81,15 +92,7 @@ export interface SupportedTokenConfig {
   decimals: number;
   priceBackend: string;
   priceBackendParams: PriceBackendParams;
-  fee: {
-    delays: HeightDelays;
-    bridgeFeeUSD: number;
-    ergNetworkFee: number;
-    adaNetworkFee: number;
-    bitcoinConfirmation: number;
-    feeRatioFloat: number;
-    rsnRatioDivisor: number;
-  };
+  fee: FeeParameters;
 }
 
 export interface ConfigInterface {

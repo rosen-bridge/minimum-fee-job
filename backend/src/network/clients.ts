@@ -1,12 +1,6 @@
 import cardanoKoiosClientFactory from '@rosen-clients/cardano-koios';
 import ergoExplorerClientFactory from '@rosen-clients/ergo-explorer';
-import {
-  esploraBaseUrl,
-  ethereumRpcBaseUrl,
-  explorerBaseUrl,
-  koiosBaseUrl,
-  minimumFeeConfigs,
-} from '../configs';
+import { minimumFeeConfigs, urls } from '../configs';
 import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
 import {
   BlockHeaders,
@@ -18,12 +12,12 @@ import JsonBigInt from '@rosen-bridge/json-bigint';
 import axios from 'axios';
 import { JsonRpcProvider } from 'ethers';
 
-const explorerClient = ergoExplorerClientFactory(explorerBaseUrl);
-const koiosClient = cardanoKoiosClientFactory(koiosBaseUrl);
+const explorerClient = ergoExplorerClientFactory(urls.ergoExplorer);
+const koiosClient = cardanoKoiosClientFactory(urls.cardanoKoios);
 const esploraClient = axios.create({
-  baseURL: esploraBaseUrl,
+  baseURL: urls.bitcoinEsplora,
 });
-const ethereumRpcClient = new JsonRpcProvider(ethereumRpcBaseUrl);
+const ethereumRpcClient = new JsonRpcProvider(urls.ethereumRpc);
 
 export const getErgoHeight = async (): Promise<number> =>
   Number((await explorerClient.v1.getApiV1Networkstate()).height);

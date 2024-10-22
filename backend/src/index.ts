@@ -6,12 +6,12 @@ import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
 import { feeConfigToRegisterValues, pricesToString } from './utils/utils';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Notification } from './network/Notification';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
 import { flushStore, saveTokensConfig, savePrices, saveTx } from './store';
 import { getConfigTokenPrices } from './minimum-fee/prices';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 const main = async () => {
   logger.info(`Starting Job`);
@@ -144,7 +144,7 @@ const interval = () => {
     })
     .catch((e) => {
       logger.warn(`An error ocurred: ${e}`);
-      if (e instanceof Error) logger.debug(e.stack);
+      if (e instanceof Error && e.stack) logger.debug(e.stack);
       // send alert to discord
       const discordNotification = Notification.getInstance();
       discordNotification.sendMessage(
