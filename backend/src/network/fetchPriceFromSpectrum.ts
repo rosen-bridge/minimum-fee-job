@@ -3,9 +3,9 @@ import { ErgTokenVolumes } from '../types';
 import { ERG_ID } from '../types/consts';
 import { spectrumPoolTimeLength, urls } from '../configs';
 import { SpectrumPool } from '../types/spectrum';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 const axiosSpectrum = axios.create({
   baseURL: urls.spectrum,

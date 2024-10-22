@@ -75,8 +75,6 @@ export const urls = {
   ethereumRpc: config.get<string>('urls.ethereumRpc'),
 };
 
-export const ethereumRpcBaseUrl = 'https://eth-mainnet.public.blastapi.io';
-
 export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
 export const feeGuaranteeDuration = new Map<string, number>([
   ['ergo', 24 * 30], // 1 day (30 blocks per hour)

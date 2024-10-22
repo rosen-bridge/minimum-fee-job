@@ -10,9 +10,9 @@ import {
   PriceBackends,
   SupportedTokenConfig,
 } from '../types';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
   const prices = new Map<string, number>();

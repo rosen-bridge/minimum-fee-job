@@ -22,7 +22,7 @@ import {
   getEthereumHeight,
 } from '../network/clients';
 import { getConfigDifferencePercent } from '../utils/utils';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import {
   BITCOIN,
   CARDANO,
@@ -33,7 +33,7 @@ import {
 import { FeeDifferencePercents, UpdatedFeeConfig } from '../types';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const updateAndGenerateFeeConfig = async (
   newConfigs: Map<string, MinimumFeeConfig>
