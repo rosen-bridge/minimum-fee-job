@@ -2,10 +2,10 @@ import { minimumFeeConfigs } from '../configs';
 import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
 import { ConfigOrder } from '../transaction/types';
 import { generateTransaction } from '../transaction/generate';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { UpdatedFeeConfig } from '../types';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const updateConfigsTransaction = async (
   feeConfigs: Map<string, UpdatedFeeConfig>

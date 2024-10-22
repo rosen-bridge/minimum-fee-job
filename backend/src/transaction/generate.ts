@@ -17,9 +17,9 @@ import {
   getStateContext,
 } from '../network/clients';
 import JsonBigInt from '@rosen-bridge/json-bigint';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 /**
  * generates unsigned transaction for config order

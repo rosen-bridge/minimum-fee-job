@@ -14,10 +14,10 @@ import {
   ETHEREUM,
   feeRatioDivisor,
 } from '../types/consts';
-import WinstonLogger from '@rosen-bridge/winston-logger';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { ChainFee, MinimumFeeConfig } from '@rosen-bridge/minimum-fee';
 
-const logger = WinstonLogger.getInstance().getLogger(import.meta.url);
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const generateNewFeeConfig = async (prices: Map<string, number>) => {
   const newFeeConfigs: Map<string, MinimumFeeConfig> = new Map();
