@@ -121,7 +121,7 @@ const Validations = async () => {
   return (
     <>
       <TableContainer>
-        <Table>
+        <Table stickyHeader>
           {renderTableHead()}
           {renderTableBody()}
         </Table>
