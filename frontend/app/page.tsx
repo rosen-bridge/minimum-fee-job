@@ -1,10 +1,12 @@
 import { Suspense } from "react";
+import { unstable_noStore as noStore } from 'next/cache';
 
 import Qr from "./_components/qrcode/Qr";
 import Validations from "./Validations";
 import { Box, CircularProgress } from "@mui/material";
 
 const Home = () => {
+  noStore();
   return (
     <main className="flex flex-row items-center justify-center h-screen gap-16">
       <div className="border-2 border-solid border-slate-300 shadow-xl rounded-2xl w-[60vw] min-h-[380px] max-h-[80vh]">
@@ -44,7 +46,5 @@ const Home = () => {
     </main>
   );
 };
-
-export const revalidate = +process.env.REVALIDATION_INTERVAL_SECONDS!;
 
 export default Home;
