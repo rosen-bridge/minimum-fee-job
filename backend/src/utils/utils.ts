@@ -2,7 +2,7 @@ import { Fee } from '@rosen-bridge/minimum-fee';
 import { minimumFeeConfigs } from '../configs';
 import { FeeDifferencePercents, Registers } from '../types';
 import { BITCOIN, CARDANO, ERGO, ETHEREUM } from '../types/consts';
-import { intersection } from 'lodash-es';
+import { intersection, chunk } from 'lodash-es';
 
 export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
   // generate register values
@@ -163,7 +163,7 @@ export const differencePercent = (a: bigint, b: bigint): bigint => {
   return (diff * 100n) / a;
 };
 
-export const pricesToString = (
+export const pricesToStringChunk = (
   prices: Map<string, number>,
   bridgeFeeDifferences: Map<string, bigint | undefined>
 ) => {
@@ -179,5 +179,6 @@ export const pricesToString = (
         : '';
     result.push(`${token.name} => ${value}$${differenceText}`);
   });
-  return result.join('\n');
+  // return result.join('\n');
+  return chunk(result, 30).map((priceChunk) => priceChunk.join('\n'));
 };
