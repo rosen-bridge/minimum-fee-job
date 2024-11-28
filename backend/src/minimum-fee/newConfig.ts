@@ -85,6 +85,19 @@ export const feeConfigFromPrice = async (
   const rsnRatioRaw =
     (tokenPrice * 10 ** rsnDecimal) / (rsnPrice * 10 ** tokenDecimal);
   logger.debug(`rsnRatioRaw: ${rsnRatioRaw}`);
+
+  let rsnRatioString = rsnRatioRaw.toString();
+  if (rsnRatioString.includes('e-')) {
+    // ratio is in scientific notation
+    const notationIndex = rsnRatioString.indexOf('e-') + 2;
+    rsnRatioString =
+      '0.' +
+      '0'.repeat(Number(rsnRatioString.slice(notationIndex)) - 1) +
+      rsnRatioString.slice(0, notationIndex - 2).replaceAll('.', '');
+  }
+  logger.debug(`rsnRatioString: ${rsnRatioString}`);
+  const parts = rsnRatioString.split('.');
+
   let rsnRatioDivisorPower;
   const fixedRatio = rsnRatioRaw.toFixed();
   if (fixedRatio.length >= minimumFeeConfigs.rsnRatioPrecision)
@@ -93,7 +106,6 @@ export const feeConfigFromPrice = async (
     rsnRatioDivisorPower =
       minimumFeeConfigs.rsnRatioPrecision - fixedRatio.length;
   else {
-    const parts = rsnRatioRaw.toString().split('.');
     if (parts.length === 1)
       throw Error(`ImpossibleBehavior: rsn ratio is zero!`);
     let i = 0;
@@ -102,7 +114,6 @@ export const feeConfigFromPrice = async (
   }
   const rsnRatioDivisor = BigInt(10 ** rsnRatioDivisorPower);
 
-  const parts = rsnRatioRaw.toString().split('.');
   const parts1 = (
     (parts.length === 1 ? '' : parts[1]) + '0'.repeat(rsnRatioDivisorPower)
   ).substring(0, rsnRatioDivisorPower);
