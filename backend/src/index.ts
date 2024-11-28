@@ -3,13 +3,14 @@ import { RunningInterval, minimumFeeConfigs, kvRestApiUrl } from './configs';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
 import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
-import { feeConfigToRegisterValues, pricesToString } from './utils/utils';
+import { feeConfigToRegisterValues, pricesToStringChunk } from './utils/utils';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Notification } from './network/Notification';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
 import { flushStore, saveTokensConfig, savePrices, saveTx } from './store';
 import { getConfigTokenPrices } from './minimum-fee/prices';
+import { chunk } from 'lodash-es';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -76,25 +77,27 @@ const main = async () => {
     // send notification to discord
     const discordNotification = Notification.getInstance();
     discordNotification.sendMessage(`# MinimumFee configs need to be updated`);
-    discordNotification.sendMessage(
-      `## Prices\n` +
-        `\`\`\`json\n${pricesToString(prices, bridgeFeeDifferences)}\n\`\`\``
-    );
+    discordNotification.sendMessage(`## Prices`);
+    pricesToStringChunk(prices, bridgeFeeDifferences).forEach((chunk) => {
+      discordNotification.sendMessage(`\`\`\`json\n${chunk}\n\`\`\``);
+    });
     const tokenIds = Array.from(updatedConfigs.keys());
 
     if (kvRestApiUrl) {
       // send info to redis
-      discordNotification.sendMessage(
-        `## Changed Tokens\n` +
-          tokenIds
-            .map((tokenId) => {
-              const token = minimumFeeConfigs.supportedTokens.find(
-                (token) => token.tokenId === tokenId
-              )!;
-              return `- ${token.name} [\`${token.ergoSideTokenId}\`]`;
-            })
-            .join('\n')
-      );
+      const tokenIdChunks = chunk(
+        tokenIds.map((tokenId) => {
+          const token = minimumFeeConfigs.supportedTokens.find(
+            (token) => token.tokenId === tokenId
+          )!;
+          return `- ${token.name} [\`${token.ergoSideTokenId}\`]`;
+        }),
+        15
+      ).map((chunk) => chunk.join('\n'));
+      discordNotification.sendMessage(`## Changed Tokens`);
+      tokenIdChunks.forEach((chunk) => {
+        discordNotification.sendMessage(chunk);
+      });
       await Promise.all([
         saveTokensConfig(minimumFeeConfigs.supportedTokens),
         savePrices(prices),
