@@ -6,6 +6,7 @@ import { fetchPriceFromSpectrumInERG } from '../network/fetchPriceFromSpectrum';
 import {
   CoinGeckoParams,
   CoinMarketCapParams,
+  DuplicateTokenParams,
   ManualParams,
   PriceBackends,
   SupportedTokenConfig,
@@ -20,6 +21,7 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
   const coinMarketCapTokens: SupportedTokenConfig[] = [];
   const spectrumTokens: SupportedTokenConfig[] = [];
   const dexHunterTokens: SupportedTokenConfig[] = [];
+  const duplicateTokens: SupportedTokenConfig[] = [];
 
   for (const token of minimumFeeConfigs.supportedTokens) {
     switch (token.priceBackend) {
@@ -43,6 +45,10 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
         const price = (token.priceBackendParams as ManualParams).price;
         logger.debug(`Price of [${token.name}]: ${price}$`);
         prices.set(token.tokenId, price);
+        break;
+      }
+      case PriceBackends.DuplicateToken: {
+        duplicateTokens.push(token);
         break;
       }
       default: {
@@ -89,6 +95,16 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
   for (const token of dexHunterTokens) {
     const price =
       (await fetchPriceFromDexHunterInADA(token.tokenId)) * adaPrice;
+    logger.debug(`Price of [${token.name}]: ${price}$`);
+    prices.set(token.tokenId, price);
+  }
+
+  // fetch duplicate token prices
+  for (const token of duplicateTokens) {
+    const price = prices.get(
+      (token.priceBackendParams as DuplicateTokenParams).tokenId
+    );
+    if (!price) throw Error(`Token [${price}] price is not fetched yet!`);
     logger.debug(`Price of [${token.name}]: ${price}$`);
     prices.set(token.tokenId, price);
   }
