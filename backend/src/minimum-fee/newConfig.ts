@@ -1,4 +1,4 @@
-import { ADA, BTC, ERG, ETH, minimumFeeConfigs, tokens } from '../configs';
+import { ADA, BNB, BTC, ERG, ETH, minimumFeeConfigs, tokens } from '../configs';
 import { SupportedTokenConfig } from '../types';
 import {
   getBitcoinHeight,
@@ -6,8 +6,10 @@ import {
   getErgoHeight,
   getBitcoinFeeRatio,
   getEthereumHeight,
+  getBinanceHeight,
 } from '../network/clients';
 import {
+  BINANCE,
   BITCOIN,
   CARDANO,
   ERGO,
@@ -210,6 +212,27 @@ export const feeConfigFromPrice = async (
     newFeeConfig.setChainConfig(ETHEREUM, ethereumHeight, undefined);
   }
 
+  //  BINANCE
+  const binanceHeight = (await getBinanceHeight()) + configs.delays.binance;
+  if (chains.includes(BINANCE)) {
+    const binanceNetworkFee = getBinanceNetworkFee(
+      prices,
+      configs,
+      tokenPrice,
+      tokenDecimal
+    );
+    const binanceFee: ChainFee = {
+      bridgeFee: bridgeFee,
+      networkFee: binanceNetworkFee,
+      rsnRatio: rsnRatio,
+      feeRatio: feeRatio,
+      rsnRatioDivisor,
+    };
+    newFeeConfig.setChainConfig(BINANCE, binanceHeight, binanceFee);
+  } else {
+    newFeeConfig.setChainConfig(BINANCE, binanceHeight, undefined);
+  }
+
   return newFeeConfig;
 };
 
@@ -283,6 +306,24 @@ const getEthereumNetworkFee = (
   return BigInt(
     Math.ceil(
       (minimumFeeConfigs.ethereumTxFee * ethPrice * 10 ** tokenDecimal) /
+        tokenPrice
+    )
+  );
+};
+
+const getBinanceNetworkFee = (
+  prices: Map<string, number>,
+  configs: SupportedTokenConfig['fee'],
+  tokenPrice: number,
+  tokenDecimal: number
+) => {
+  const bnbPrice = prices.get(BNB);
+  if (!bnbPrice) throw Error(`Bnb price is required`);
+
+  // calculating network fee on Binance
+  return BigInt(
+    Math.ceil(
+      (minimumFeeConfigs.binanceTxFee * bnbPrice * 10 ** tokenDecimal) /
         tokenPrice
     )
   );

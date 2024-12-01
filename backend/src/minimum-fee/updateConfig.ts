@@ -5,6 +5,7 @@ import {
   MinimumFeeConfig,
 } from '@rosen-bridge/minimum-fee';
 import {
+  binanceNetworkFeeTriggerPercent,
   bitcoinNetworkFeeTriggerPercent,
   bridgeFeeTriggerPercent,
   cardanoNetworkFeeTriggerPercent,
@@ -16,6 +17,7 @@ import {
   urls,
 } from '../configs';
 import {
+  getBinanceHeight,
   getBitcoinHeight,
   getCardanoHeight,
   getErgoHeight,
@@ -24,6 +26,7 @@ import {
 import { getConfigDifferencePercent } from '../utils/utils';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import {
+  BINANCE,
   BITCOIN,
   CARDANO,
   ERGO,
@@ -107,7 +110,9 @@ export const updateFeeConfig = async (
           bitcoinNetworkFeeTriggerPercent) &&
       (!differencePercent.ethereumNetworkFee ||
         differencePercent.ethereumNetworkFee <=
-          ethereumNetworkFeeTriggerPercent)
+          ethereumNetworkFeeTriggerPercent) &&
+      (!differencePercent.binanceNetworkFee ||
+        differencePercent.binanceNetworkFee <= binanceNetworkFeeTriggerPercent)
     ) {
       logger.debug(
         `token [${tokenId}] config difference is not sufficient for update`
@@ -183,6 +188,7 @@ const cleanOldConfig = async (tokenMinimumFeeBox: MinimumFeeBox) => {
   chainHeights.set(CARDANO, await getCardanoHeight());
   chainHeights.set(BITCOIN, await getBitcoinHeight());
   chainHeights.set(ETHEREUM, await getEthereumHeight());
+  chainHeights.set(BINANCE, await getBinanceHeight());
 
   const getCurrentHeight = (chain: string) => {
     const currentHeight = chainHeights.get(chain);

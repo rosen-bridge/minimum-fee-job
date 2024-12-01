@@ -6,4 +6,5 @@ export const ERGO = 'ergo';
 export const CARDANO = 'cardano';
 export const BITCOIN = 'bitcoin';
 export const ETHEREUM = 'ethereum';
-export const SUPPORTED_CHAINS = [ERGO, CARDANO, BITCOIN, ETHEREUM];
+export const BINANCE = 'binance';
+export const SUPPORTED_CHAINS = [ERGO, CARDANO, BITCOIN, ETHEREUM, BINANCE];
