@@ -5,11 +5,15 @@ import { Err, Ok } from "ts-results-es";
 
 import { TxDataExtractionError } from "../_error/tx";
 
+const cache = new Map<string, any>();
+
 /**
  * extract data from the reduced tx that is going to be used for fee update
  * @param tx Transaction created by the backend job
  */
 const extractTxData = (tx: string) => {
+  if (cache.has(tx)) return Ok(cache.get(tx));
+
   try {
     const reducedTxBase64 = JSON.parse(tx).reducedTx;
     const reducedTx = wasm.ReducedTransaction.sigma_parse_bytes(
@@ -62,6 +66,8 @@ const extractTxData = (tx: string) => {
           ),
         };
       }, {});
+
+    cache.set(tx, feesByToken);
 
     return Ok(feesByToken);
   } catch (error) {
