@@ -46,6 +46,7 @@ export enum PriceBackends {
   Spectrum = 'spectrum',
   DexHunter = 'dexhunter',
   Manual = 'manual',
+  DuplicateToken = 'duplicate-token',
 }
 
 export interface CoinGeckoParams {
@@ -60,13 +61,18 @@ export interface ManualParams {
   price: number;
 }
 
+export interface DuplicateTokenParams {
+  tokenId: string;
+}
+
 export interface SpectrumParams {}
 
 export type PriceBackendParams =
   | CoinGeckoParams
   | CoinMarketCapParams
   | ManualParams
-  | SpectrumParams;
+  | SpectrumParams
+  | DuplicateTokenParams;
 
 export interface HeightDelays {
   ergo: number;
