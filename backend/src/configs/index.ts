@@ -55,6 +55,9 @@ export const ergoNetworkFeeTriggerPercent = config.get<number>(
 export const ethereumNetworkFeeTriggerPercent = config.get<number>(
   'triggerPercent.ethereumNetworkFee'
 );
+export const binanceNetworkFeeTriggerPercent = config.get<number>(
+  'triggerPercent.binanceNetworkFee'
+);
 export const rsnRatioTriggerPercent = config.get<number>(
   'triggerPercent.rsnRatio'
 );
@@ -63,6 +66,7 @@ export const ERG = 'erg';
 export const ADA = 'ada';
 export const BTC = 'btc';
 export const ETH = 'eth';
+export const BNB = 'bnb';
 
 export const urls = {
   coinMarketCap: config.get<string>('urls.coinMarketCap'),
@@ -73,6 +77,7 @@ export const urls = {
   cardanoKoios: config.get<string>('urls.cardanoKoios'),
   bitcoinEsplora: config.get<string>('urls.bitcoinEsplora'),
   ethereumRpc: config.get<string>('urls.ethereumRpc'),
+  binanceRpc: config.get<string>('urls.binanceRpc'),
 };
 
 export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
@@ -81,6 +86,7 @@ export const feeGuaranteeDuration = new Map<string, number>([
   ['cardano', 24 * 60 * 3], // 1 day (3 blocks per minute)
   ['bitcoin', 24 * 6], // 1 day (6 blocks per hour)
   ['ethereum', 24 * 60 * 5], // 1 day (5 blocks per minute)
+  ['binance', 24 * 60 * 20], // 1 day (20 blocks per minute)
 ]);
 export const RunningInterval = config.get<number>('interval') * 1000; // seconds to milliseconds
 
@@ -101,6 +107,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   rsnRatioPrecision: config.get<number>('minimumFee.rsnRatioPrecision') ?? 6,
   bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
   ethereumTxFee: config.get<number>('minimumFee.ethereumTxFee') ?? 0.001,
+  binanceTxFee: config.get<number>('minimumFee.binanceTxFee') ?? 0.0001,
 };
 
 export const discordWebHookUrl = config.has('discordWebHookUrl')

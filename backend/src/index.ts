@@ -146,7 +146,7 @@ const interval = () => {
       setTimeout(interval, RunningInterval);
     })
     .catch((e) => {
-      logger.warn(`An error ocurred: ${e}`);
+      logger.warn(`An error occurred: ${e}`);
       if (e instanceof Error && e.stack) logger.debug(e.stack);
       // send alert to discord
       const discordNotification = Notification.getInstance();

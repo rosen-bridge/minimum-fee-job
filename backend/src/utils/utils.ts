@@ -1,7 +1,7 @@
 import { Fee } from '@rosen-bridge/minimum-fee';
 import { minimumFeeConfigs } from '../configs';
 import { FeeDifferencePercents, Registers } from '../types';
-import { BITCOIN, CARDANO, ERGO, ETHEREUM } from '../types/consts';
+import { BINANCE, BITCOIN, CARDANO, ERGO, ETHEREUM } from '../types/consts';
 import { intersection, chunk } from 'lodash-es';
 
 export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
@@ -148,6 +148,18 @@ export const getConfigDifferencePercent = (
     );
   }
 
+  // to-Binance fee difference
+  let binanceNetworkFeeDifference: bigint | undefined;
+  if (chains.includes(BINANCE)) {
+    const currentBinanceNetworkFee = currentConfig.configs[BINANCE].networkFee;
+    const newBinanceNetworkFee = newConfig.configs[BINANCE].networkFee;
+
+    binanceNetworkFeeDifference = differencePercent(
+      currentBinanceNetworkFee,
+      newBinanceNetworkFee
+    );
+  }
+
   return {
     bridgeFee: bridgeFeeDifference,
     rsnRatio: rsnRatioDifference,
@@ -155,6 +167,7 @@ export const getConfigDifferencePercent = (
     cardanoNetworkFee: cardanoNetworkFeeDifference,
     bitcoinNetworkFee: bitcoinNetworkFeeDifference,
     ethereumNetworkFee: ethereumNetworkFeeDifference,
+    binanceNetworkFee: binanceNetworkFeeDifference,
   };
 };
 
