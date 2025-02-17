@@ -34,7 +34,7 @@ const TOKENS_MIN: { [key: string]: number } = {
 
 const roundWithDigits = (value: number, significantDigits: number = 3) => {
   const valueBigint = BigInt(Math.ceil(value));
-  const valueString = value.toString();
+  const valueString = valueBigint.toString();
   if (significantDigits < valueString.length) {
     const roundValue =
       '5' +
@@ -74,7 +74,7 @@ const getHighAmount = (tokenId: string, price: number) => {
   const filtered = Object.keys(TOKENS_MAX).filter((item) =>
     new RegExp(item).test(tokenId)
   );
-  if (filtered.length === 0) return 150000 / price;
+  if (filtered.length === 0) return 300000 / price;
   return TOKENS_MAX[filtered[0]];
 };
 
