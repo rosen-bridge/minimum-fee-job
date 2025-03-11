@@ -18,6 +18,7 @@ const esploraClient = axios.create({
   baseURL: urls.bitcoinEsplora,
 });
 const ethereumRpcClient = new JsonRpcProvider(urls.ethereumRpc);
+const binanceRpcClient = new JsonRpcProvider(urls.binanceRpc);
 
 export const getErgoHeight = async (): Promise<number> =>
   Number((await explorerClient.v1.getApiV1Networkstate()).height);
@@ -30,6 +31,9 @@ export const getBitcoinHeight = async (): Promise<number> =>
 
 export const getEthereumHeight = async (): Promise<number> =>
   await ethereumRpcClient.getBlockNumber();
+
+export const getBinanceHeight = async (): Promise<number> =>
+  await binanceRpcClient.getBlockNumber();
 
 export const getAddressBoxes = async (
   address: string

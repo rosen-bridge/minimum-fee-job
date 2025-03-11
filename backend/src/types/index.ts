@@ -32,6 +32,7 @@ export interface FeeDifferencePercents {
   cardanoNetworkFee: bigint | undefined;
   bitcoinNetworkFee: bigint | undefined;
   ethereumNetworkFee: bigint | undefined;
+  binanceNetworkFee: bigint | undefined;
   rsnRatio: bigint;
 }
 
@@ -79,6 +80,7 @@ export interface HeightDelays {
   cardano: number;
   bitcoin: number;
   ethereum: number;
+  binance: number;
 }
 
 export interface FeeParameters {
@@ -112,6 +114,7 @@ export interface ConfigInterface {
   rsnRatioPrecision: number;
   bitcoinTxVSize: number;
   ethereumTxFee: number;
+  binanceTxFee: number;
 }
 
 interface CoinMarketCapPricePoolQuote {

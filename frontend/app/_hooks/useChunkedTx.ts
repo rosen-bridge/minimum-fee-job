@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { MAX_CHUNK_SIZE, MIN_CHUNK_SIZE, QR_TYPE } from "../constants";
 
@@ -25,6 +25,9 @@ const useChunkedTx = (tx: string) => {
 
   const [pagesCount, setPagesCount] = useState(pageThresholds.min);
   const [pageIndex, setPageIndex] = useState(0);
+  const [playing, setPlaying] = useState(false);
+
+  const interval = useRef<number>();
 
   useEffect(() => {
     setPagesCount(pageThresholds.min);
@@ -49,7 +52,35 @@ const useChunkedTx = (tx: string) => {
     [QR_TYPE]: chunk,
     p: pageIndex + 1,
     n: pagesCount,
+    a: playing ? 1 : 0,
   });
+
+  const clone = () => {
+    return JSON.stringify({ [QR_TYPE]: tx });
+  }
+
+  const play = () => {
+    clearInterval(interval.current);
+
+    setPlaying(!playing);
+
+    if (playing) return;
+
+    setPageIndex(0);
+
+    interval.current = window.setInterval(() => {
+      setPageIndex((index) => {
+        if (index + 1 > pagesCount - 1) return 0;
+        return (index + 1)
+      });
+    }, 800);
+  }
+
+  useEffect(() => {
+    return () => {
+      clearInterval(interval.current);
+    };
+  }, []);
 
   return {
     setIndex: setPageIndex,
@@ -58,6 +89,9 @@ const useChunkedTx = (tx: string) => {
     pagesCount,
     pageThresholds,
     value,
+    playing,
+    clone,
+    play,
   };
 };
 

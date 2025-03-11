@@ -7,6 +7,7 @@ urls:
   cardanoKoios: 'https://api.koios.rest/api/v1'
   bitcoinEsplora: 'https://mempool.space'
   ethereumRpc: 'https://eth-mainnet.public.blastapi.io'
+  binanceRpc: 'https://bsc-mainnet.public.blastapi.io'
 minimumFee:
   NFT: '1ce1ea41ceaed94a6976a047645ffb3f3da3916685268c8f2d8f80f892147caa'
   minimumFeeAddress: '9fmj8dX6QFy9PS2zCqYJj4LTyDvWRS29BBuSTToy961oWf2VaQQ'
@@ -15,12 +16,14 @@ minimumFee:
   rsnRatioPrecision: 6
   bitcoinTxVSize: 150
   ethereumTxFee: 0.001
+  binanceTxFee: 0.0001
   defaultFee:
     delays:
       ergo: 5
       cardano: 30
       bitcoin: 2
       ethereum: 50
+      binance: 200
     bridgeFeeUSD: 10
     ergNetworkFee: 0.0013
     adaNetworkFee: 3.4
@@ -40,6 +43,7 @@ minimumFee:
           cardano: 30
           bitcoin: 2
           ethereum: 50
+          binance: 200
         bridgeFeeUSD: 10
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
@@ -61,6 +65,7 @@ triggerPercent:
   cardanoNetworkFee: 30
   ergoNetworkFee: 50
   ethereumNetworkFee: 150
+  binanceNetworkFee: 50
 discordWebHookUrl: '' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours
 kv:
