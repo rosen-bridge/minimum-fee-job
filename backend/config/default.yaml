@@ -8,6 +8,8 @@ urls:
   bitcoinEsplora: 'https://mempool.space'
   ethereumRpc: 'https://eth-mainnet.public.blastapi.io'
   binanceRpc: 'https://bsc-mainnet.public.blastapi.io'
+auth:
+  koios: ''
 minimumFee:
   NFT: '1ce1ea41ceaed94a6976a047645ffb3f3da3916685268c8f2d8f80f892147caa'
   minimumFeeAddress: '9fmj8dX6QFy9PS2zCqYJj4LTyDvWRS29BBuSTToy961oWf2VaQQ'

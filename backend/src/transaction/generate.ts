@@ -61,7 +61,8 @@ export const generateTransaction = async (
     requiredAssets,
     [],
     new Map(),
-    (await getAddressBoxes(minimumFeeConfigs.feeAddress)).values()
+    (await getAddressBoxes(minimumFeeConfigs.feeAddress)).values(),
+    DefaultLoggerFactory.getInstance().getLogger(`ergo-box-selection`)
   );
 
   // check if boxes covered requirements
