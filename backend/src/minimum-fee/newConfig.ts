@@ -70,9 +70,9 @@ export const feeConfigFromPrice = async (
   );
 
   const tokenMapData = tokens();
-  const tokenSet = tokenMapData.tokens.find((set) => {
+  const tokenSet = tokenMapData.find((set) => {
     for (const chain of Object.keys(set)) {
-      if (set[chain][tokenMapData.idKeys[chain]] === tokenId) return true;
+      if (set[chain].tokenId === tokenId) return true;
     }
     return false;
   });
