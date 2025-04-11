@@ -132,6 +132,6 @@ export const tokens = (): RosenTokens => {
     throw new Error(`Tokens config file with path ${tokensPath} doesn't exist`);
   } else {
     const configJson: string = fs.readFileSync(tokensPath, 'utf8');
-    return JSON.parse(configJson);
+    return JSON.parse(configJson).tokens;
   }
 };
