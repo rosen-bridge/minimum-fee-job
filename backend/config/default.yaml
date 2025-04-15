@@ -8,6 +8,7 @@ urls:
   bitcoinEsplora: 'https://mempool.space'
   ethereumRpc: 'https://eth-mainnet.public.blastapi.io'
   binanceRpc: 'https://bsc-mainnet.public.blastapi.io'
+  minswap: 'https://monorepo-mainnet-prod.minswap.org/graphql'
 auth:
   koios: ''
 minimumFee:
