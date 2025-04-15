@@ -78,6 +78,7 @@ export const urls = {
   bitcoinEsplora: config.get<string>('urls.bitcoinEsplora'),
   ethereumRpc: config.get<string>('urls.ethereumRpc'),
   binanceRpc: config.get<string>('urls.binanceRpc'),
+  minswap: config.get<string>('urls.minswap'),
 };
 
 export const auth = {

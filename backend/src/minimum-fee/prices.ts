@@ -2,12 +2,14 @@ import { minimumFeeConfigs } from '../configs';
 import { fetchPriceFromCoingeckoInUSD } from '../network/fetchPriceFromCoingecko';
 import { fetchPriceFromCoinMarketCapInUSD } from '../network/fetchPriceFromCoinMarketCap';
 import { fetchPriceFromDexHunterInADA } from '../network/fetchPriceFromDexHunter';
+import { fetchPriceFromMinswapInADA } from '../network/fetchPriceFromMinswap';
 import { fetchPriceFromSpectrumInERG } from '../network/fetchPriceFromSpectrum';
 import {
   CoinGeckoParams,
   CoinMarketCapParams,
   DuplicateTokenParams,
   ManualParams,
+  MinswapParams,
   PriceBackends,
   SupportedTokenConfig,
 } from '../types';
@@ -21,6 +23,7 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
   const coinMarketCapTokens: SupportedTokenConfig[] = [];
   const spectrumTokens: SupportedTokenConfig[] = [];
   const dexHunterTokens: SupportedTokenConfig[] = [];
+  const minswapTokens: SupportedTokenConfig[] = [];
   const duplicateTokens: SupportedTokenConfig[] = [];
 
   for (const token of minimumFeeConfigs.supportedTokens) {
@@ -39,6 +42,10 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
       }
       case PriceBackends.DexHunter: {
         dexHunterTokens.push(token);
+        break;
+      }
+      case PriceBackends.Minswap: {
+        minswapTokens.push(token);
         break;
       }
       case PriceBackends.Manual: {
@@ -80,21 +87,38 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
     prices.set(token.tokenId, price);
   }
 
-  // fetch price from spectrum
+  // fetch Erg price
   const ergPrice = prices.get('erg');
   if (!ergPrice) throw Error(`Erg price is not fetched yet!`);
+
+  // fetch price from spectrum
   for (const token of spectrumTokens) {
     const price = (await fetchPriceFromSpectrumInERG(token.tokenId)) * ergPrice;
     logger.debug(`Price of [${token.name}]: ${price}$`);
     prices.set(token.tokenId, price);
   }
 
-  // fetch price from dexhunter
+  // fetch Ada price
   const adaPrice = prices.get('ada');
   if (!adaPrice) throw Error(`Ada price is not fetched yet!`);
+
+  // fetch price from dexhunter
   for (const token of dexHunterTokens) {
     const price =
       (await fetchPriceFromDexHunterInADA(token.tokenId)) * adaPrice;
+    logger.debug(`Price of [${token.name}]: ${price}$`);
+    prices.set(token.tokenId, price);
+  }
+
+  // fetch price from minswap
+  for (const token of minswapTokens) {
+    const params = token.priceBackendParams as MinswapParams;
+    const price =
+      (await fetchPriceFromMinswapInADA(
+        token.tokenId,
+        params.lpPolicyId,
+        params.lpAssetName
+      )) * adaPrice;
     logger.debug(`Price of [${token.name}]: ${price}$`);
     prices.set(token.tokenId, price);
   }
