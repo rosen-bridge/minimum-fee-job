@@ -31,7 +31,7 @@ export const fetchPriceFromMinswapInADA = async (
             currencySymbol: lpPolicyId,
             tokenName: lpAssetName,
           },
-          period: 'ONE_YEAR',
+          period: 'ONE_DAY',
         },
       },
       operationName: 'PriceChart',
