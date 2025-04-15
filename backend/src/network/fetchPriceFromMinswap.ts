@@ -38,5 +38,12 @@ export const fetchPriceFromMinswapInADA = async (
     },
     { params: { PriceChart: '' } }
   );
-  return Number(response.data.data.priceChart[0].value);
+  const priceChartList: Array<{ time: string; value: string }> =
+    response.data.data.priceChart;
+  const latestPrice = priceChartList.reduce((latestPrice, currentPrice) => {
+    if (Date.parse(latestPrice.time) < Date.parse(currentPrice.time))
+      return currentPrice;
+    return latestPrice;
+  }, priceChartList[0]);
+  return Number(latestPrice.value);
 };
