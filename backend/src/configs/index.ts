@@ -58,6 +58,9 @@ export const ethereumNetworkFeeTriggerPercent = config.get<number>(
 export const binanceNetworkFeeTriggerPercent = config.get<number>(
   'triggerPercent.binanceNetworkFee'
 );
+export const dogeNetworkFeeTriggerPercent = config.get<number>(
+  'triggerPercent.dogeNetworkFee'
+);
 export const rsnRatioTriggerPercent = config.get<number>(
   'triggerPercent.rsnRatio'
 );
@@ -67,6 +70,7 @@ export const ADA = 'ada';
 export const BTC = 'btc';
 export const ETH = 'eth';
 export const BNB = 'bnb';
+export const DOGE = 'doge';
 
 export const urls = {
   coinMarketCap: config.get<string>('urls.coinMarketCap'),
@@ -76,6 +80,7 @@ export const urls = {
   ergoExplorer: config.get<string>('urls.ergoExplorer'),
   cardanoKoios: config.get<string>('urls.cardanoKoios'),
   bitcoinEsplora: config.get<string>('urls.bitcoinEsplora'),
+  dogeBlockcypher: config.get<string>('urls.dogeBlockcypher'),
   ethereumRpc: config.get<string>('urls.ethereumRpc'),
   binanceRpc: config.get<string>('urls.binanceRpc'),
   minswap: config.get<string>('urls.minswap'),
@@ -90,6 +95,7 @@ export const feeGuaranteeDuration = new Map<string, number>([
   ['ergo', 24 * 30], // 1 day (30 blocks per hour)
   ['cardano', 24 * 60 * 3], // 1 day (3 blocks per minute)
   ['bitcoin', 24 * 6], // 1 day (6 blocks per hour)
+  ['doge', 24 * 60], // 1 day (60 blocks per hour)
   ['ethereum', 24 * 60 * 5], // 1 day (5 blocks per minute)
   ['binance', 24 * 60 * 20], // 1 day (20 blocks per minute)
 ]);
@@ -111,6 +117,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   fetchBoxRetry: config.get<number>('minimumFee.fetchBoxRetry') ?? 3,
   rsnRatioPrecision: config.get<number>('minimumFee.rsnRatioPrecision') ?? 6,
   bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
+  dogeTxVSize: config.get<number>('minimumFee.dogeTxVSize') ?? 200,
   ethereumTxFee: config.get<number>('minimumFee.ethereumTxFee') ?? 0.001,
   binanceTxFee: config.get<number>('minimumFee.binanceTxFee') ?? 0.0001,
 };

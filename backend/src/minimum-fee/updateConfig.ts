@@ -9,6 +9,7 @@ import {
   bitcoinNetworkFeeTriggerPercent,
   bridgeFeeTriggerPercent,
   cardanoNetworkFeeTriggerPercent,
+  DOGE,
   ergoNetworkFeeTriggerPercent,
   ethereumNetworkFeeTriggerPercent,
   feeGuaranteeDuration,
@@ -20,6 +21,7 @@ import {
   getBinanceHeight,
   getBitcoinHeight,
   getCardanoHeight,
+  getDogeHeight,
   getErgoHeight,
   getEthereumHeight,
 } from '../network/clients';
@@ -189,6 +191,7 @@ const cleanOldConfig = async (tokenMinimumFeeBox: MinimumFeeBox) => {
   chainHeights.set(BITCOIN, await getBitcoinHeight());
   chainHeights.set(ETHEREUM, await getEthereumHeight());
   chainHeights.set(BINANCE, await getBinanceHeight());
+  chainHeights.set(DOGE, await getDogeHeight());
 
   const getCurrentHeight = (chain: string) => {
     const currentHeight = chainHeights.get(chain);

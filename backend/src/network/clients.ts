@@ -17,6 +17,9 @@ const koiosClient = cardanoKoiosClientFactory(urls.cardanoKoios, auth.koios);
 const esploraClient = axios.create({
   baseURL: urls.bitcoinEsplora,
 });
+const dogeBlockcypherClient = axios.create({
+  baseURL: urls.dogeBlockcypher,
+});
 const ethereumRpcClient = new JsonRpcProvider(urls.ethereumRpc);
 const binanceRpcClient = new JsonRpcProvider(urls.binanceRpc);
 
@@ -28,6 +31,9 @@ export const getCardanoHeight = async (): Promise<number> =>
 
 export const getBitcoinHeight = async (): Promise<number> =>
   Number((await esploraClient.get<number>(`/api/blocks/tip/height`)).data);
+
+export const getDogeHeight = async (): Promise<number> =>
+  Number((await dogeBlockcypherClient.get(`v1/doge/main`)).data.height);
 
 export const getEthereumHeight = async (): Promise<number> =>
   await ethereumRpcClient.getBlockNumber();
@@ -102,4 +108,9 @@ export const getStateContext = async (): Promise<ErgoStateContext> => {
 export const getBitcoinFeeRatio = async (): Promise<Record<string, number>> => {
   return (await esploraClient.get<Record<string, number>>(`/api/fee-estimates`))
     .data;
+};
+
+export const getDogeFeeRatio = async (): Promise<number> => {
+  const response = await dogeBlockcypherClient.get(`v1/doge/main`);
+  return response.data.medium_fee_per_kb / 1000;
 };
