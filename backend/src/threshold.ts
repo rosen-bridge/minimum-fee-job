@@ -1,9 +1,12 @@
 import './bootstrap';
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import axios from 'axios';
 import { tokens as loadTokens } from './configs';
 import JsonBi from '@rosen-bridge/json-bigint';
 import { getConfigTokenPrices } from './minimum-fee/prices';
 import { writeFileSync } from 'fs';
+
+const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 interface TokenType {
   [chain: string]: {
@@ -22,6 +25,7 @@ const MAX_NATIVE_TRANSFER: { [chain: string]: bigint } = {
   cardano: 10000000n,
   bitcoin: 1000000n,
   ethereum: 0n,
+  binance: 0n,
 };
 
 const TOKENS_MAX: { [key: string]: number } = {
@@ -32,21 +36,19 @@ const TOKENS_MIN: { [key: string]: number } = {
   erg: 350000,
 };
 
+const MIN_THRESHOLD_USD = 150000;
+const MAX_THRESHOLD_USD = 300000;
+
 const roundWithDigits = (value: number, significantDigits: number = 3) => {
   const valueBigint = BigInt(Math.ceil(value));
   const valueString = valueBigint.toString();
   if (significantDigits < valueString.length) {
     const roundValue =
-      '5' +
-      Array(valueString.length - significantDigits - 1)
-        .fill('0')
-        .join('');
+      '5' + '0'.repeat(valueString.length - significantDigits - 1);
     const newValueString = (valueBigint + BigInt(roundValue)).toString();
     return BigInt(
       newValueString.substring(0, significantDigits) +
-        Array(newValueString.length - significantDigits)
-          .fill('0')
-          .join('')
+        '0'.repeat(newValueString.length - significantDigits)
     );
   }
   return valueBigint;
@@ -59,22 +61,19 @@ const ergoTokenSupply = async (tokenId: string) => {
     );
     return res.data.emissionAmount / Math.pow(10, res.data.decimals ?? 0);
   } catch (error) {
+    logger.warn(`Cannot get total supply for [${tokenId}]`);
     return 0;
   }
 };
 
 const getLowAmount = (tokenId: string, price: number) => {
-  const filtered = Object.keys(TOKENS_MIN).filter((item) =>
-    new RegExp(item).test(tokenId)
-  );
-  if (filtered.length === 0) return 150000 / price;
+  const filtered = Object.keys(TOKENS_MIN).filter((item) => item === tokenId);
+  if (filtered.length === 0) return MIN_THRESHOLD_USD / price;
   return TOKENS_MIN[filtered[0]];
 };
 const getHighAmount = (tokenId: string, price: number) => {
-  const filtered = Object.keys(TOKENS_MAX).filter((item) =>
-    new RegExp(item).test(tokenId)
-  );
-  if (filtered.length === 0) return 300000 / price;
+  const filtered = Object.keys(TOKENS_MAX).filter((item) => item === tokenId);
+  if (filtered.length === 0) return MAX_THRESHOLD_USD / price;
   return TOKENS_MAX[filtered[0]];
 };
 
@@ -119,8 +118,7 @@ const threshold = async () => {
     }
   }
   writeFileSync('thresholds.json', JsonBi.stringify(thresholds, undefined, 4));
-  console.log(JsonBi.stringify(thresholds, undefined, 4));
+  logger.debug(JsonBi.stringify(thresholds, undefined, 4));
 };
 
 threshold().then(() => null);
-// console.log(roundWithDigits(12345, 1));
