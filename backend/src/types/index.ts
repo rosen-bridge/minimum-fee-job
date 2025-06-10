@@ -1,5 +1,14 @@
 import { MinimumFeeBox, MinimumFeeBoxBuilder } from '@rosen-bridge/minimum-fee';
 
+export enum Chains {
+  ERGO = 'ergo',
+  CARDANO = 'cardano',
+  BITCOIN = 'bitcoin',
+  ETHEREUM = 'ethereum',
+  BINANCE = 'binance',
+  DOGE = 'doge',
+}
+
 export interface TokenConfig {
   tokenId: string;
   name: string;
@@ -26,14 +35,21 @@ export interface Registers {
   R9: Array<Array<string>>;
 }
 
+export enum Direction {
+  UP = '↑',
+  DOWN = '↓',
+  NONE = '•',
+}
+
+export interface DifferencePercent {
+  value: bigint;
+  direction: Direction;
+}
+
 export interface FeeDifferencePercents {
-  bridgeFee: bigint;
-  ergoNetworkFee: bigint | undefined;
-  cardanoNetworkFee: bigint | undefined;
-  bitcoinNetworkFee: bigint | undefined;
-  ethereumNetworkFee: bigint | undefined;
-  binanceNetworkFee: bigint | undefined;
-  rsnRatio: bigint;
+  bridgeFee: DifferencePercent;
+  networkFee: Record<Chains, DifferencePercent | undefined>;
+  rsnRatio: DifferencePercent;
 }
 
 export interface UpdatedFeeConfig {
@@ -134,3 +150,18 @@ interface CoinMarketCapPricePoolQuote {
 export interface CoinMarketCapPricePool {
   quotes: Array<CoinMarketCapPricePoolQuote>;
 }
+
+export enum AnsiColor {
+  RED = '31',
+  GREEN = '32',
+  YELLOW = '33',
+  BLUE = '34',
+  RESET = '0',
+}
+
+export interface TableRecord {
+  value: string;
+  color: AnsiColor;
+}
+export type TableRow = TableRecord[];
+export type TableData = TableRow[];

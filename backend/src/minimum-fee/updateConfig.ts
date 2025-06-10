@@ -5,56 +5,39 @@ import {
   MinimumFeeConfig,
 } from '@rosen-bridge/minimum-fee';
 import {
-  binanceNetworkFeeTriggerPercent,
-  bitcoinNetworkFeeTriggerPercent,
   bridgeFeeTriggerPercent,
-  cardanoNetworkFeeTriggerPercent,
-  DOGE,
-  ergoNetworkFeeTriggerPercent,
-  ethereumNetworkFeeTriggerPercent,
   feeGuaranteeDuration,
   minimumFeeConfigs,
+  networkFeeTriggerPercent,
   rsnRatioTriggerPercent,
   urls,
 } from '../configs';
-import {
-  getBinanceHeight,
-  getBitcoinHeight,
-  getCardanoHeight,
-  getDogeHeight,
-  getErgoHeight,
-  getEthereumHeight,
-} from '../network/clients';
 import { getConfigDifferencePercent } from '../utils/utils';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import {
-  BINANCE,
-  BITCOIN,
-  CARDANO,
-  ERGO,
-  ETHEREUM,
-  SUPPORTED_CHAINS,
-} from '../types/consts';
-import { FeeDifferencePercents, UpdatedFeeConfig } from '../types';
+import { SUPPORTED_CHAINS } from '../utils/consts';
+import { Chains, FeeDifferencePercents, UpdatedFeeConfig } from '../types';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const updateAndGenerateFeeConfig = async (
-  newConfigs: Map<string, MinimumFeeConfig>
+  newConfigs: Map<string, MinimumFeeConfig>,
+  chainHeights: Map<Chains, number>
 ) => {
   const updatedFeeConfigs: Map<string, UpdatedFeeConfig> = new Map();
-  const bridgeFeeDifferences: Map<string, bigint | undefined> = new Map();
+  const feeDifferences: Map<string, FeeDifferencePercents | undefined> =
+    new Map();
   for (const token of minimumFeeConfigs.supportedTokens) {
     logger.debug(`Combining old and new config of token [${token.name}]`);
     const newConfig = newConfigs.get(token.tokenId)!;
 
-    const result = await updateFeeConfig(token.ergoSideTokenId, newConfig);
-    const feeConfig = result.config;
-    bridgeFeeDifferences.set(
-      token.tokenId,
-      result.differencePercent?.bridgeFee
+    const result = await updateFeeConfig(
+      token.ergoSideTokenId,
+      newConfig,
+      chainHeights
     );
+    const feeConfig = result.config;
+    feeDifferences.set(token.tokenId, result.differencePercent);
     if (feeConfig.new)
       updatedFeeConfigs.set(token.tokenId, {
         current: feeConfig.current,
@@ -63,13 +46,14 @@ export const updateAndGenerateFeeConfig = async (
   }
   return {
     config: updatedFeeConfigs,
-    bridgeFeeDifferences: bridgeFeeDifferences,
+    feeDifferences: feeDifferences,
   };
 };
 
-export const updateFeeConfig = async (
+const updateFeeConfig = async (
   tokenId: string,
-  newFeeConfig: MinimumFeeConfig
+  newFeeConfig: MinimumFeeConfig,
+  chainHeights: Map<Chains, number>
 ): Promise<{
   config: {
     current: MinimumFeeBox;
@@ -91,7 +75,7 @@ export const updateFeeConfig = async (
   const box = tokenMinimumFeeBox.getBox();
   if (box) {
     logger.debug(`Found a config for token [${tokenId}]`);
-    const builder = await cleanOldConfig(tokenMinimumFeeBox);
+    const builder = await cleanOldConfig(tokenMinimumFeeBox, chainHeights);
 
     // calculate config differences
     const differencePercent = getConfigDifferencePercent(
@@ -99,23 +83,20 @@ export const updateFeeConfig = async (
       newFeeConfig.getConfig()
     );
 
-    if (
-      differencePercent.bridgeFee <= bridgeFeeTriggerPercent &&
-      differencePercent.rsnRatio <= rsnRatioTriggerPercent &&
-      (!differencePercent.ergoNetworkFee ||
-        differencePercent.ergoNetworkFee <= ergoNetworkFeeTriggerPercent) &&
-      (!differencePercent.cardanoNetworkFee ||
-        differencePercent.cardanoNetworkFee <=
-          cardanoNetworkFeeTriggerPercent) &&
-      (!differencePercent.bitcoinNetworkFee ||
-        differencePercent.bitcoinNetworkFee <=
-          bitcoinNetworkFeeTriggerPercent) &&
-      (!differencePercent.ethereumNetworkFee ||
-        differencePercent.ethereumNetworkFee <=
-          ethereumNetworkFeeTriggerPercent) &&
-      (!differencePercent.binanceNetworkFee ||
-        differencePercent.binanceNetworkFee <= binanceNetworkFeeTriggerPercent)
-    ) {
+    // check any chain is added or removed
+    const isChainAddedOrRemoved = false; // TODO: implement (local:ergo/rosen-bridge/minimum-fee-job#12)
+    // check if fee difference is sufficient for update
+    const isFeeDifferenceSufficient =
+      differencePercent.bridgeFee.value <= bridgeFeeTriggerPercent ||
+      differencePercent.rsnRatio.value <= rsnRatioTriggerPercent ||
+      SUPPORTED_CHAINS.some(
+        (chain) =>
+          differencePercent.networkFee[chain] !== undefined &&
+          differencePercent.networkFee[chain]!.value <=
+            networkFeeTriggerPercent[chain]!
+      );
+
+    if (!isChainAddedOrRemoved && !isFeeDifferenceSufficient) {
       logger.debug(
         `token [${tokenId}] config difference is not sufficient for update`
       );
@@ -131,19 +112,10 @@ export const updateFeeConfig = async (
         `trigger condition for token [${tokenId}]: ${JsonBigInt.stringify([
           [differencePercent.bridgeFee, bridgeFeeTriggerPercent],
           [differencePercent.rsnRatio, rsnRatioTriggerPercent],
-          [differencePercent.ergoNetworkFee, ergoNetworkFeeTriggerPercent],
-          [
-            differencePercent.cardanoNetworkFee,
-            cardanoNetworkFeeTriggerPercent,
-          ],
-          [
-            differencePercent.bitcoinNetworkFee,
-            bitcoinNetworkFeeTriggerPercent,
-          ],
-          [
-            differencePercent.ethereumNetworkFee,
-            ethereumNetworkFeeTriggerPercent,
-          ],
+          ...SUPPORTED_CHAINS.map((chain) => [
+            differencePercent.networkFee[chain],
+            networkFeeTriggerPercent[chain],
+          ]),
         ])}`
       );
       // add new config
@@ -160,7 +132,7 @@ export const updateFeeConfig = async (
     logger.debug(
       `No config found for token [${tokenId}]. Generating config with only the new one...`
     );
-    const currentErgoHeight = await getErgoHeight();
+    const currentErgoHeight = chainHeights.get(Chains.ERGO)!;
 
     const builder = new MinimumFeeBoxBuilder(
       minimumFeeConfigs.minimumFeeNFT,
@@ -183,17 +155,11 @@ export const updateFeeConfig = async (
   }
 };
 
-const cleanOldConfig = async (tokenMinimumFeeBox: MinimumFeeBox) => {
-  // fetch current heights
-  const chainHeights = new Map<string, number>();
-  chainHeights.set(ERGO, await getErgoHeight());
-  chainHeights.set(CARDANO, await getCardanoHeight());
-  chainHeights.set(BITCOIN, await getBitcoinHeight());
-  chainHeights.set(ETHEREUM, await getEthereumHeight());
-  chainHeights.set(BINANCE, await getBinanceHeight());
-  chainHeights.set(DOGE, await getDogeHeight());
-
-  const getCurrentHeight = (chain: string) => {
+const cleanOldConfig = async (
+  tokenMinimumFeeBox: MinimumFeeBox,
+  chainHeights: Map<Chains, number>
+) => {
+  const getCurrentHeight = (chain: Chains) => {
     const currentHeight = chainHeights.get(chain);
     if (!currentHeight)
       throw Error(
@@ -204,7 +170,7 @@ const cleanOldConfig = async (tokenMinimumFeeBox: MinimumFeeBox) => {
 
   // convert to builder
   const builder = tokenMinimumFeeBox.toBuilder();
-  builder.setHeight(getCurrentHeight(ERGO));
+  builder.setHeight(getCurrentHeight(Chains.ERGO));
   const fees = builder.getConfigs();
 
   // remove unused configs

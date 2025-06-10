@@ -8,31 +8,18 @@ import {
   minimumFeeConfigs,
   tokens,
 } from '../configs';
-import { SupportedTokenConfig } from '../types';
-import {
-  getBitcoinHeight,
-  getCardanoHeight,
-  getErgoHeight,
-  getBitcoinFeeRatio,
-  getEthereumHeight,
-  getBinanceHeight,
-  getDogeHeight,
-  getDogeFeeRatio,
-} from '../network/clients';
-import {
-  BINANCE,
-  BITCOIN,
-  CARDANO,
-  ERGO,
-  ETHEREUM,
-  feeRatioDivisor,
-} from '../types/consts';
+import { Chains, SupportedTokenConfig } from '../types';
+import { getBitcoinFeeRatio, getDogeFeeRatio } from '../network/clients';
+import { feeRatioDivisor } from '../utils/consts';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { ChainFee, MinimumFeeConfig } from '@rosen-bridge/minimum-fee';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
-export const generateNewFeeConfig = async (prices: Map<string, number>) => {
+export const generateNewFeeConfig = async (
+  prices: Map<string, number>,
+  chainHeights: Map<Chains, number>
+) => {
   const newFeeConfigs: Map<string, MinimumFeeConfig> = new Map();
 
   const rsnTokenConfig = minimumFeeConfigs.supportedTokens.find(
@@ -54,6 +41,7 @@ export const generateNewFeeConfig = async (prices: Map<string, number>) => {
     const feeConfig = await feeConfigFromPrice(
       token.tokenId,
       prices,
+      chainHeights,
       rsnPrice,
       rsnTokenConfig.decimals,
       token.decimals,
@@ -69,6 +57,7 @@ export const generateNewFeeConfig = async (prices: Map<string, number>) => {
 export const feeConfigFromPrice = async (
   tokenId: string,
   prices: Map<string, number>,
+  chainHeights: Map<Chains, number>,
   rsnPrice: number,
   rsnDecimal: number,
   tokenDecimal: number,
@@ -76,6 +65,15 @@ export const feeConfigFromPrice = async (
   bitcoinFeeRatioMap: Record<string, number>,
   dogeFeeRatio: number
 ): Promise<MinimumFeeConfig> => {
+  const getCurrentHeight = (chain: Chains) => {
+    const currentHeight = chainHeights.get(chain);
+    if (!currentHeight)
+      throw Error(
+        `Impossible behavior: chain [${chain}] is supported but its height is not fetched`
+      );
+    return currentHeight;
+  };
+
   const tokenPrice = prices.get(tokenId);
   if (tokenPrice == undefined)
     throw Error(`Unexpected state: token price is missing`);
@@ -144,8 +142,8 @@ export const feeConfigFromPrice = async (
   const newFeeConfig = new MinimumFeeConfig();
 
   //  ERGO
-  const ergoHeight = (await getErgoHeight()) + configs.delays.ergo;
-  if (chains.includes(ERGO)) {
+  const ergoHeight = getCurrentHeight(Chains.ERGO) + configs.delays.ergo;
+  if (chains.includes(Chains.ERGO)) {
     const ergoNetworkFee = getErgoNetworkFee(
       prices,
       configs,
@@ -159,14 +157,15 @@ export const feeConfigFromPrice = async (
       feeRatio: feeRatio,
       rsnRatioDivisor,
     };
-    newFeeConfig.setChainConfig(ERGO, ergoHeight, ergoFee);
+    newFeeConfig.setChainConfig(Chains.ERGO, ergoHeight, ergoFee);
   } else {
-    newFeeConfig.setChainConfig(ERGO, ergoHeight, undefined);
+    newFeeConfig.setChainConfig(Chains.ERGO, ergoHeight, undefined);
   }
 
   //  CARDANO
-  const cardanoHeight = (await getCardanoHeight()) + configs.delays.cardano;
-  if (chains.includes(CARDANO)) {
+  const cardanoHeight =
+    getCurrentHeight(Chains.CARDANO) + configs.delays.cardano;
+  if (chains.includes(Chains.CARDANO)) {
     const cardanoNetworkFee = getCardanoNetworkFee(
       prices,
       configs,
@@ -180,14 +179,15 @@ export const feeConfigFromPrice = async (
       feeRatio: feeRatio,
       rsnRatioDivisor,
     };
-    newFeeConfig.setChainConfig(CARDANO, cardanoHeight, cardanoFee);
+    newFeeConfig.setChainConfig(Chains.CARDANO, cardanoHeight, cardanoFee);
   } else {
-    newFeeConfig.setChainConfig(CARDANO, cardanoHeight, undefined);
+    newFeeConfig.setChainConfig(Chains.CARDANO, cardanoHeight, undefined);
   }
 
   //  BITCOIN
-  const bitcoinHeight = (await getBitcoinHeight()) + configs.delays.bitcoin;
-  if (chains.includes(BITCOIN)) {
+  const bitcoinHeight =
+    getCurrentHeight(Chains.BITCOIN) + configs.delays.bitcoin;
+  if (chains.includes(Chains.BITCOIN)) {
     const bitcoinNetworkFee = getBitcoinNetworkFee(
       prices,
       configs,
@@ -202,14 +202,15 @@ export const feeConfigFromPrice = async (
       feeRatio: feeRatio,
       rsnRatioDivisor,
     };
-    newFeeConfig.setChainConfig(BITCOIN, bitcoinHeight, bitcoinFee);
+    newFeeConfig.setChainConfig(Chains.BITCOIN, bitcoinHeight, bitcoinFee);
   } else {
-    newFeeConfig.setChainConfig(BITCOIN, bitcoinHeight, undefined);
+    newFeeConfig.setChainConfig(Chains.BITCOIN, bitcoinHeight, undefined);
   }
 
   //  ETHEREUM
-  const ethereumHeight = (await getEthereumHeight()) + configs.delays.ethereum;
-  if (chains.includes(ETHEREUM)) {
+  const ethereumHeight =
+    getCurrentHeight(Chains.ETHEREUM) + configs.delays.ethereum;
+  if (chains.includes(Chains.ETHEREUM)) {
     const ethereumNetworkFee = getEthereumNetworkFee(
       prices,
       configs,
@@ -223,14 +224,15 @@ export const feeConfigFromPrice = async (
       feeRatio: feeRatio,
       rsnRatioDivisor,
     };
-    newFeeConfig.setChainConfig(ETHEREUM, ethereumHeight, ethereumFee);
+    newFeeConfig.setChainConfig(Chains.ETHEREUM, ethereumHeight, ethereumFee);
   } else {
-    newFeeConfig.setChainConfig(ETHEREUM, ethereumHeight, undefined);
+    newFeeConfig.setChainConfig(Chains.ETHEREUM, ethereumHeight, undefined);
   }
 
   //  BINANCE
-  const binanceHeight = (await getBinanceHeight()) + configs.delays.binance;
-  if (chains.includes(BINANCE)) {
+  const binanceHeight =
+    getCurrentHeight(Chains.BINANCE) + configs.delays.binance;
+  if (chains.includes(Chains.BINANCE)) {
     const binanceNetworkFee = getBinanceNetworkFee(
       prices,
       configs,
@@ -244,14 +246,14 @@ export const feeConfigFromPrice = async (
       feeRatio: feeRatio,
       rsnRatioDivisor,
     };
-    newFeeConfig.setChainConfig(BINANCE, binanceHeight, binanceFee);
+    newFeeConfig.setChainConfig(Chains.BINANCE, binanceHeight, binanceFee);
   } else {
-    newFeeConfig.setChainConfig(BINANCE, binanceHeight, undefined);
+    newFeeConfig.setChainConfig(Chains.BINANCE, binanceHeight, undefined);
   }
 
   //  DOGE
-  const dogeHeight = (await getDogeHeight()) + configs.delays.doge;
-  if (chains.includes(DOGE)) {
+  const dogeHeight = getCurrentHeight(Chains.DOGE) + configs.delays.doge;
+  if (chains.includes(Chains.DOGE)) {
     const dogeNetworkFee = getDogeNetworkFee(
       prices,
       configs,
@@ -266,9 +268,9 @@ export const feeConfigFromPrice = async (
       feeRatio: feeRatio,
       rsnRatioDivisor,
     };
-    newFeeConfig.setChainConfig(DOGE, dogeHeight, dogeFee);
+    newFeeConfig.setChainConfig(Chains.DOGE, dogeHeight, dogeFee);
   } else {
-    newFeeConfig.setChainConfig(DOGE, dogeHeight, undefined);
+    newFeeConfig.setChainConfig(Chains.DOGE, dogeHeight, undefined);
   }
 
   return newFeeConfig;

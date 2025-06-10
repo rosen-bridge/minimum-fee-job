@@ -1,7 +1,20 @@
 import { Fee } from '@rosen-bridge/minimum-fee';
-import { minimumFeeConfigs } from '../configs';
-import { FeeDifferencePercents, Registers } from '../types';
-import { BINANCE, BITCOIN, CARDANO, ERGO, ETHEREUM } from '../types/consts';
+import {
+  bridgeFeeTriggerPercent,
+  minimumFeeConfigs,
+  networkFeeTriggerPercent,
+  rsnRatioTriggerPercent,
+} from '../configs';
+import {
+  AnsiColor,
+  DifferencePercent,
+  Direction,
+  FeeDifferencePercents,
+  Registers,
+  TableData,
+  TableRow,
+} from '../types';
+import { SUPPORTED_CHAINS, TABLE_CHUNK_SIZE } from './consts';
 import { intersection, chunk } from 'lodash-es';
 
 export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
@@ -99,99 +112,169 @@ export const getConfigDifferencePercent = (
 
   const rsnRatioDifference = differencePercent(currentRatio, newRatio);
 
-  // to-Ergo network fee difference
-  let ergoNetworkFeeDifference: bigint | undefined;
-  if (chains.includes(ERGO)) {
-    const currentErgoNetworkFee = currentConfig.configs[ERGO].networkFee;
-    const newErgoNetworkFee = newConfig.configs[ERGO].networkFee;
+  // network fee difference for each chain
+  const networkFeeDifferences: Record<string, DifferencePercent | undefined> =
+    {};
+  SUPPORTED_CHAINS.forEach((chain) => {
+    let networkFeeDifference: DifferencePercent | undefined;
+    if (chains.includes(chain)) {
+      const currentNetworkFee = currentConfig.configs[chain].networkFee;
+      const newNetworkFee = newConfig.configs[chain].networkFee;
 
-    ergoNetworkFeeDifference = differencePercent(
-      currentErgoNetworkFee,
-      newErgoNetworkFee
-    );
-  }
-
-  // to-Cardano fee difference
-  let cardanoNetworkFeeDifference: bigint | undefined;
-  if (chains.includes(CARDANO)) {
-    const currentCardanoNetworkFee = currentConfig.configs[CARDANO].networkFee;
-    const newCardanoNetworkFee = newConfig.configs[CARDANO].networkFee;
-
-    cardanoNetworkFeeDifference = differencePercent(
-      currentCardanoNetworkFee,
-      newCardanoNetworkFee
-    );
-  }
-
-  // to-Bitcoin fee difference
-  let bitcoinNetworkFeeDifference: bigint | undefined;
-  if (chains.includes(BITCOIN)) {
-    const currentBitcoinNetworkFee = currentConfig.configs[BITCOIN].networkFee;
-    const newBitcoinNetworkFee = newConfig.configs[BITCOIN].networkFee;
-
-    bitcoinNetworkFeeDifference = differencePercent(
-      currentBitcoinNetworkFee,
-      newBitcoinNetworkFee
-    );
-  }
-
-  // to-Ethereum fee difference
-  let ethereumNetworkFeeDifference: bigint | undefined;
-  if (chains.includes(ETHEREUM)) {
-    const currentEthereumNetworkFee =
-      currentConfig.configs[ETHEREUM].networkFee;
-    const newEthereumNetworkFee = newConfig.configs[ETHEREUM].networkFee;
-
-    ethereumNetworkFeeDifference = differencePercent(
-      currentEthereumNetworkFee,
-      newEthereumNetworkFee
-    );
-  }
-
-  // to-Binance fee difference
-  let binanceNetworkFeeDifference: bigint | undefined;
-  if (chains.includes(BINANCE)) {
-    const currentBinanceNetworkFee = currentConfig.configs[BINANCE].networkFee;
-    const newBinanceNetworkFee = newConfig.configs[BINANCE].networkFee;
-
-    binanceNetworkFeeDifference = differencePercent(
-      currentBinanceNetworkFee,
-      newBinanceNetworkFee
-    );
-  }
+      networkFeeDifference = differencePercent(
+        currentNetworkFee,
+        newNetworkFee
+      );
+    }
+    networkFeeDifferences[chain] = networkFeeDifference;
+  });
 
   return {
     bridgeFee: bridgeFeeDifference,
     rsnRatio: rsnRatioDifference,
-    ergoNetworkFee: ergoNetworkFeeDifference,
-    cardanoNetworkFee: cardanoNetworkFeeDifference,
-    bitcoinNetworkFee: bitcoinNetworkFeeDifference,
-    ethereumNetworkFee: ethereumNetworkFeeDifference,
-    binanceNetworkFee: binanceNetworkFeeDifference,
+    networkFee: networkFeeDifferences,
   };
 };
 
-export const differencePercent = (a: bigint, b: bigint): bigint => {
+export const differencePercent = (a: bigint, b: bigint): DifferencePercent => {
+  let direction: Direction;
+  if (a < b) direction = Direction.UP;
+  else if (a === b) direction = Direction.NONE;
+  else direction = Direction.DOWN;
+
   const diff = a < b ? b - a : a - b;
-  return (diff * 100n) / a;
+  return {
+    value: (diff * 100n) / a,
+    direction: direction,
+  };
 };
 
 export const pricesToStringChunk = (
   prices: Map<string, number>,
-  bridgeFeeDifferences: Map<string, bigint | undefined>
+  feeDifferences: Map<string, FeeDifferencePercents | undefined>
 ) => {
-  const result: Array<string> = [];
+  // generate table headers
+  const headers = [
+    'Name',
+    'Price',
+    'Bridge Fee',
+    'Rsn Ratio',
+    ...SUPPORTED_CHAINS.map(
+      (chain) => chain.charAt(0).toUpperCase() + chain.slice(1)
+    ),
+  ].map((header) => ({ value: header, color: AnsiColor.RESET }));
+
+  // generate token data
+  const tableData: TableData = [];
   prices.forEach((value, key) => {
     const token = minimumFeeConfigs.supportedTokens.find(
       (token) => token.tokenId === key
     )!;
-    const bridgeFeeDifference = bridgeFeeDifferences.get(key)!;
-    const differenceText =
-      bridgeFeeDifference != undefined
-        ? ` (${bridgeFeeDifference}% change)`
-        : '';
-    result.push(`${token.name} => ${value}$${differenceText}`);
+    const feeDifference = feeDifferences.get(key);
+    if (!feeDifference)
+      throw Error(
+        `ImpossibleBehavior: no fee difference for token [${token.name}] with id [${key}]`
+      );
+
+    const bridgeFeeDifference = conditionalColorize(
+      feeDifference.bridgeFee,
+      bridgeFeeTriggerPercent
+    );
+    const rsnRatioDifference = conditionalColorize(
+      feeDifference.rsnRatio,
+      rsnRatioTriggerPercent
+    );
+    const networkFeeDifferences = SUPPORTED_CHAINS.map((chain) => {
+      const networkFeeDifference = conditionalColorize(
+        feeDifference.networkFee[chain],
+        networkFeeTriggerPercent[chain]
+      );
+      return {
+        chain,
+        difference: networkFeeDifference,
+      };
+    });
+
+    tableData.push([
+      { value: token.name, color: AnsiColor.RESET },
+      { value: value.toString(), color: AnsiColor.BLUE },
+      bridgeFeeDifference,
+      rsnRatioDifference,
+      ...networkFeeDifferences.map(
+        (networkFeeDifference) => networkFeeDifference.difference
+      ),
+    ]);
   });
-  // return result.join('\n');
-  return chunk(result, 30).map((priceChunk) => priceChunk.join('\n'));
+  const result = chunk(tableData, TABLE_CHUNK_SIZE).map((priceChunk) =>
+    generateAsciiTable([headers, ...priceChunk])
+  );
+  if (result.some((chunkString) => chunkString.length > 2000))
+    throw Error(
+      `Table string passed 2000 character limitation! Please reduce chunk size. Current chunk: ${TABLE_CHUNK_SIZE}`
+    );
+
+  return result;
+};
+
+const colorizeText = (text: string, color: AnsiColor) => {
+  if (color === AnsiColor.RESET) return text;
+  return `[2;${color}m${text}[0m`;
+};
+
+const conditionalColorize = (
+  feeDifference: DifferencePercent | undefined,
+  threshold: number
+) => {
+  if (feeDifference === undefined)
+    return { value: '-', color: AnsiColor.RESET };
+
+  const value = Number(feeDifference.value);
+
+  const finalText =
+    feeDifference.direction + feeDifference.value.toString() + '%';
+  if (value < threshold) return { value: finalText, color: AnsiColor.GREEN };
+  else if (value >= threshold && value < 2 * threshold)
+    return { value: finalText, color: AnsiColor.YELLOW };
+  return { value: finalText, color: AnsiColor.RED };
+};
+
+/**
+ * Generate an ASCII table from a 2D array.
+ * @param data - The 2D array of rows.
+ * @returns A formatted ASCII table as a string.
+ */
+const generateAsciiTable = (data: TableData): string => {
+  if (data.length === 0) return '';
+
+  const colWidths = data[0].map((_, colIndex) =>
+    Math.max(...data.map((row) => row[colIndex].value.length))
+  );
+
+  const horizontalLine = (
+    char: string,
+    cornerLeft: string,
+    cornerRight: string,
+    separator: string
+  ) =>
+    cornerLeft +
+    colWidths.map((w) => char.repeat(w + 2)).join(separator) +
+    cornerRight;
+
+  const formatRow = (row: TableRow) =>
+    '| ' +
+    row
+      .map((cell, i) =>
+        colorizeText(cell.value.padEnd(colWidths[i], ' '), cell.color)
+      )
+      .join(' | ') +
+    ' |';
+
+  const topBorder = horizontalLine('─', '┌', '┐', '┬');
+  const midBorder = horizontalLine('─', '├', '┤', '┼');
+  const bottomBorder = horizontalLine('─', '└', '┘', '┴');
+
+  const header = formatRow(data[0]);
+  const body = data.slice(1).map(formatRow).join('\n');
+
+  return [topBorder, header, midBorder, body, bottomBorder].join('\n');
 };
