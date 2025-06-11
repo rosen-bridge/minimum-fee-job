@@ -1,5 +1,6 @@
 import {
   ErgoNetworkType,
+  Fee,
   MinimumFeeBox,
   MinimumFeeBoxBuilder,
   MinimumFeeConfig,
@@ -17,6 +18,7 @@ import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { SUPPORTED_CHAINS } from '../utils/consts';
 import { Chains, FeeDifferencePercents, UpdatedFeeConfig } from '../types';
 import JsonBigInt from '@rosen-bridge/json-bigint';
+import { isEqual } from 'lodash-es';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -84,7 +86,10 @@ const updateFeeConfig = async (
     );
 
     // check any chain is added or removed
-    const isChainAddedOrRemoved = false; // TODO: implement (local:ergo/rosen-bridge/minimum-fee-job#12)
+    const isChainAddedOrRemoved = !isEqual(
+      getConfigActiveChains(builder.getConfigs()),
+      getConfigActiveChains([newFeeConfig.getConfig()])
+    );
     // check if fee difference is sufficient for update
     const isFeeDifferenceSufficient =
       differencePercent.bridgeFee.value <= bridgeFeeTriggerPercent ||
@@ -212,4 +217,24 @@ const cleanOldConfig = async (
   }
 
   return builder;
+};
+
+const getConfigActiveChains = (fees: Fee[]): string[] => {
+  const activeChains: Array<string> = [];
+  for (let i = 0; i < fees.length; i++) {
+    const chains = Object.keys(fees[i].heights);
+    chains.forEach((chain) => {
+      const feeConfig = fees[i].configs[chain];
+      if (
+        feeConfig &&
+        (feeConfig.bridgeFee !== -1n ||
+          feeConfig.networkFee !== -1n ||
+          feeConfig.rsnRatio !== -1n ||
+          feeConfig.rsnRatioDivisor !== -1n ||
+          feeConfig.feeRatio !== -1n)
+      )
+        activeChains.push(chain);
+    });
+  }
+  return activeChains.sort();
 };
