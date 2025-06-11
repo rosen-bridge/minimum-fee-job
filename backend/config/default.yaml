@@ -69,12 +69,13 @@ logs:
 triggerPercent:
   bridgeFee: 10
   rsnRatio: 10
-  bitcoinNetworkFee: 100
-  dogeNetworkFee: 100
-  cardanoNetworkFee: 30
-  ergoNetworkFee: 50
-  ethereumNetworkFee: 150
-  binanceNetworkFee: 50
+  networkFee:
+    cardano: 10
+    ergo: 10
+    bitcoin: 100
+    ethereum: 200
+    binance: 10
+    doge: 100
 discordWebHookUrl: '' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours
 kv:

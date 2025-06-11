@@ -11,6 +11,15 @@ import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { flushStore, saveTokensConfig, savePrices, saveTx } from './store';
 import { getConfigTokenPrices } from './minimum-fee/prices';
 import { chunk } from 'lodash-es';
+import { Chains, UpdatedFeeConfig } from './types';
+import {
+  getBinanceHeight,
+  getBitcoinHeight,
+  getCardanoHeight,
+  getDogeHeight,
+  getErgoHeight,
+  getEthereumHeight,
+} from './network/clients';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -22,9 +31,18 @@ const main = async () => {
   // fetch current prices
   const prices = await getConfigTokenPrices();
 
+  // fetch current network heights
+  const chainHeights = new Map<Chains, number>();
+  chainHeights.set(Chains.ERGO, await getErgoHeight());
+  chainHeights.set(Chains.CARDANO, await getCardanoHeight());
+  chainHeights.set(Chains.BITCOIN, await getBitcoinHeight());
+  chainHeights.set(Chains.ETHEREUM, await getEthereumHeight());
+  chainHeights.set(Chains.BINANCE, await getBinanceHeight());
+  chainHeights.set(Chains.DOGE, await getDogeHeight());
+
   // new config
   logger.info(`Generating new config`);
-  const newFeeConfigs = await generateNewFeeConfig(prices);
+  const newFeeConfigs = await generateNewFeeConfig(prices, chainHeights);
 
   newFeeConfigs.forEach((feeConfig, tokenId) => {
     logger.debug(
@@ -39,11 +57,14 @@ const main = async () => {
 
   // updated config
   logger.info(`Combining new config with current config`);
-  const updateResult = await updateAndGenerateFeeConfig(newFeeConfigs);
+  const updateResult = await updateAndGenerateFeeConfig(
+    newFeeConfigs,
+    chainHeights
+  );
   const updatedConfigs = updateResult.config;
-  const bridgeFeeDifferences = updateResult.bridgeFeeDifferences;
+  const feeDifferences = updateResult.feeDifferences;
 
-  updatedConfigs.forEach((updatedConfig, tokenId) => {
+  updatedConfigs.forEach((updatedConfig: UpdatedFeeConfig, tokenId: string) => {
     const feeConfig = updatedConfig.new.getConfigs();
     logger.debug(
       `Updated fee config for token [${tokenId}]: ${JsonBigInt.stringify(
@@ -78,8 +99,8 @@ const main = async () => {
     const discordNotification = Notification.getInstance();
     discordNotification.sendMessage(`# MinimumFee configs need to be updated`);
     discordNotification.sendMessage(`## Prices`);
-    pricesToStringChunk(prices, bridgeFeeDifferences).forEach((chunk) => {
-      discordNotification.sendMessage(`\`\`\`json\n${chunk}\n\`\`\``);
+    pricesToStringChunk(prices, feeDifferences).forEach((chunk) => {
+      discordNotification.sendMessage(`\`\`\`ansi\n${chunk}\n\`\`\``);
     });
     const tokenIds = Array.from(updatedConfigs.keys());
 

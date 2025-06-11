@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ErgTokenVolumes } from '../types';
-import { ERG_ID } from '../types/consts';
+import { ERG_ID } from '../utils/consts';
 import { spectrumPoolTimeLength, urls } from '../configs';
 import { SpectrumPool } from '../types/spectrum';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';

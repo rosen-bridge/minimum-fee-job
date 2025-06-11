@@ -43,23 +43,8 @@ export const logConfigs = () => {
 export const bridgeFeeTriggerPercent = config.get<number>(
   'triggerPercent.bridgeFee'
 );
-export const bitcoinNetworkFeeTriggerPercent = config.get<number>(
-  'triggerPercent.bitcoinNetworkFee'
-);
-export const cardanoNetworkFeeTriggerPercent = config.get<number>(
-  'triggerPercent.cardanoNetworkFee'
-);
-export const ergoNetworkFeeTriggerPercent = config.get<number>(
-  'triggerPercent.ergoNetworkFee'
-);
-export const ethereumNetworkFeeTriggerPercent = config.get<number>(
-  'triggerPercent.ethereumNetworkFee'
-);
-export const binanceNetworkFeeTriggerPercent = config.get<number>(
-  'triggerPercent.binanceNetworkFee'
-);
-export const dogeNetworkFeeTriggerPercent = config.get<number>(
-  'triggerPercent.dogeNetworkFee'
+export const networkFeeTriggerPercent = config.get<Record<string, number>>(
+  'triggerPercent.networkFee'
 );
 export const rsnRatioTriggerPercent = config.get<number>(
   'triggerPercent.rsnRatio'
