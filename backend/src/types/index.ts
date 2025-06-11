@@ -88,6 +88,7 @@ export interface HeightDelays {
   bitcoin: number;
   ethereum: number;
   binance: number;
+  doge: number;
 }
 
 export interface FeeParameters {
@@ -96,6 +97,7 @@ export interface FeeParameters {
   ergNetworkFee: number;
   adaNetworkFee: number;
   bitcoinConfirmation: number;
+  dogeConfirmation: number;
   feeRatioFloat: number;
   rsnRatioDivisor: number;
 }
@@ -120,6 +122,7 @@ export interface ConfigInterface {
   fetchBoxRetry: number;
   rsnRatioPrecision: number;
   bitcoinTxVSize: number;
+  dogeTxVSize: number;
   ethereumTxFee: number;
   binanceTxFee: number;
 }

@@ -1,4 +1,13 @@
-import { ADA, BNB, BTC, ERG, ETH, minimumFeeConfigs, tokens } from '../configs';
+import {
+  ADA,
+  BNB,
+  BTC,
+  DOGE,
+  ERG,
+  ETH,
+  minimumFeeConfigs,
+  tokens,
+} from '../configs';
 import { SupportedTokenConfig } from '../types';
 import {
   getBitcoinHeight,
@@ -7,6 +16,8 @@ import {
   getBitcoinFeeRatio,
   getEthereumHeight,
   getBinanceHeight,
+  getDogeHeight,
+  getDogeFeeRatio,
 } from '../network/clients';
 import {
   BINANCE,
@@ -34,6 +45,9 @@ export const generateNewFeeConfig = async (prices: Map<string, number>) => {
   logger.debug(`Fetching bitcoin fee ratio`);
   const bitcoinFeeRatioMap = await getBitcoinFeeRatio();
 
+  logger.debug(`Fetching doge fee ratio`);
+  const dogeFeeRatio = await getDogeFeeRatio();
+
   for (const token of minimumFeeConfigs.supportedTokens) {
     logger.debug(`Generating new config for token [${token.name}]`);
 
@@ -44,7 +58,8 @@ export const generateNewFeeConfig = async (prices: Map<string, number>) => {
       rsnTokenConfig.decimals,
       token.decimals,
       token.fee,
-      bitcoinFeeRatioMap
+      bitcoinFeeRatioMap,
+      dogeFeeRatio
     );
     newFeeConfigs.set(token.tokenId, feeConfig);
   }
@@ -58,7 +73,8 @@ export const feeConfigFromPrice = async (
   rsnDecimal: number,
   tokenDecimal: number,
   configs: SupportedTokenConfig['fee'],
-  bitcoinFeeRatioMap: Record<string, number>
+  bitcoinFeeRatioMap: Record<string, number>,
+  dogeFeeRatio: number
 ): Promise<MinimumFeeConfig> => {
   const tokenPrice = prices.get(tokenId);
   if (tokenPrice == undefined)
@@ -233,6 +249,28 @@ export const feeConfigFromPrice = async (
     newFeeConfig.setChainConfig(BINANCE, binanceHeight, undefined);
   }
 
+  //  DOGE
+  const dogeHeight = (await getDogeHeight()) + configs.delays.doge;
+  if (chains.includes(DOGE)) {
+    const dogeNetworkFee = getDogeNetworkFee(
+      prices,
+      configs,
+      tokenPrice,
+      tokenDecimal,
+      dogeFeeRatio
+    );
+    const dogeFee: ChainFee = {
+      bridgeFee: bridgeFee,
+      networkFee: dogeNetworkFee,
+      rsnRatio: rsnRatio,
+      feeRatio: feeRatio,
+      rsnRatioDivisor,
+    };
+    newFeeConfig.setChainConfig(DOGE, dogeHeight, dogeFee);
+  } else {
+    newFeeConfig.setChainConfig(DOGE, dogeHeight, undefined);
+  }
+
   return newFeeConfig;
 };
 
@@ -325,6 +363,28 @@ const getBinanceNetworkFee = (
     Math.ceil(
       (minimumFeeConfigs.binanceTxFee * bnbPrice * 10 ** tokenDecimal) /
         tokenPrice
+    )
+  );
+};
+
+const getDogeNetworkFee = (
+  prices: Map<string, number>,
+  configs: SupportedTokenConfig['fee'],
+  tokenPrice: number,
+  tokenDecimal: number,
+  dogeFeeRatio: number
+) => {
+  const dogePrice = prices.get(DOGE);
+  if (!dogePrice) throw Error(`Doge price is required`);
+
+  // calculating network fee on Dogecoin
+  return BigInt(
+    Math.ceil(
+      (dogeFeeRatio *
+        minimumFeeConfigs.dogeTxVSize *
+        dogePrice *
+        10 ** tokenDecimal) /
+        (tokenPrice * 10 ** 8)
     )
   );
 };
