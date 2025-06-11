@@ -3,7 +3,7 @@ import { RunningInterval, minimumFeeConfigs, kvRestApiUrl } from './configs';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
 import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
-import { feeConfigToRegisterValues, pricesToStringChunk } from './utils/utils';
+import { feeConfigToRegisterValues, pricesToTables } from './utils/utils';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Notification } from './network/Notification';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
@@ -11,7 +11,7 @@ import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { flushStore, saveTokensConfig, savePrices, saveTx } from './store';
 import { getConfigTokenPrices } from './minimum-fee/prices';
 import { chunk } from 'lodash-es';
-import { Chains, UpdatedFeeConfig } from './types';
+import { Chains, DiscordPayloadType, UpdatedFeeConfig } from './types';
 import {
   getBinanceHeight,
   getBitcoinHeight,
@@ -96,12 +96,20 @@ const main = async () => {
     logger.info(`Transaction to update minimum-fee config box generated`);
 
     // send notification to discord
+    const tables = pricesToTables(prices, feeDifferences);
     const discordNotification = Notification.getInstance();
-    discordNotification.sendMessage(`# MinimumFee configs need to be updated`);
-    discordNotification.sendMessage(`## Prices`);
-    pricesToStringChunk(prices, feeDifferences).forEach((chunk) => {
-      discordNotification.sendMessage(`\`\`\`ansi\n${chunk}\n\`\`\``);
-    });
+    await discordNotification.send(
+      DiscordPayloadType.MESSAGE,
+      `# MinimumFee configs need to be updated`
+    );
+    await discordNotification.send(DiscordPayloadType.MESSAGE, `## Prices`);
+    for (const chunk of tables.brief) {
+      await discordNotification.send(
+        DiscordPayloadType.MESSAGE,
+        `\`\`\`ansi\n${chunk}\n\`\`\``
+      );
+    }
+    await discordNotification.send(DiscordPayloadType.FILE, tables.details);
     const tokenIds = Array.from(updatedConfigs.keys());
 
     if (kvRestApiUrl) {
@@ -115,10 +123,13 @@ const main = async () => {
         }),
         15
       ).map((chunk) => chunk.join('\n'));
-      discordNotification.sendMessage(`## Changed Tokens`);
-      tokenIdChunks.forEach((chunk) => {
-        discordNotification.sendMessage(chunk);
-      });
+      await discordNotification.send(
+        DiscordPayloadType.MESSAGE,
+        `## Changed Tokens`
+      );
+      for (const chunk of tokenIdChunks) {
+        await discordNotification.send(DiscordPayloadType.MESSAGE, chunk);
+      }
       await Promise.all([
         saveTokensConfig(minimumFeeConfigs.supportedTokens),
         savePrices(prices),
@@ -131,11 +142,15 @@ const main = async () => {
         const token = minimumFeeConfigs.supportedTokens.find(
           (token) => token.tokenId === tokenId
         )!;
-        discordNotification.sendMessage(`## Token ${token.name} [${token.tokenId}]
+        await discordNotification.send(
+          DiscordPayloadType.MESSAGE,
+          `## Token ${token.name} [${token.tokenId}]
           ergo side tokenId: \`${token.ergoSideTokenId}\`
-        `);
+        `
+        );
         const tokenFeeConfig = updatedConfigs.get(tokenId)!.new.getConfigs();
-        discordNotification.sendMessage(
+        await discordNotification.send(
+          DiscordPayloadType.MESSAGE,
           `\`\`\`json\n${JsonBigInt.stringify(tokenFeeConfig)}\n\`\`\``
         );
       }
@@ -143,7 +158,11 @@ const main = async () => {
       // send tx
       const n = Math.ceil(tx.length / 1500);
       const chunks = Array.from(tx.match(/.{1,1500}/g)!);
-      discordNotification.sendMessage(`generated tx. chunks: ${n}`);
+      await discordNotification.send(
+        DiscordPayloadType.MESSAGE,
+        `## Generated tx (chunks: ${n})`
+      );
+      const txChunks: string[] = [];
       for (let i = 0; i < n; i++) {
         const txChunk = JsonBigInt.stringify({
           CSR: chunks[i],
@@ -151,8 +170,13 @@ const main = async () => {
           p: i + 1,
         });
         logger.info(`chunk [${i}]: ${txChunk}`);
-
-        discordNotification.sendMessage(`\`\`\`json\n${txChunk}\n\`\`\``);
+        txChunks.push(txChunk);
+      }
+      for (const txChunk of txChunks) {
+        await discordNotification.send(
+          DiscordPayloadType.MESSAGE,
+          `\`\`\`json\n${txChunk}\n\`\`\``
+        );
         logger.info('Sent data to discord');
       }
     }
@@ -171,9 +195,9 @@ const interval = () => {
       if (e instanceof Error && e.stack) logger.debug(e.stack);
       // send alert to discord
       const discordNotification = Notification.getInstance();
-      discordNotification.sendMessage(
-        `# :warning: An error occurred at minimum-fee-job\n` +
-          `\`\`\`json\n${e}\n\`\`\``
+      discordNotification.send(
+        DiscordPayloadType.MESSAGE,
+        `# :warning: Error in Minimum Fee Job\n` + `\`\`\`json\n${e}\n\`\`\``
       );
       setTimeout(interval, RunningInterval);
     });

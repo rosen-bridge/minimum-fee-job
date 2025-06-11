@@ -168,7 +168,7 @@ export const isDifferencePercentSufficient = (
   }
 };
 
-export const pricesToStringChunk = (
+export const pricesToTables = (
   prices: Map<string, number>,
   feeDifferences: Map<string, FeeDifferencePercents | undefined>
 ) => {
@@ -181,10 +181,15 @@ export const pricesToStringChunk = (
     ...SUPPORTED_CHAINS.map(
       (chain) => chain.charAt(0).toUpperCase() + chain.slice(1)
     ),
-  ].map((header) => ({ value: header, color: AnsiColor.RESET }));
+  ].map((header) => ({ value: header, color: AnsiColor.NONE }));
+  const briefHeaders = ['Name', 'Price', 'Fee'].map((header) => ({
+    value: header,
+    color: AnsiColor.NONE,
+  }));
 
   // generate token data
-  const tableData: TableData = [];
+  const fullTableData: TableData = [];
+  const briefTableData: TableData = [];
   prices.forEach((value, key) => {
     const token = minimumFeeConfigs.supportedTokens.find(
       (token) => token.tokenId === key
@@ -214,30 +219,72 @@ export const pricesToStringChunk = (
       };
     });
 
-    tableData.push([
-      { value: token.name, color: AnsiColor.RESET },
-      { value: value.toString(), color: AnsiColor.BLUE },
-      bridgeFeeDifference,
-      rsnRatioDifference,
-      ...networkFeeDifferences.map(
-        (networkFeeDifference) => networkFeeDifference.difference
-      ),
+    fullTableData.push([
+      { value: token.name, color: AnsiColor.NONE },
+      { value: value.toString(), color: AnsiColor.NONE },
+      { value: bridgeFeeDifference.value, color: AnsiColor.NONE },
+      { value: rsnRatioDifference.value, color: AnsiColor.NONE },
+      ...networkFeeDifferences.map((networkFeeDifference) => ({
+        value: networkFeeDifference.difference.value,
+        color: AnsiColor.NONE,
+      })),
+    ]);
+
+    const briefNetworkFee =
+      colorizeText(
+        bridgeFeeDifference.value.charAt(0),
+        bridgeFeeDifference.color,
+        false
+      ) +
+      colorizeText(
+        rsnRatioDifference.value.charAt(0),
+        rsnRatioDifference.color,
+        false
+      ) +
+      networkFeeDifferences
+        .map((networkFeeDifference) =>
+          colorizeText(
+            networkFeeDifference.difference.value.charAt(0),
+            networkFeeDifference.difference.color,
+            false
+          )
+        )
+        .join('');
+
+    briefTableData.push([
+      { value: token.name, color: AnsiColor.NONE },
+      { value: value.toString(), color: AnsiColor.YELLOW },
+      {
+        value: appendResetColor(briefNetworkFee),
+        color: AnsiColor.NONE,
+        asciiLen: 2 + networkFeeDifferences.length,
+      },
     ]);
   });
-  const result = chunk(tableData, TABLE_CHUNK_SIZE).map((priceChunk) =>
-    generateAsciiTable([headers, ...priceChunk])
+  const fullTable = generateAsciiTable([headers, ...fullTableData]);
+  const brief = chunk(briefTableData, TABLE_CHUNK_SIZE).map((priceChunk) =>
+    generateAsciiTable([briefHeaders, ...priceChunk])
   );
-  if (result.some((chunkString) => chunkString.length > 2000))
+  if (brief.some((chunkString) => chunkString.length > 2000))
     throw Error(
-      `Table string passed 2000 character limitation! Please reduce chunk size. Current chunk: ${TABLE_CHUNK_SIZE}`
+      `Table string passed 2000 character limitation (${Math.max(
+        ...brief.map((chunkString) => chunkString.length)
+      )} > 2000)! Please reduce chunk size. Current chunk: ${TABLE_CHUNK_SIZE}`
     );
 
-  return result;
+  return {
+    brief: brief,
+    details: fullTable,
+  };
 };
 
-const colorizeText = (text: string, color: AnsiColor) => {
-  if (color === AnsiColor.RESET) return text;
-  return `[2;${color}m${text}[0m`;
+const appendResetColor = (text: string) => text + `[0m`;
+
+const colorizeText = (text: string, color: AnsiColor, resetColor = true) => {
+  if (color === AnsiColor.NONE) return text;
+  const result = `[2;${color}m${text}`;
+  if (resetColor) return appendResetColor(result);
+  return result;
 };
 
 const conditionalColorize = (
@@ -257,12 +304,12 @@ const conditionalColorize = (
     if (reversedValue < threshold)
       return { value: finalText, color: AnsiColor.GREEN };
     else if (reversedValue >= threshold && value < 2 * threshold)
-      return { value: finalText, color: AnsiColor.YELLOW };
+      return { value: finalText, color: AnsiColor.BLUE };
     return { value: finalText, color: AnsiColor.RED };
   } else {
     if (value < threshold) return { value: finalText, color: AnsiColor.GREEN };
     else if (value >= threshold && value < 2 * threshold)
-      return { value: finalText, color: AnsiColor.YELLOW };
+      return { value: finalText, color: AnsiColor.BLUE };
     return { value: finalText, color: AnsiColor.RED };
   }
 };
@@ -276,7 +323,13 @@ const generateAsciiTable = (data: TableData): string => {
   if (data.length === 0) return '';
 
   const colWidths = data[0].map((_, colIndex) =>
-    Math.max(...data.map((row) => row[colIndex].value.length))
+    Math.max(
+      ...data.map((row) =>
+        row[colIndex].asciiLen !== undefined
+          ? row[colIndex].asciiLen!
+          : row[colIndex].value.length
+      )
+    )
   );
 
   const horizontalLine = (

@@ -1,6 +1,7 @@
 import { WebhookClient } from 'discord.js';
 import { discordWebHookUrl } from '../configs';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { DiscordPayloadType } from '../types';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -36,27 +37,43 @@ export class Notification {
    * sends a message to notification service using webhook
    * @param msg
    */
-  sendMessage = async (msg: string): Promise<void> => {
+  send = async (type: DiscordPayloadType, payload: string): Promise<void> => {
     if (this.hookClient) {
-      this.hookClient
-        .send({
-          content: msg,
-        })
-        .then(() => {
-          logger.info(`Notification has been sent using discord webhook`);
-        })
-        .catch((e) => {
-          logger.warn(
-            `An error occurred while sending message to discord webhook: ${e}`
-          );
-          logger.warn(e.stack);
-        });
+      const sendFunction =
+        type === DiscordPayloadType.MESSAGE ? this.sendMessage : this.sendFile;
+      try {
+        await sendFunction(payload);
+        logger.info(`Payload [${type}] has been sent using discord webhook`);
+      } catch (e) {
+        logger.warn(
+          `An error occurred while sending message to discord webhook: ${e}`
+        );
+        if (e instanceof Error && e.stack) logger.warn(e.stack);
+      }
     } else {
       logger.info(`WebhookClient instance doesn't exist`);
       logger.debug(
-        `Method sendMessage called for send notification with msg ${msg}`
+        `Method sendMessage called for send notification with msg ${payload}`
       );
     }
+  };
+
+  /**
+   * sends a message to notification service using webhook
+   * @param msg
+   */
+  protected sendMessage = async (msg: string) => {
+    return this.hookClient!.send({ content: msg });
+  };
+
+  /**
+   * sends a file to notification service using webhook
+   * @param msg
+   */
+  protected sendFile = async (fileContent: string) => {
+    return this.hookClient!.send({
+      files: [{ attachment: Buffer.from(fileContent), name: 'details.md' }],
+    });
   };
 }
 
