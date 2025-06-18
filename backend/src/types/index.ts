@@ -157,11 +157,18 @@ export enum AnsiColor {
   YELLOW = '33',
   BLUE = '34',
   RESET = '0',
+  NONE = '-1',
 }
 
 export interface TableRecord {
   value: string;
   color: AnsiColor;
+  asciiLen?: number;
 }
 export type TableRow = TableRecord[];
 export type TableData = TableRow[];
+
+export enum DiscordPayloadType {
+  MESSAGE = 'message',
+  FILE = 'file',
+}
