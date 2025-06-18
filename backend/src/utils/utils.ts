@@ -136,17 +136,36 @@ export const getConfigDifferencePercent = (
   };
 };
 
-export const differencePercent = (a: bigint, b: bigint): DifferencePercent => {
+const differencePercent = (a: bigint, b: bigint): DifferencePercent => {
+  const diff = a < b ? b - a : a - b;
+  const changePercent = (diff * 100n) / a;
+
   let direction: Direction;
-  if (a < b) direction = Direction.UP;
-  else if (a === b) direction = Direction.NONE;
+  if (changePercent === 0n) direction = Direction.NONE;
+  else if (a < b) direction = Direction.UP;
   else direction = Direction.DOWN;
 
-  const diff = a < b ? b - a : a - b;
   return {
-    value: (diff * 100n) / a,
+    value: changePercent,
     direction: direction,
   };
+};
+
+const reversePercentage = (percentage: number): number => {
+  const result = 10000 / (100 - percentage) - 100;
+  return result;
+};
+
+export const isDifferencePercentSufficient = (
+  changePercent: number,
+  thresholdPercent: number,
+  direction: Direction
+): boolean => {
+  if (direction === Direction.DOWN) {
+    return reversePercentage(changePercent) > thresholdPercent;
+  } else {
+    return changePercent > thresholdPercent;
+  }
 };
 
 export const pricesToStringChunk = (
@@ -232,10 +251,20 @@ const conditionalColorize = (
 
   const finalText =
     feeDifference.direction + feeDifference.value.toString() + '%';
-  if (value < threshold) return { value: finalText, color: AnsiColor.GREEN };
-  else if (value >= threshold && value < 2 * threshold)
-    return { value: finalText, color: AnsiColor.YELLOW };
-  return { value: finalText, color: AnsiColor.RED };
+
+  if (feeDifference.direction === Direction.DOWN) {
+    const reversedValue = reversePercentage(value);
+    if (reversedValue < threshold)
+      return { value: finalText, color: AnsiColor.GREEN };
+    else if (reversedValue >= threshold && value < 2 * threshold)
+      return { value: finalText, color: AnsiColor.YELLOW };
+    return { value: finalText, color: AnsiColor.RED };
+  } else {
+    if (value < threshold) return { value: finalText, color: AnsiColor.GREEN };
+    else if (value >= threshold && value < 2 * threshold)
+      return { value: finalText, color: AnsiColor.YELLOW };
+    return { value: finalText, color: AnsiColor.RED };
+  }
 };
 
 /**

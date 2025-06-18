@@ -13,7 +13,10 @@ import {
   rsnRatioTriggerPercent,
   urls,
 } from '../configs';
-import { getConfigDifferencePercent } from '../utils/utils';
+import {
+  getConfigDifferencePercent,
+  isDifferencePercentSufficient,
+} from '../utils/utils';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { SUPPORTED_CHAINS } from '../utils/consts';
 import { Chains, FeeDifferencePercents, UpdatedFeeConfig } from '../types';
@@ -92,13 +95,24 @@ const updateFeeConfig = async (
     );
     // check if fee difference is sufficient for update
     const isFeeDifferenceSufficient =
-      differencePercent.bridgeFee.value <= bridgeFeeTriggerPercent ||
-      differencePercent.rsnRatio.value <= rsnRatioTriggerPercent ||
+      isDifferencePercentSufficient(
+        Number(differencePercent.bridgeFee.value),
+        bridgeFeeTriggerPercent,
+        differencePercent.bridgeFee.direction
+      ) ||
+      isDifferencePercentSufficient(
+        Number(differencePercent.rsnRatio.value),
+        rsnRatioTriggerPercent,
+        differencePercent.rsnRatio.direction
+      ) ||
       SUPPORTED_CHAINS.some(
         (chain) =>
           differencePercent.networkFee[chain] !== undefined &&
-          differencePercent.networkFee[chain]!.value <=
-            networkFeeTriggerPercent[chain]!
+          isDifferencePercentSufficient(
+            Number(differencePercent.networkFee[chain]!.value),
+            networkFeeTriggerPercent[chain]!,
+            differencePercent.networkFee[chain]!.direction
+          )
       );
 
     if (!isChainAddedOrRemoved && !isFeeDifferenceSufficient) {
