@@ -88,9 +88,9 @@ const threshold = async () => {
       tokens: {},
     };
   });
-  for (const item of tokens.tokens) {
+  for (const item of tokens) {
     const nativeChain = chains.filter(
-      (chain) => item[chain] && item[chain].metaData.residency === 'native'
+      (chain) => item[chain] && item[chain].residency === 'native'
     );
     if (nativeChain.length > 0) {
       const price = prices.get(item[nativeChain[0]].tokenId);
