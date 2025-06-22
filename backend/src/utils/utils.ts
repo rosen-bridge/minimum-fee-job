@@ -195,22 +195,18 @@ export const pricesToTables = (
       (token) => token.tokenId === key
     )!;
     const feeDifference = feeDifferences.get(key);
-    if (!feeDifference)
-      throw Error(
-        `ImpossibleBehavior: no fee difference for token [${token.name}] with id [${key}]`
-      );
 
     const bridgeFeeDifference = conditionalColorize(
-      feeDifference.bridgeFee,
+      feeDifference?.bridgeFee,
       bridgeFeeTriggerPercent
     );
     const rsnRatioDifference = conditionalColorize(
-      feeDifference.rsnRatio,
+      feeDifference?.rsnRatio,
       rsnRatioTriggerPercent
     );
     const networkFeeDifferences = SUPPORTED_CHAINS.map((chain) => {
       const networkFeeDifference = conditionalColorize(
-        feeDifference.networkFee[chain],
+        feeDifference?.networkFee[chain],
         networkFeeTriggerPercent[chain]
       );
       return {

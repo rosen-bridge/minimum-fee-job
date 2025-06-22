@@ -89,9 +89,11 @@ const updateFeeConfig = async (
     );
 
     // check any chain is added or removed
+    const currentActiveChains = getConfigActiveChains(builder.getConfigs());
+    const newActiveChains = getConfigActiveChains([newFeeConfig.getConfig()]);
     const isChainAddedOrRemoved = !isEqual(
-      getConfigActiveChains(builder.getConfigs()),
-      getConfigActiveChains([newFeeConfig.getConfig()])
+      currentActiveChains,
+      newActiveChains
     );
     // check if fee difference is sufficient for update
     const isFeeDifferenceSufficient =
@@ -115,6 +117,9 @@ const updateFeeConfig = async (
           )
       );
 
+    logger.debug(
+      `trigger condition for token [${tokenId}]: [chainAddedOrRemoved: ${isChainAddedOrRemoved}] [feeDifferenceSufficient: ${isFeeDifferenceSufficient}]`
+    );
     if (!isChainAddedOrRemoved && !isFeeDifferenceSufficient) {
       logger.debug(
         `token [${tokenId}] config difference is not sufficient for update`
@@ -126,9 +131,18 @@ const updateFeeConfig = async (
         },
         differencePercent: differencePercent,
       };
-    } else {
+    }
+
+    if (isChainAddedOrRemoved) {
       logger.debug(
-        `trigger condition for token [${tokenId}]: ${JsonBigInt.stringify([
+        `chain differences for token [${tokenId}]: ${JsonBigInt.stringify([
+          [currentActiveChains, newActiveChains],
+        ])}`
+      );
+    }
+    if (isFeeDifferenceSufficient) {
+      logger.debug(
+        `fee differences for token [${tokenId}]: ${JsonBigInt.stringify([
           [differencePercent.bridgeFee, bridgeFeeTriggerPercent],
           [differencePercent.rsnRatio, rsnRatioTriggerPercent],
           ...SUPPORTED_CHAINS.map((chain) => [
@@ -137,16 +151,16 @@ const updateFeeConfig = async (
           ]),
         ])}`
       );
-      // add new config
-      builder.addConfig(newFeeConfig).prune();
-      return {
-        config: {
-          current: tokenMinimumFeeBox,
-          new: builder,
-        },
-        differencePercent: differencePercent,
-      };
     }
+    // add new config
+    builder.addConfig(newFeeConfig).prune();
+    return {
+      config: {
+        current: tokenMinimumFeeBox,
+        new: builder,
+      },
+      differencePercent: differencePercent,
+    };
   } else {
     logger.debug(
       `No config found for token [${tokenId}]. Generating config with only the new one...`
