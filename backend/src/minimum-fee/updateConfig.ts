@@ -248,7 +248,7 @@ const cleanOldConfig = async (
 };
 
 const getConfigActiveChains = (fees: Fee[]): string[] => {
-  const activeChains: Array<string> = [];
+  const activeChains: Set<string> = new Set();
   for (let i = 0; i < fees.length; i++) {
     const chains = Object.keys(fees[i].heights);
     chains.forEach((chain) => {
@@ -261,8 +261,8 @@ const getConfigActiveChains = (fees: Fee[]): string[] => {
           feeConfig.rsnRatioDivisor !== -1n ||
           feeConfig.feeRatio !== -1n)
       )
-        activeChains.push(chain);
+        activeChains.add(chain);
     });
   }
-  return activeChains.sort();
+  return Array.from(activeChains.values()).sort();
 };
