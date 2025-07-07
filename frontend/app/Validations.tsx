@@ -120,7 +120,7 @@ const Validations = async () => {
 
   return (
     <>
-      <TableContainer>
+      <TableContainer className="max-h-[80vh] [clip-path:inset(0_round_1rem)]">
         <Table>
           {renderTableHead()}
           {renderTableBody()}
