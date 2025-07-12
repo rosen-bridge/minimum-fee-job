@@ -2,7 +2,7 @@ import fs from 'fs';
 import config from 'config';
 import { ConfigInterface, FeeParameters, SupportedTokenConfig } from '../types';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
-import { RosenTokens } from '@rosen-bridge/tokens';
+import { RosenTokens, TokenMap } from '@rosen-bridge/tokens';
 
 export const logConfigs = () => {
   const logs = config.get<TransportOptions[]>('logs');
@@ -130,3 +130,5 @@ export const tokens = (): RosenTokens => {
     return JSON.parse(configJson).tokens;
   }
 };
+
+export const tokenMap = new TokenMap();
