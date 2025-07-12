@@ -138,7 +138,9 @@ export interface ConfigInterface {
   fetchBoxRetry: number;
   rsnRatioPrecision: number;
   bitcoinTxVSize: number;
-  dogeTxVSize: number;
+  bitcoinMinUtxo: number;
+  dogeTxSize: number;
+  dogeMinUtxo: number;
   ethereumTxFee: number;
   binanceTxFee: number;
 }

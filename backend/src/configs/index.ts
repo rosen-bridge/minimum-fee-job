@@ -102,7 +102,9 @@ export const minimumFeeConfigs: ConfigInterface = {
   fetchBoxRetry: config.get<number>('minimumFee.fetchBoxRetry') ?? 3,
   rsnRatioPrecision: config.get<number>('minimumFee.rsnRatioPrecision') ?? 6,
   bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
-  dogeTxVSize: config.get<number>('minimumFee.dogeTxVSize') ?? 200,
+  bitcoinMinUtxo: config.get<number>('minimumFee.bitcoinMinUtxo') ?? 0.00000546,
+  dogeTxSize: config.get<number>('minimumFee.dogeTxSize') ?? 226,
+  dogeMinUtxo: config.get<number>('minimumFee.dogeMinUtxo') ?? 0.01,
   ethereumTxFee: config.get<number>('minimumFee.ethereumTxFee') ?? 0.001,
   binanceTxFee: config.get<number>('minimumFee.binanceTxFee') ?? 0.0001,
 };

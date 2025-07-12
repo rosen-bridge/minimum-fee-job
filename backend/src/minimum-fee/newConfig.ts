@@ -322,13 +322,12 @@ const getBitcoinNetworkFee = (
 
   // calculating network fee on Bitcoin
   const bitcoinFeeRatio = bitcoinFeeRatioMap[configs.bitcoinConfirmation];
+  const bitcoinValue =
+    bitcoinFeeRatio * minimumFeeConfigs.bitcoinTxVSize +
+    minimumFeeConfigs.bitcoinMinUtxo * 10 ** 8;
   return BigInt(
     Math.ceil(
-      (bitcoinFeeRatio *
-        minimumFeeConfigs.bitcoinTxVSize *
-        btcPrice *
-        10 ** tokenDecimal) /
-        (tokenPrice * 10 ** 8)
+      (bitcoinValue * btcPrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8)
     )
   );
 };
@@ -380,13 +379,12 @@ const getDogeNetworkFee = (
   if (!dogePrice) throw Error(`Doge price is required`);
 
   // calculating network fee on Dogecoin
+  const dogeValue =
+    dogeFeeRatio * minimumFeeConfigs.dogeTxSize +
+    minimumFeeConfigs.dogeMinUtxo * 10 ** 6;
   return BigInt(
     Math.ceil(
-      (dogeFeeRatio *
-        minimumFeeConfigs.dogeTxVSize *
-        dogePrice *
-        10 ** tokenDecimal) /
-        (tokenPrice * 10 ** 8)
+      (dogeValue * dogePrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 6) // Doge significant decimal is 6
     )
   );
 };
