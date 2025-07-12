@@ -19,7 +19,9 @@ minimumFee:
   fetchBoxRetry: 3
   rsnRatioPrecision: 6
   bitcoinTxVSize: 150
-  dogeTxVSize: 200
+  bitcoinMinUtxo: 0.00000546
+  dogeTxSize: 226
+  dogeMinUtxo: 0.01
   ethereumTxFee: 0.001
   binanceTxFee: 0.0001
   defaultFee:
@@ -33,6 +35,8 @@ minimumFee:
     bridgeFeeUSD: 10
     ergNetworkFee: 0.0013
     adaNetworkFee: 3.4
+    bitcoinNetworkFee: 0.0000546
+    dogeNetworkFee: 0.01
     feeRatioFloat: 0.005
     bitcoinConfirmation: 6
     dogeConfirmation: 10

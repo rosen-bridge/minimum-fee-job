@@ -2,7 +2,7 @@ import fs from 'fs';
 import config from 'config';
 import { ConfigInterface, FeeParameters, SupportedTokenConfig } from '../types';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
-import { RosenTokens } from '@rosen-bridge/tokens';
+import { RosenTokens, TokenMap } from '@rosen-bridge/tokens';
 
 export const logConfigs = () => {
   const logs = config.get<TransportOptions[]>('logs');
@@ -102,7 +102,9 @@ export const minimumFeeConfigs: ConfigInterface = {
   fetchBoxRetry: config.get<number>('minimumFee.fetchBoxRetry') ?? 3,
   rsnRatioPrecision: config.get<number>('minimumFee.rsnRatioPrecision') ?? 6,
   bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
-  dogeTxVSize: config.get<number>('minimumFee.dogeTxVSize') ?? 200,
+  bitcoinMinUtxo: config.get<number>('minimumFee.bitcoinMinUtxo') ?? 0.00000546,
+  dogeTxSize: config.get<number>('minimumFee.dogeTxSize') ?? 226,
+  dogeMinUtxo: config.get<number>('minimumFee.dogeMinUtxo') ?? 0.01,
   ethereumTxFee: config.get<number>('minimumFee.ethereumTxFee') ?? 0.001,
   binanceTxFee: config.get<number>('minimumFee.binanceTxFee') ?? 0.0001,
 };
@@ -128,3 +130,5 @@ export const tokens = (): RosenTokens => {
     return JSON.parse(configJson).tokens;
   }
 };
+
+export const tokenMap = new TokenMap();
