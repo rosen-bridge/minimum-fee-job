@@ -92,6 +92,7 @@ const main = async () => {
       logger.info('Flushed store');
     }
   } else {
+    const currentDate = new Date().toISOString().split('T')[0];
     // transaction
     logger.info(
       `updating config for tokens [${Array.from(updatedConfigs.keys())}]`
@@ -115,7 +116,9 @@ const main = async () => {
         `\`\`\`ansi\n${chunk}\n\`\`\``
       );
     }
-    await discordNotification.send(DiscordPayloadType.FILE, tables.details);
+    await discordNotification.send(DiscordPayloadType.FILE, tables.details, {
+      filename: `prices.${currentDate}.md`,
+    });
     const tokenIds = Array.from(updatedConfigs.keys());
 
     if (kvRestApiUrl) {
@@ -151,13 +154,14 @@ const main = async () => {
         await discordNotification.send(
           DiscordPayloadType.MESSAGE,
           `## Token ${token.name} [${token.tokenId}]
-          ergo side tokenId: \`${token.ergoSideTokenId}\`
+          Ergo side tokenId: \`${token.ergoSideTokenId}\`
         `
         );
         const tokenFeeConfig = updatedConfigs.get(tokenId)!.new.getConfigs();
         await discordNotification.send(
-          DiscordPayloadType.MESSAGE,
-          `\`\`\`json\n${JsonBigInt.stringify(tokenFeeConfig)}\n\`\`\``
+          DiscordPayloadType.FILE,
+          JsonBigInt.stringify(tokenFeeConfig, null, 2),
+          { filename: `${token.name}.${currentDate}.json` }
         );
       }
 

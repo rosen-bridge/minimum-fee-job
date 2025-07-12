@@ -36,13 +36,18 @@ export class Notification {
   /**
    * sends a message to notification service using webhook
    * @param msg
+   * @param options
    */
-  send = async (type: DiscordPayloadType, payload: string): Promise<void> => {
+  send = async (
+    type: DiscordPayloadType,
+    payload: string,
+    options?: { filename?: string }
+  ): Promise<void> => {
     if (this.hookClient) {
       const sendFunction =
         type === DiscordPayloadType.MESSAGE ? this.sendMessage : this.sendFile;
       try {
-        await sendFunction(payload);
+        await sendFunction(payload, options?.filename);
         logger.info(`Payload [${type}] has been sent using discord webhook`);
       } catch (e) {
         logger.warn(
@@ -69,10 +74,11 @@ export class Notification {
   /**
    * sends a file to notification service using webhook
    * @param msg
+   * @param filename
    */
-  protected sendFile = async (fileContent: string) => {
+  protected sendFile = async (fileContent: string, filename = 'details.md') => {
     return this.hookClient!.send({
-      files: [{ attachment: Buffer.from(fileContent), name: 'details.md' }],
+      files: [{ attachment: Buffer.from(fileContent), name: filename }],
     });
   };
 }
