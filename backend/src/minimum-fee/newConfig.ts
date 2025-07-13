@@ -6,7 +6,6 @@ import {
   ERG,
   ETH,
   minimumFeeConfigs,
-  tokenMap,
   tokens,
 } from '../configs';
 import { Chains, SupportedTokenConfig } from '../types';
@@ -321,19 +320,14 @@ const getBitcoinNetworkFee = (
   const btcPrice = prices.get(BTC);
   if (!btcPrice) throw Error(`Btc price is required`);
 
-  const btcSignificantDecimal = tokenMap.getSignificantDecimals(BTC);
-  if (!btcSignificantDecimal)
-    throw Error(`BTC significant decimal is required`);
-
   // calculating network fee on Bitcoin
   const bitcoinFeeRatio = bitcoinFeeRatioMap[configs.bitcoinConfirmation];
   const bitcoinValue =
     bitcoinFeeRatio * minimumFeeConfigs.bitcoinTxVSize +
-    minimumFeeConfigs.bitcoinMinUtxo * 10 ** btcSignificantDecimal;
+    minimumFeeConfigs.bitcoinMinUtxo * 10 ** 8;
   return BigInt(
     Math.ceil(
-      (bitcoinValue * btcPrice * 10 ** tokenDecimal) /
-        (tokenPrice * 10 ** btcSignificantDecimal)
+      (bitcoinValue * btcPrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8)
     )
   );
 };
@@ -384,18 +378,13 @@ const getDogeNetworkFee = (
   const dogePrice = prices.get(DOGE);
   if (!dogePrice) throw Error(`Doge price is required`);
 
-  const dogeSignificantDecimal = tokenMap.getSignificantDecimals(DOGE);
-  if (!dogeSignificantDecimal)
-    throw Error(`Doge significant decimal is required`);
-
   // calculating network fee on Dogecoin
   const dogeValue =
     dogeFeeRatio * minimumFeeConfigs.dogeTxSize +
-    minimumFeeConfigs.dogeMinUtxo * 10 ** dogeSignificantDecimal;
+    minimumFeeConfigs.dogeMinUtxo * 10 ** 8;
   return BigInt(
     Math.ceil(
-      (dogeValue * dogePrice * 10 ** tokenDecimal) /
-        (tokenPrice * 10 ** dogeSignificantDecimal)
+      (dogeValue * dogePrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8)
     )
   );
 };
