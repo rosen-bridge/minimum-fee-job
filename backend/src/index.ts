@@ -1,11 +1,5 @@
 import './bootstrap';
-import {
-  RunningInterval,
-  minimumFeeConfigs,
-  kvRestApiUrl,
-  tokenMap,
-  tokens,
-} from './configs';
+import { RunningInterval, minimumFeeConfigs, kvRestApiUrl } from './configs';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
 import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
@@ -213,10 +207,4 @@ const interval = () => {
     });
 };
 
-const init = async () => {
-  logger.info(`Initializing token map`);
-  await tokenMap.updateConfigByJson(tokens());
-  logger.info(`Initialization completed`);
-};
-
-init().then(interval);
+interval();
