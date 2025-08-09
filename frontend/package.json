@@ -30,7 +30,7 @@
     "ts-results-es": "^4.2.0"
   },
   "devDependencies": {
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/qrcode.react": "^1.0.5",
     "@types/react": "^18",
     "@types/react-copy-to-clipboard": "^5.0.7",

@@ -1,9 +1,11 @@
-import { Suspense } from "react";
+export const dynamic = 'force-dynamic';
+
+import { Suspense } from 'react';
 import { unstable_noStore as noStore } from 'next/cache';
 
-import Qr from "./_components/qrcode/Qr";
-import Validations from "./Validations";
-import { Box, CircularProgress } from "@mui/material";
+import Qr from './_components/qrcode/Qr';
+import Validations from './Validations';
+import { Box, CircularProgress } from '@mui/material';
 
 const Home = () => {
   noStore();
