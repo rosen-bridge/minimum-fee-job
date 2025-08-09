@@ -8,12 +8,11 @@
   "type": "module",
   "main": "dist/src/index.js",
   "scripts": {
-    "build": "rimraf dist && tsc",
     "lint": "eslint --fix . && npm run prettify",
     "prettify": "prettier --write . --ignore-path ./.gitignore",
-    "start": "ts-node --experimental-specifier-resolution=node ./src/index.ts",
-    "threshold": "ts-node --experimental-specifier-resolution=node ./src/threshold.ts",
-    "start:prod": "node --experimental-specifier-resolution=node ./dist/index.js",
+    "start": "tsx ./src/index.ts",
+    "start:dev": "tsx watch ./src/index.ts",
+    "threshold": "tsx ./src/threshold.ts",
     "type-check": "tsc --noEmit",
     "postinstall": "patch-package",
     "prepare": "cd .. && husky install backend/.husky"
@@ -36,7 +35,8 @@
     "ethers": "^6.13.2",
     "lodash-es": "^4.17.21",
     "patch-package": "^8.0.0",
-    "tiny-secp256k1": "^2.2.3"
+    "tiny-secp256k1": "^2.2.3",
+    "tsx": "^4.20.3"
   },
   "devDependencies": {
     "@types/config": "^0.0.41",
@@ -49,11 +49,9 @@
     "husky": "^8.0.0",
     "lint-staged": "^13.0.3",
     "prettier": "2.7.1",
-    "ts-node": "^10.7.0",
-    "tsconfig-paths": "^4.1.2",
     "typescript": "^5.0.0"
   },
   "engines": {
-    "node": ">=18.12.0"
+    "node": ">=22.0.0"
   }
 }
