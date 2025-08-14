@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A process to check minimum fee config with current price of tokens",
   "repository": "@rosen-bridge/minimum-fee-job",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "author": "",
   "type": "module",
   "main": "dist/src/index.js",
