@@ -42,29 +42,28 @@ export const getBinanceHeight = async (): Promise<number> =>
   await binanceRpcClient.getBlockNumber();
 
 export const getAddressBoxes = async (
-  address: string
+  address: string,
 ): Promise<Array<ErgoBoxProxy>> => {
-  const explorerBoxes = await explorerClient.v1.getApiV1BoxesUnspentByaddressP1(
-    address
-  );
+  const explorerBoxes =
+    await explorerClient.v1.getApiV1BoxesUnspentByaddressP1(address);
   const result = explorerBoxes.items?.map((box) =>
-    ErgoBox.from_json(JsonBigInt.stringify(box)).to_js_eip12()
+    ErgoBox.from_json(JsonBigInt.stringify(box)).to_js_eip12(),
   );
   if (!result) return [];
   return result;
 };
 
 export const getMinimumFeeConfigBox = async (
-  tokenId: string
+  tokenId: string,
 ): Promise<ErgoBoxProxy | undefined> => {
   const boxes = (
     await explorerClient.v1.getApiV1BoxesUnspentBytokenidP1(
-      minimumFeeConfigs.minimumFeeNFT
+      minimumFeeConfigs.minimumFeeNFT,
     )
   ).items;
   if (!boxes)
     throw Error(
-      `found no box for minimum-fee NFT ${minimumFeeConfigs.minimumFeeNFT}`
+      `found no box for minimum-fee NFT ${minimumFeeConfigs.minimumFeeNFT}`,
     );
   const targetBoxes = boxes
     .map((box) => {
@@ -90,16 +89,16 @@ export const getStateContext = async (): Promise<ErgoStateContext> => {
   });
 
   const lastBlocksStrings = lastBlocks!.map((header) =>
-    JsonBigInt.stringify(header)
+    JsonBigInt.stringify(header),
   );
   const lastBlocksHeaders = BlockHeaders.from_json(lastBlocksStrings);
   const lastBlockPreHeader = PreHeader.from_block_header(
-    lastBlocksHeaders.get(0)
+    lastBlocksHeaders.get(0),
   );
 
   const stateContext = new ErgoStateContext(
     lastBlockPreHeader,
-    lastBlocksHeaders
+    lastBlocksHeaders,
   );
 
   return stateContext;

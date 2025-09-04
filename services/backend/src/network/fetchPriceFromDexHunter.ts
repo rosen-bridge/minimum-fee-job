@@ -7,7 +7,7 @@ const axiosDexHunter = axios.create({
 });
 
 export const fetchPriceFromDexHunterInADA = async (
-  tokenId: string
+  tokenId: string,
 ): Promise<number> => {
   const unit = tokenId.replaceAll('.', '');
   return await axiosDexHunter

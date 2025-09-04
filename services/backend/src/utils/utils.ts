@@ -81,15 +81,15 @@ export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
 
 export const getConfigDifferencePercent = (
   currentConfig: Fee,
-  newConfig: Fee
+  newConfig: Fee,
 ): FeeDifferencePercents => {
   const chains = intersection(
     Object.keys(currentConfig.configs),
-    Object.keys(newConfig.configs)
+    Object.keys(newConfig.configs),
   );
   if (chains.length === 0)
     throw Error(
-      `impossible behavior: no intersection between the current and new config chains`
+      `impossible behavior: no intersection between the current and new config chains`,
     );
 
   // bridge fee difference
@@ -123,7 +123,7 @@ export const getConfigDifferencePercent = (
 
       networkFeeDifference = differencePercent(
         currentNetworkFee,
-        newNetworkFee
+        newNetworkFee,
       );
     }
     networkFeeDifferences[chain] = networkFeeDifference;
@@ -159,7 +159,7 @@ const reversePercentage = (percentage: number): number => {
 export const isDifferencePercentSufficient = (
   changePercent: number,
   thresholdPercent: number,
-  direction: Direction
+  direction: Direction,
 ): boolean => {
   if (direction === Direction.DOWN) {
     return reversePercentage(changePercent) > thresholdPercent;
@@ -170,7 +170,7 @@ export const isDifferencePercentSufficient = (
 
 export const pricesToTables = (
   prices: Map<string, number>,
-  feeDifferences: Map<string, FeeDifferencePercents | undefined>
+  feeDifferences: Map<string, FeeDifferencePercents | undefined>,
 ) => {
   // generate table headers
   const headers = [
@@ -179,7 +179,7 @@ export const pricesToTables = (
     'Bridge Fee',
     'Rsn Ratio',
     ...SUPPORTED_CHAINS.map(
-      (chain) => chain.charAt(0).toUpperCase() + chain.slice(1)
+      (chain) => chain.charAt(0).toUpperCase() + chain.slice(1),
     ),
   ].map((header) => ({ value: header, color: AnsiColor.NONE }));
   const briefHeaders = ['Name', 'Price', 'Fee'].map((header) => ({
@@ -192,22 +192,22 @@ export const pricesToTables = (
   const briefTableData: TableData = [];
   prices.forEach((value, key) => {
     const token = minimumFeeConfigs.supportedTokens.find(
-      (token) => token.tokenId === key
+      (token) => token.tokenId === key,
     )!;
     const feeDifference = feeDifferences.get(key);
 
     const bridgeFeeDifference = conditionalColorize(
       feeDifference?.bridgeFee,
-      bridgeFeeTriggerPercent
+      bridgeFeeTriggerPercent,
     );
     const rsnRatioDifference = conditionalColorize(
       feeDifference?.rsnRatio,
-      rsnRatioTriggerPercent
+      rsnRatioTriggerPercent,
     );
     const networkFeeDifferences = SUPPORTED_CHAINS.map((chain) => {
       const networkFeeDifference = conditionalColorize(
         feeDifference?.networkFee[chain],
-        networkFeeTriggerPercent[chain]
+        networkFeeTriggerPercent[chain],
       );
       return {
         chain,
@@ -230,20 +230,20 @@ export const pricesToTables = (
       colorizeText(
         bridgeFeeDifference.value.charAt(0),
         bridgeFeeDifference.color,
-        false
+        false,
       ) +
       colorizeText(
         rsnRatioDifference.value.charAt(0),
         rsnRatioDifference.color,
-        false
+        false,
       ) +
       networkFeeDifferences
         .map((networkFeeDifference) =>
           colorizeText(
             networkFeeDifference.difference.value.charAt(0),
             networkFeeDifference.difference.color,
-            false
-          )
+            false,
+          ),
         )
         .join('');
 
@@ -259,13 +259,13 @@ export const pricesToTables = (
   });
   const fullTable = generateAsciiTable([headers, ...fullTableData]);
   const brief = chunk(briefTableData, TABLE_CHUNK_SIZE).map((priceChunk) =>
-    generateAsciiTable([briefHeaders, ...priceChunk])
+    generateAsciiTable([briefHeaders, ...priceChunk]),
   );
   if (brief.some((chunkString) => chunkString.length > 2000))
     throw Error(
       `Table string passed 2000 character limitation (${Math.max(
-        ...brief.map((chunkString) => chunkString.length)
-      )} > 2000)! Please reduce chunk size. Current chunk: ${TABLE_CHUNK_SIZE}`
+        ...brief.map((chunkString) => chunkString.length),
+      )} > 2000)! Please reduce chunk size. Current chunk: ${TABLE_CHUNK_SIZE}`,
     );
 
   return {
@@ -285,7 +285,7 @@ const colorizeText = (text: string, color: AnsiColor, resetColor = true) => {
 
 const conditionalColorize = (
   feeDifference: DifferencePercent | undefined,
-  threshold: number
+  threshold: number,
 ) => {
   if (feeDifference === undefined)
     return { value: '-', color: AnsiColor.RESET };
@@ -323,16 +323,16 @@ const generateAsciiTable = (data: TableData): string => {
       ...data.map((row) =>
         row[colIndex].asciiLen !== undefined
           ? row[colIndex].asciiLen!
-          : row[colIndex].value.length
-      )
-    )
+          : row[colIndex].value.length,
+      ),
+    ),
   );
 
   const horizontalLine = (
     char: string,
     cornerLeft: string,
     cornerRight: string,
-    separator: string
+    separator: string,
   ) =>
     cornerLeft +
     colWidths.map((w) => char.repeat(w + 2)).join(separator) +
@@ -342,7 +342,7 @@ const generateAsciiTable = (data: TableData): string => {
     '| ' +
     row
       .map((cell, i) =>
-        colorizeText(cell.value.padEnd(colWidths[i], ' '), cell.color)
+        colorizeText(cell.value.padEnd(colWidths[i], ' '), cell.color),
       )
       .join(' | ') +
     ' |';

@@ -8,7 +8,7 @@ import { UpdatedFeeConfig } from '../types';
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const updateConfigsTransaction = async (
-  feeConfigs: Map<string, UpdatedFeeConfig>
+  feeConfigs: Map<string, UpdatedFeeConfig>,
 ) => {
   const inputs: Array<ErgoBoxProxy> = [];
   const order: ConfigOrder = [];

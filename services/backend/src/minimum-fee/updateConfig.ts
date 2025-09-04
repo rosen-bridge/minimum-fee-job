@@ -27,7 +27,7 @@ const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const updateAndGenerateFeeConfig = async (
   newConfigs: Map<string, MinimumFeeConfig>,
-  chainHeights: Map<Chains, number>
+  chainHeights: Map<Chains, number>,
 ) => {
   const updatedFeeConfigs: Map<string, UpdatedFeeConfig> = new Map();
   const feeDifferences: Map<string, FeeDifferencePercents | undefined> =
@@ -39,7 +39,7 @@ export const updateAndGenerateFeeConfig = async (
     const result = await updateFeeConfig(
       token.ergoSideTokenId,
       newConfig,
-      chainHeights
+      chainHeights,
     );
     const feeConfig = result.config;
     feeDifferences.set(token.tokenId, result.differencePercent);
@@ -58,7 +58,7 @@ export const updateAndGenerateFeeConfig = async (
 const updateFeeConfig = async (
   tokenId: string,
   newFeeConfig: MinimumFeeConfig,
-  chainHeights: Map<Chains, number>
+  chainHeights: Map<Chains, number>,
 ): Promise<{
   config: {
     current: MinimumFeeBox;
@@ -71,7 +71,7 @@ const updateFeeConfig = async (
     minimumFeeConfigs.minimumFeeNFT,
     ErgoNetworkType.explorer,
     urls.ergoExplorer,
-    logger
+    logger,
   );
   for (let i = 0; i < minimumFeeConfigs.fetchBoxRetry; i++) {
     const res = await tokenMinimumFeeBox.fetchBox();
@@ -85,7 +85,7 @@ const updateFeeConfig = async (
     // calculate config differences
     const differencePercent = getConfigDifferencePercent(
       builder.getConfigs().at(-1)!,
-      newFeeConfig.getConfig()
+      newFeeConfig.getConfig(),
     );
 
     // check any chain is added or removed
@@ -93,19 +93,19 @@ const updateFeeConfig = async (
     const newActiveChains = getConfigActiveChains([newFeeConfig.getConfig()]);
     const isChainAddedOrRemoved = !isEqual(
       currentActiveChains,
-      newActiveChains
+      newActiveChains,
     );
     // check if fee difference is sufficient for update
     const isFeeDifferenceSufficient =
       isDifferencePercentSufficient(
         Number(differencePercent.bridgeFee.value),
         bridgeFeeTriggerPercent,
-        differencePercent.bridgeFee.direction
+        differencePercent.bridgeFee.direction,
       ) ||
       isDifferencePercentSufficient(
         Number(differencePercent.rsnRatio.value),
         rsnRatioTriggerPercent,
-        differencePercent.rsnRatio.direction
+        differencePercent.rsnRatio.direction,
       ) ||
       SUPPORTED_CHAINS.some(
         (chain) =>
@@ -113,16 +113,16 @@ const updateFeeConfig = async (
           isDifferencePercentSufficient(
             Number(differencePercent.networkFee[chain]!.value),
             networkFeeTriggerPercent[chain]!,
-            differencePercent.networkFee[chain]!.direction
-          )
+            differencePercent.networkFee[chain]!.direction,
+          ),
       );
 
     logger.debug(
-      `trigger condition for token [${tokenId}]: [chainAddedOrRemoved: ${isChainAddedOrRemoved}] [feeDifferenceSufficient: ${isFeeDifferenceSufficient}]`
+      `trigger condition for token [${tokenId}]: [chainAddedOrRemoved: ${isChainAddedOrRemoved}] [feeDifferenceSufficient: ${isFeeDifferenceSufficient}]`,
     );
     if (!isChainAddedOrRemoved && !isFeeDifferenceSufficient) {
       logger.debug(
-        `token [${tokenId}] config difference is not sufficient for update`
+        `token [${tokenId}] config difference is not sufficient for update`,
       );
       return {
         config: {
@@ -137,7 +137,7 @@ const updateFeeConfig = async (
       logger.debug(
         `chain differences for token [${tokenId}]: ${JsonBigInt.stringify([
           [currentActiveChains, newActiveChains],
-        ])}`
+        ])}`,
       );
     }
     if (isFeeDifferenceSufficient) {
@@ -149,7 +149,7 @@ const updateFeeConfig = async (
             differencePercent.networkFee[chain],
             networkFeeTriggerPercent[chain],
           ]),
-        ])}`
+        ])}`,
       );
     }
     // add new config
@@ -163,13 +163,13 @@ const updateFeeConfig = async (
     };
   } else {
     logger.debug(
-      `No config found for token [${tokenId}]. Generating config with only the new one...`
+      `No config found for token [${tokenId}]. Generating config with only the new one...`,
     );
     const currentErgoHeight = chainHeights.get(Chains.ERGO)!;
 
     const builder = new MinimumFeeBoxBuilder(
       minimumFeeConfigs.minimumFeeNFT,
-      minimumFeeConfigs.minimumFeeAddress
+      minimumFeeConfigs.minimumFeeAddress,
     );
     builder
       .setHeight(currentErgoHeight)
@@ -190,13 +190,13 @@ const updateFeeConfig = async (
 
 const cleanOldConfig = async (
   tokenMinimumFeeBox: MinimumFeeBox,
-  chainHeights: Map<Chains, number>
+  chainHeights: Map<Chains, number>,
 ) => {
   const getCurrentHeight = (chain: Chains) => {
     const currentHeight = chainHeights.get(chain);
     if (!currentHeight)
       throw Error(
-        `Impossible behavior: chain [${chain}] is supported but its height is not fetched`
+        `Impossible behavior: chain [${chain}] is supported but its height is not fetched`,
       );
     return currentHeight;
   };
@@ -234,7 +234,7 @@ const cleanOldConfig = async (
       const feeGuaranteeGap = feeGuaranteeDuration.get(chain);
       if (!feeGuaranteeGap)
         throw Error(
-          `Impossible behavior: chain [${chain}] is supported but its fee guarantee gap is not set`
+          `Impossible behavior: chain [${chain}] is supported but its fee guarantee gap is not set`,
         );
 
       if (Object.hasOwn(fees[i].heights, chain))

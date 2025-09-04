@@ -46,12 +46,12 @@ const main = async () => {
 
   newFeeConfigs.forEach((feeConfig, tokenId) => {
     logger.debug(
-      `fee config for token [${tokenId}]: ${JsonBigInt.stringify(feeConfig)}`
+      `fee config for token [${tokenId}]: ${JsonBigInt.stringify(feeConfig)}`,
     );
     logger.debug(
       `Register values: ${JsonBigInt.stringify(
-        feeConfigToRegisterValues([feeConfig.getConfig()])
-      )}`
+        feeConfigToRegisterValues([feeConfig.getConfig()]),
+      )}`,
     );
   });
 
@@ -59,7 +59,7 @@ const main = async () => {
   logger.info(`Combining new config with current config`);
   const updateResult = await updateAndGenerateFeeConfig(
     newFeeConfigs,
-    chainHeights
+    chainHeights,
   );
   const updatedConfigs = updateResult.config;
   const feeDifferences = updateResult.feeDifferences;
@@ -68,13 +68,13 @@ const main = async () => {
     const feeConfig = updatedConfig.new.getConfigs();
     logger.debug(
       `Updated fee config for token [${tokenId}]: ${JsonBigInt.stringify(
-        feeConfig
-      )}`
+        feeConfig,
+      )}`,
     );
     logger.debug(
       `Register values: ${JsonBigInt.stringify(
-        feeConfigToRegisterValues(feeConfig)
-      )}`
+        feeConfigToRegisterValues(feeConfig),
+      )}`,
     );
   });
 
@@ -89,10 +89,10 @@ const main = async () => {
     const currentDate = new Date().toISOString().split('T')[0];
     // transaction
     logger.info(
-      `updating config for tokens [${Array.from(updatedConfigs.keys())}]`
+      `updating config for tokens [${Array.from(updatedConfigs.keys())}]`,
     );
     const tx = JsonBigInt.stringify(
-      await updateConfigsTransaction(updatedConfigs)
+      await updateConfigsTransaction(updatedConfigs),
     );
     logger.info(`Transaction to update minimum-fee config box generated`);
 
@@ -101,13 +101,13 @@ const main = async () => {
     const discordNotification = Notification.getInstance();
     await discordNotification.send(
       DiscordPayloadType.MESSAGE,
-      `# MinimumFee configs need to be updated`
+      `# MinimumFee configs need to be updated`,
     );
     await discordNotification.send(DiscordPayloadType.MESSAGE, `## Prices`);
     for (const chunk of tables.brief) {
       await discordNotification.send(
         DiscordPayloadType.MESSAGE,
-        `\`\`\`ansi\n${chunk}\n\`\`\``
+        `\`\`\`ansi\n${chunk}\n\`\`\``,
       );
     }
     await discordNotification.send(DiscordPayloadType.FILE, tables.details, {
@@ -120,15 +120,15 @@ const main = async () => {
       const tokenIdChunks = chunk(
         tokenIds.map((tokenId) => {
           const token = minimumFeeConfigs.supportedTokens.find(
-            (token) => token.tokenId === tokenId
+            (token) => token.tokenId === tokenId,
           )!;
           return `- ${token.name} [\`${token.ergoSideTokenId}\`]`;
         }),
-        15
+        15,
       ).map((chunk) => chunk.join('\n'));
       await discordNotification.send(
         DiscordPayloadType.MESSAGE,
-        `## Changed Tokens`
+        `## Changed Tokens`,
       );
       for (const chunk of tokenIdChunks) {
         await discordNotification.send(DiscordPayloadType.MESSAGE, chunk);
@@ -143,19 +143,19 @@ const main = async () => {
       // send info to discord
       for (const tokenId of tokenIds) {
         const token = minimumFeeConfigs.supportedTokens.find(
-          (token) => token.tokenId === tokenId
+          (token) => token.tokenId === tokenId,
         )!;
         await discordNotification.send(
           DiscordPayloadType.MESSAGE,
           `## Token ${token.name} [${token.tokenId}]
           Ergo side tokenId: \`${token.ergoSideTokenId}\`
-        `
+        `,
         );
         const tokenFeeConfig = updatedConfigs.get(tokenId)!.new.getConfigs();
         await discordNotification.send(
           DiscordPayloadType.FILE,
           JsonBigInt.stringify(tokenFeeConfig, null, 2),
-          { filename: `${token.name}.${currentDate}.json` }
+          { filename: `${token.name}.${currentDate}.json` },
         );
       }
 
@@ -164,7 +164,7 @@ const main = async () => {
       const chunks = Array.from(tx.match(/.{1,1500}/g)!);
       await discordNotification.send(
         DiscordPayloadType.MESSAGE,
-        `## Generated tx (chunks: ${n})`
+        `## Generated tx (chunks: ${n})`,
       );
       const txChunks: string[] = [];
       for (let i = 0; i < n; i++) {
@@ -179,7 +179,7 @@ const main = async () => {
       for (const txChunk of txChunks) {
         await discordNotification.send(
           DiscordPayloadType.MESSAGE,
-          `\`\`\`json\n${txChunk}\n\`\`\``
+          `\`\`\`json\n${txChunk}\n\`\`\``,
         );
         logger.info('Sent data to discord');
       }
@@ -201,7 +201,7 @@ const interval = () => {
       const discordNotification = Notification.getInstance();
       discordNotification.send(
         DiscordPayloadType.MESSAGE,
-        `# :warning: Error in Minimum Fee Job\n` + `\`\`\`json\n${e}\n\`\`\``
+        `# :warning: Error in Minimum Fee Job\n` + `\`\`\`json\n${e}\n\`\`\``,
       );
       setTimeout(interval, RunningInterval);
     });

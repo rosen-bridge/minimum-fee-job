@@ -9,7 +9,7 @@ const axiosMinswap = axios.create({
 export const fetchPriceFromMinswapInADA = async (
   tokenId: string,
   lpPolicyId: string,
-  lpAssetName: string
+  lpAssetName: string,
 ): Promise<number> => {
   const [policyId, assetName] = tokenId.split('.');
   const response = await axiosMinswap.post(
@@ -36,7 +36,7 @@ export const fetchPriceFromMinswapInADA = async (
       },
       operationName: 'PriceChart',
     },
-    { params: { PriceChart: '' } }
+    { params: { PriceChart: '' } },
   );
   const priceChartList: Array<{ time: string; value: string }> =
     response.data.data.priceChart;

@@ -33,21 +33,21 @@ export const logConfigs = () => {
   if (wrongLogTypeIndex >= 0) {
     throw new Error(
       `unexpected config at path logs[${wrongLogTypeIndex}]: ${JSON.stringify(
-        logs[wrongLogTypeIndex]
-      )}`
+        logs[wrongLogTypeIndex],
+      )}`,
     );
   }
   return logs;
 };
 
 export const bridgeFeeTriggerPercent = config.get<number>(
-  'triggerPercent.bridgeFee'
+  'triggerPercent.bridgeFee',
 );
 export const networkFeeTriggerPercent = config.get<Record<string, number>>(
-  'triggerPercent.networkFee'
+  'triggerPercent.networkFee',
 );
 export const rsnRatioTriggerPercent = config.get<number>(
-  'triggerPercent.rsnRatio'
+  'triggerPercent.rsnRatio',
 );
 
 export const ERG = 'erg';

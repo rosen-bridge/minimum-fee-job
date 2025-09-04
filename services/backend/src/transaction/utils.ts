@@ -49,7 +49,7 @@ export const getBoxAssets = (box: wasm.ErgoBoxCandidate): AssetBalance => {
  */
 export const sumAssetBalance = (
   a: AssetBalance,
-  b: AssetBalance
+  b: AssetBalance,
 ): AssetBalance => {
   // sum native token
   const nativeToken = a.nativeToken + b.nativeToken;
@@ -80,7 +80,7 @@ export const subtractAssetBalance = (
   a: AssetBalance,
   b: AssetBalance,
   minimumNativeToken = 0n,
-  allowNegativeNativeToken = false
+  allowNegativeNativeToken = false,
 ): AssetBalance => {
   // sum native token
   let nativeToken = 0n;
@@ -89,7 +89,7 @@ export const subtractAssetBalance = (
   else if (allowNegativeNativeToken) nativeToken = 0n;
   else
     throw new Error(
-      `Cannot reduce native token: [${a.nativeToken.toString()}] is less than [${b.nativeToken.toString()} + ${minimumNativeToken.toString()}]`
+      `Cannot reduce native token: [${a.nativeToken.toString()}] is less than [${b.nativeToken.toString()} + ${minimumNativeToken.toString()}]`,
     );
 
   // reduce all `b` tokens
@@ -103,7 +103,7 @@ export const subtractAssetBalance = (
         throw new Error(
           `Cannot reduce token [${token.id}]: [${tokens[
             index
-          ].value.toString()}] is less than [${token.value.toString()}]`
+          ].value.toString()}] is less than [${token.value.toString()}]`,
         );
     } else
       throw new Error(`Cannot reduce token [${token.id}]: Token not found`);

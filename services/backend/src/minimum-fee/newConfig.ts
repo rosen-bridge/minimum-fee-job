@@ -18,12 +18,12 @@ const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const generateNewFeeConfig = async (
   prices: Map<string, number>,
-  chainHeights: Map<Chains, number>
+  chainHeights: Map<Chains, number>,
 ) => {
   const newFeeConfigs: Map<string, MinimumFeeConfig> = new Map();
 
   const rsnTokenConfig = minimumFeeConfigs.supportedTokens.find(
-    (token) => token.name === 'RSN'
+    (token) => token.name === 'RSN',
   );
   if (!rsnTokenConfig) throw Error(`Token [RSN] is not found in config`);
   const rsnPrice = prices.get(rsnTokenConfig.tokenId);
@@ -47,7 +47,7 @@ export const generateNewFeeConfig = async (
       token.decimals,
       token.fee,
       bitcoinFeeRatioMap,
-      dogeFeeRatio
+      dogeFeeRatio,
     );
     newFeeConfigs.set(token.tokenId, feeConfig);
   }
@@ -63,13 +63,13 @@ export const feeConfigFromPrice = async (
   tokenDecimal: number,
   configs: SupportedTokenConfig['fee'],
   bitcoinFeeRatioMap: Record<string, number>,
-  dogeFeeRatio: number
+  dogeFeeRatio: number,
 ): Promise<MinimumFeeConfig> => {
   const getCurrentHeight = (chain: Chains) => {
     const currentHeight = chainHeights.get(chain);
     if (!currentHeight)
       throw Error(
-        `Impossible behavior: chain [${chain}] is supported but its height is not fetched`
+        `Impossible behavior: chain [${chain}] is supported but its height is not fetched`,
       );
     return currentHeight;
   };
@@ -80,7 +80,7 @@ export const feeConfigFromPrice = async (
 
   // calculating bridge fee
   const bridgeFee = BigInt(
-    Math.ceil((configs.bridgeFeeUSD / tokenPrice) * 10 ** tokenDecimal)
+    Math.ceil((configs.bridgeFeeUSD / tokenPrice) * 10 ** tokenDecimal),
   );
 
   const tokenMapData = tokens();
@@ -92,7 +92,7 @@ export const feeConfigFromPrice = async (
   });
   if (!tokenSet)
     throw Error(
-      `Unexpected state: token [${tokenId}] is not found in token map`
+      `Unexpected state: token [${tokenId}] is not found in token map`,
     );
   const chains = Object.keys(tokenSet);
   logger.debug(`supported chains for token [${tokenId}]: ${chains}`);
@@ -148,7 +148,7 @@ export const feeConfigFromPrice = async (
       prices,
       configs,
       tokenPrice,
-      tokenDecimal
+      tokenDecimal,
     );
     const ergoFee: ChainFee = {
       bridgeFee: bridgeFee,
@@ -170,7 +170,7 @@ export const feeConfigFromPrice = async (
       prices,
       configs,
       tokenPrice,
-      tokenDecimal
+      tokenDecimal,
     );
     const cardanoFee: ChainFee = {
       bridgeFee: bridgeFee,
@@ -193,7 +193,7 @@ export const feeConfigFromPrice = async (
       configs,
       tokenPrice,
       tokenDecimal,
-      bitcoinFeeRatioMap
+      bitcoinFeeRatioMap,
     );
     const bitcoinFee: ChainFee = {
       bridgeFee: bridgeFee,
@@ -215,7 +215,7 @@ export const feeConfigFromPrice = async (
       prices,
       configs,
       tokenPrice,
-      tokenDecimal
+      tokenDecimal,
     );
     const ethereumFee: ChainFee = {
       bridgeFee: bridgeFee,
@@ -237,7 +237,7 @@ export const feeConfigFromPrice = async (
       prices,
       configs,
       tokenPrice,
-      tokenDecimal
+      tokenDecimal,
     );
     const binanceFee: ChainFee = {
       bridgeFee: bridgeFee,
@@ -259,7 +259,7 @@ export const feeConfigFromPrice = async (
       configs,
       tokenPrice,
       tokenDecimal,
-      dogeFeeRatio
+      dogeFeeRatio,
     );
     const dogeFee: ChainFee = {
       bridgeFee: bridgeFee,
@@ -280,7 +280,7 @@ const getErgoNetworkFee = (
   prices: Map<string, number>,
   configs: SupportedTokenConfig['fee'],
   tokenPrice: number,
-  tokenDecimal: number
+  tokenDecimal: number,
 ) => {
   const ergPrice = prices.get(ERG);
   if (!ergPrice) throw Error(`Erg price is required`);
@@ -288,8 +288,8 @@ const getErgoNetworkFee = (
   // calculating network fee on Ergo
   return BigInt(
     Math.ceil(
-      (configs.ergNetworkFee * ergPrice * 10 ** tokenDecimal) / tokenPrice
-    )
+      (configs.ergNetworkFee * ergPrice * 10 ** tokenDecimal) / tokenPrice,
+    ),
   );
 };
 
@@ -297,7 +297,7 @@ const getCardanoNetworkFee = (
   prices: Map<string, number>,
   configs: SupportedTokenConfig['fee'],
   tokenPrice: number,
-  tokenDecimal: number
+  tokenDecimal: number,
 ) => {
   const adaPrice = prices.get(ADA);
   if (!adaPrice) throw Error(`Ada price is required`);
@@ -305,8 +305,8 @@ const getCardanoNetworkFee = (
   // calculating network fee on Cardano
   return BigInt(
     Math.ceil(
-      (configs.adaNetworkFee * adaPrice * 10 ** tokenDecimal) / tokenPrice
-    )
+      (configs.adaNetworkFee * adaPrice * 10 ** tokenDecimal) / tokenPrice,
+    ),
   );
 };
 
@@ -315,7 +315,7 @@ const getBitcoinNetworkFee = (
   configs: SupportedTokenConfig['fee'],
   tokenPrice: number,
   tokenDecimal: number,
-  bitcoinFeeRatioMap: Record<string, number>
+  bitcoinFeeRatioMap: Record<string, number>,
 ) => {
   const btcPrice = prices.get(BTC);
   if (!btcPrice) throw Error(`Btc price is required`);
@@ -327,8 +327,8 @@ const getBitcoinNetworkFee = (
     minimumFeeConfigs.bitcoinMinUtxo * 10 ** 8;
   return BigInt(
     Math.ceil(
-      (bitcoinValue * btcPrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8)
-    )
+      (bitcoinValue * btcPrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8),
+    ),
   );
 };
 
@@ -336,7 +336,7 @@ const getEthereumNetworkFee = (
   prices: Map<string, number>,
   configs: SupportedTokenConfig['fee'],
   tokenPrice: number,
-  tokenDecimal: number
+  tokenDecimal: number,
 ) => {
   const ethPrice = prices.get(ETH);
   if (!ethPrice) throw Error(`Eth price is required`);
@@ -345,8 +345,8 @@ const getEthereumNetworkFee = (
   return BigInt(
     Math.ceil(
       (minimumFeeConfigs.ethereumTxFee * ethPrice * 10 ** tokenDecimal) /
-        tokenPrice
-    )
+        tokenPrice,
+    ),
   );
 };
 
@@ -354,7 +354,7 @@ const getBinanceNetworkFee = (
   prices: Map<string, number>,
   configs: SupportedTokenConfig['fee'],
   tokenPrice: number,
-  tokenDecimal: number
+  tokenDecimal: number,
 ) => {
   const bnbPrice = prices.get(BNB);
   if (!bnbPrice) throw Error(`Bnb price is required`);
@@ -363,8 +363,8 @@ const getBinanceNetworkFee = (
   return BigInt(
     Math.ceil(
       (minimumFeeConfigs.binanceTxFee * bnbPrice * 10 ** tokenDecimal) /
-        tokenPrice
-    )
+        tokenPrice,
+    ),
   );
 };
 
@@ -373,7 +373,7 @@ const getDogeNetworkFee = (
   configs: SupportedTokenConfig['fee'],
   tokenPrice: number,
   tokenDecimal: number,
-  dogeFeeRatio: number
+  dogeFeeRatio: number,
 ) => {
   const dogePrice = prices.get(DOGE);
   if (!dogePrice) throw Error(`Doge price is required`);
@@ -384,7 +384,7 @@ const getDogeNetworkFee = (
     minimumFeeConfigs.dogeMinUtxo * 10 ** 8;
   return BigInt(
     Math.ceil(
-      (dogeValue * dogePrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8)
-    )
+      (dogeValue * dogePrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8),
+    ),
   );
 };

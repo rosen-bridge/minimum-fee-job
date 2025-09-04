@@ -67,8 +67,8 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
   // fetch price from coingecko
   const coingeckoPrices = await fetchPriceFromCoingeckoInUSD(
     coingeckoTokens.map(
-      (token) => (token.priceBackendParams as CoinGeckoParams).network
-    )
+      (token) => (token.priceBackendParams as CoinGeckoParams).network,
+    ),
   );
   coingeckoTokens.forEach((token) => {
     const price =
@@ -81,7 +81,7 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
   // fetch price from coinMarketCap
   for (const token of coinMarketCapTokens) {
     const price = await fetchPriceFromCoinMarketCapInUSD(
-      (token.priceBackendParams as CoinMarketCapParams).slug
+      (token.priceBackendParams as CoinMarketCapParams).slug,
     );
     logger.debug(`Price of [${token.name}]: ${price}$`);
     prices.set(token.tokenId, price);
@@ -117,7 +117,7 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
       (await fetchPriceFromMinswapInADA(
         token.tokenId,
         params.lpPolicyId,
-        params.lpAssetName
+        params.lpAssetName,
       )) * adaPrice;
     logger.debug(`Price of [${token.name}]: ${price}$`);
     prices.set(token.tokenId, price);
@@ -126,7 +126,7 @@ export const getConfigTokenPrices = async (): Promise<Map<string, number>> => {
   // fetch duplicate token prices
   for (const token of duplicateTokens) {
     const price = prices.get(
-      (token.priceBackendParams as DuplicateTokenParams).tokenId
+      (token.priceBackendParams as DuplicateTokenParams).tokenId,
     );
     if (!price) throw Error(`Token [${price}] price is not fetched yet!`);
     logger.debug(`Price of [${token.name}]: ${price}$`);

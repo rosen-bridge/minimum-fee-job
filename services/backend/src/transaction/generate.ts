@@ -29,30 +29,30 @@ const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
  */
 export const generateTransaction = async (
   order: ConfigOrder,
-  inputs: Array<ErgoBoxProxy>
+  inputs: Array<ErgoBoxProxy>,
 ): Promise<TransactionEIP19> => {
   logger.debug(
-    `Generating Ergo transaction for Order: ${JsonBigInt.stringify(order)}`
+    `Generating Ergo transaction for Order: ${JsonBigInt.stringify(order)}`,
   );
   // calculate required assets
   const orderRequiredAssets = order
     .map((order) => order.assets)
     .reduce(sumAssetBalance, { nativeToken: 0n, tokens: [] });
   logger.debug(
-    `Order required assets: ${JsonBigInt.stringify(orderRequiredAssets)}`
+    `Order required assets: ${JsonBigInt.stringify(orderRequiredAssets)}`,
   );
   const inputAssets = inputs
     .map((box) => getBoxInfo(box).assets)
     .reduce(sumAssetBalance, { nativeToken: 0n, tokens: [] });
   logger.debug(
-    `Pre-selected boxes assets: ${JsonBigInt.stringify(inputAssets)}`
+    `Pre-selected boxes assets: ${JsonBigInt.stringify(inputAssets)}`,
   );
   const requiredAssets = sumAssetBalance(
     subtractAssetBalance(orderRequiredAssets, inputAssets, 0n, true),
     {
       nativeToken: minimumFeeConfigs.minBoxErg + minimumFeeConfigs.txFee,
       tokens: [],
-    }
+    },
   );
   logger.debug(`Required assets: ${JsonBigInt.stringify(requiredAssets)}`);
 
@@ -62,7 +62,7 @@ export const generateTransaction = async (
     [],
     new Map(),
     (await getAddressBoxes(minimumFeeConfigs.feeAddress)).values(),
-    DefaultLoggerFactory.getInstance().getLogger(`ergo-box-selection`)
+    DefaultLoggerFactory.getInstance().getLogger(`ergo-box-selection`),
   );
 
   // check if boxes covered requirements
@@ -70,7 +70,7 @@ export const generateTransaction = async (
     const neededErgs = requiredAssets.nativeToken.toString();
     const neededTokens = JsonBigInt.stringify(requiredAssets.tokens);
     throw new Error(
-      `Available boxes didn't cover required assets. Erg: ${neededErgs}, Tokens: ${neededTokens}`
+      `Available boxes didn't cover required assets. Erg: ${neededErgs}, Tokens: ${neededTokens}`,
     );
   }
 
@@ -83,7 +83,7 @@ export const generateTransaction = async (
     tokens: [],
   };
   const inBoxes = inputs.map((serializedBox) =>
-    wasm.ErgoBox.from_json(JsonBigInt.stringify(serializedBox))
+    wasm.ErgoBox.from_json(JsonBigInt.stringify(serializedBox)),
   );
   const inErgoBoxes = wasm.ErgoBoxes.empty();
   inBoxes.forEach((box) => {
@@ -106,7 +106,7 @@ export const generateTransaction = async (
     remainingAssets = subtractAssetBalance(
       remainingAssets,
       getBoxAssets(box),
-      minimumFeeConfigs.minBoxErg
+      minimumFeeConfigs.minBoxErg,
     );
   });
   logger.debug(`Remaining assets: ${JsonBigInt.stringify(remainingAssets)}`);
@@ -115,20 +115,20 @@ export const generateTransaction = async (
   const boxBuilder = new wasm.ErgoBoxCandidateBuilder(
     wasm.BoxValue.from_i64(
       wasm.I64.from_str(
-        (remainingAssets.nativeToken - minimumFeeConfigs.txFee).toString()
-      )
+        (remainingAssets.nativeToken - minimumFeeConfigs.txFee).toString(),
+      ),
     ),
     wasm.Contract.new(
-      wasm.Address.from_base58(minimumFeeConfigs.feeAddress).to_ergo_tree()
+      wasm.Address.from_base58(minimumFeeConfigs.feeAddress).to_ergo_tree(),
     ),
-    currentHeight
+    currentHeight,
   );
   // add change box tokens
   remainingAssets.tokens.forEach((token) =>
     boxBuilder.add_token(
       wasm.TokenId.from_str(token.id),
-      wasm.TokenAmount.from_i64(wasm.I64.from_str(token.value.toString()))
-    )
+      wasm.TokenAmount.from_i64(wasm.I64.from_str(token.value.toString())),
+    ),
   );
   // build and add change box
   const changeBox = boxBuilder.build();
@@ -137,7 +137,7 @@ export const generateTransaction = async (
   // create the box selector in tx builder
   const inBoxSelection = new wasm.BoxSelection(
     inErgoBoxes,
-    new wasm.ErgoBoxAssetsDataList()
+    new wasm.ErgoBoxAssetsDataList(),
   );
 
   // create the transaction
@@ -146,9 +146,9 @@ export const generateTransaction = async (
     outBoxCandidates,
     currentHeight,
     wasm.BoxValue.from_i64(
-      wasm.I64.from_str(minimumFeeConfigs.txFee.toString())
+      wasm.I64.from_str(minimumFeeConfigs.txFee.toString()),
     ),
-    wasm.Address.from_base58(minimumFeeConfigs.feeAddress)
+    wasm.Address.from_base58(minimumFeeConfigs.feeAddress),
   );
   const tx = txCandidate.build();
 
@@ -158,18 +158,18 @@ export const generateTransaction = async (
     tx,
     inErgoBoxes,
     wasm.ErgoBoxes.empty(),
-    ctx
+    ctx,
   );
 
   // create PaymentTransaction object
   const serializedTx = Buffer.from(reducedTx.sigma_serialize_bytes()).toString(
-    'base64'
+    'base64',
   );
   const ergoTx: TransactionEIP19 = {
     reducedTx: serializedTx,
     sender: minimumFeeConfigs.feeAddress,
     inputs: inBoxes.map((input) =>
-      Buffer.from(input.sigma_serialize_bytes()).toString('base64')
+      Buffer.from(input.sigma_serialize_bytes()).toString('base64'),
     ),
   };
 

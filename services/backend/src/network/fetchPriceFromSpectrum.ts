@@ -13,7 +13,7 @@ const axiosSpectrum = axios.create({
 });
 
 export const fetchPriceFromSpectrumInERG = async (
-  tokenId: string
+  tokenId: string,
 ): Promise<number> => {
   const toDate = Date.now();
   const fromDate = toDate - spectrumPoolTimeLength;
@@ -49,7 +49,7 @@ export const fetchPriceFromSpectrumInERG = async (
       erg: total.erg + pool.erg,
       token: total.token + pool.token,
     }),
-    { erg: 0, token: 0 }
+    { erg: 0, token: 0 },
   );
 
   return totalPrice.erg / totalPrice.token;

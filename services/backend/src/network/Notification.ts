@@ -16,7 +16,7 @@ export class Notification {
           url: discordWebHookUrl,
         });
         logger.debug(
-          `'discordWebHookUrl' config is set, instantiating WebhookClient...`
+          `'discordWebHookUrl' config is set, instantiating WebhookClient...`,
         );
       } else logger.info("Key discordWebHookUrl isn't set in config");
     } catch (e) {
@@ -41,7 +41,7 @@ export class Notification {
   send = async (
     type: DiscordPayloadType,
     payload: string,
-    options?: { filename?: string }
+    options?: { filename?: string },
   ): Promise<void> => {
     if (this.hookClient) {
       const sendFunction =
@@ -51,14 +51,14 @@ export class Notification {
         logger.info(`Payload [${type}] has been sent using discord webhook`);
       } catch (e) {
         logger.warn(
-          `An error occurred while sending message to discord webhook: ${e}`
+          `An error occurred while sending message to discord webhook: ${e}`,
         );
         if (e instanceof Error && e.stack) logger.warn(e.stack);
       }
     } else {
       logger.info(`WebhookClient instance doesn't exist`);
       logger.debug(
-        `Method sendMessage called for send notification with msg ${payload}`
+        `Method sendMessage called for send notification with msg ${payload}`,
       );
     }
   };

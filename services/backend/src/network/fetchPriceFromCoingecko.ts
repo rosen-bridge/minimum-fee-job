@@ -7,7 +7,7 @@ const axiosCoingecko = axios.create({
 });
 
 export const fetchPriceFromCoingeckoInUSD = async (
-  network: string[]
+  network: string[],
 ): Promise<Record<string, { usd: number }>> => {
   const queryParams = {
     ids: network.join(','),

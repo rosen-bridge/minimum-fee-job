@@ -8,7 +8,7 @@ const axiosCoinMarketCap = axios.create({
 });
 
 export const fetchPriceFromCoinMarketCapInUSD = async (
-  slug: string
+  slug: string,
 ): Promise<number> => {
   const queryParams = {
     slug: slug,
@@ -42,7 +42,7 @@ export const fetchPriceFromCoinMarketCapInUSD = async (
         (total.volume + newPrice.volume),
       volume: total.volume + newPrice.volume,
     }),
-    { price: 0, volume: 0 }
+    { price: 0, volume: 0 },
   );
 
   return totalPrice.price;
