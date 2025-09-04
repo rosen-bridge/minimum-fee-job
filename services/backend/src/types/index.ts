@@ -88,6 +88,7 @@ export interface MinswapParams {
   lpAssetName: string;
 }
 
+// eslint-disable-next-line
 export interface SpectrumParams {}
 
 export type PriceBackendParams =

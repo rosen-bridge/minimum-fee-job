@@ -48,7 +48,7 @@ const roundWithDigits = (value: number, significantDigits: number = 3) => {
     const newValueString = (valueBigint + BigInt(roundValue)).toString();
     return BigInt(
       newValueString.substring(0, significantDigits) +
-        '0'.repeat(newValueString.length - significantDigits)
+        '0'.repeat(newValueString.length - significantDigits),
     );
   }
   return valueBigint;
@@ -57,10 +57,10 @@ const roundWithDigits = (value: number, significantDigits: number = 3) => {
 const ergoTokenSupply = async (tokenId: string) => {
   try {
     const res = await axios.get<{ emissionAmount: number; decimals?: number }>(
-      `https://api.ergoplatform.com/api/v1/tokens/${tokenId}`
+      `https://api.ergoplatform.com/api/v1/tokens/${tokenId}`,
     );
     return res.data.emissionAmount / Math.pow(10, res.data.decimals ?? 0);
-  } catch (error) {
+  } catch {
     logger.warn(`Cannot get total supply for [${tokenId}]`);
     return 0;
   }
@@ -90,7 +90,7 @@ const threshold = async () => {
   });
   for (const item of tokens) {
     const nativeChain = chains.filter(
-      (chain) => item[chain] && item[chain].residency === 'native'
+      (chain) => item[chain] && item[chain].residency === 'native',
     );
     if (nativeChain.length > 0) {
       const price = prices.get(item[nativeChain[0]].tokenId);
