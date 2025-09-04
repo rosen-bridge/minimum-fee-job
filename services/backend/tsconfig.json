@@ -1,0 +1,16 @@
+
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "forceConsistentCasingInFileNames": true,
+     "paths": {
+      "@/configs": ["./src/configs"],
+      "@/configs/*": ["./src/configs/*"],
+      "@/types": ["./src/types"],
+      "@/utils/*": ["./src/utils/*"]
+    },
+  },
+  "include": ["./**/*.ts"],
+}
