@@ -7,12 +7,12 @@ import globals from 'globals';
 export default [
   // Ignore Patterns
   {
-    ignores: ['**/dist/*', '**/node_modules/**'],
+    ignores: ['**/dist/*', '**/node_modules/*'],
   },
 
   // Base Configuration
   {
-    files: ['packages/**/*.{js,ts}', 'services/backend/*.{js,ts}'],
+    files: ['**/{packages,services/backend}/**/*.{js,ts}'],
     languageOptions: {
       parser: typescriptParser,
       ecmaVersion: 'latest',
