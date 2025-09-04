@@ -22,7 +22,7 @@ const perPackage = (resolver) => (files) => {
 export default {
   '*': 'prettier --ignore-unknown --write',
 
-  '**/*.{js,jsx,ts,tsx}': 'eslint --fix',
+  'services/backend/**/*.{js,ts}': 'eslint --fix',
 
   'services/frontend/**/*.{js,jsx,ts,tsx}': perPackage((directory, file) => {
     return `next lint ${directory} --fix --file ${path.relative(directory, file)}`;
