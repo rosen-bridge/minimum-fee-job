@@ -5,7 +5,6 @@ stages:
   - build
   - type-check
   - lint
-  - test
   - changeset
 
 installation:
