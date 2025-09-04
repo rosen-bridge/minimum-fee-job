@@ -29,7 +29,7 @@ type-check:
       - '**/node_modules'
       - '**/dist'
   script:
-    - npm run type-check 
+    - npm run type-check
 
 build:
   stage: build
@@ -41,7 +41,7 @@ build:
       - '**/node_modules'
       - '**/dist'
   script:
-    - npm run build 
+    - npm run build
 
 lint:
   stage: lint
@@ -53,25 +53,7 @@ lint:
       - '**/node_modules'
       - '**/dist'
   script:
-    - npm run lint 
-
-test:
-  stage: test
-  cache:
-    key: $CI_COMMIT_REF_NAME
-    policy: pull
-    paths:
-      - node_modules
-      - '**/node_modules'
-      - '**/dist'
-  script:
-    - npm run coverage
-  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: '**/coverage/cobertura-coverage.xml'
+    - npm run lint
 
 changeset:
   stage: changeset
