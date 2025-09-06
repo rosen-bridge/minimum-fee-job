@@ -1,8 +1,8 @@
-import { GppBad, GppMaybe, VerifiedUser } from "@mui/icons-material";
-import { Box, Tooltip } from "@mui/material";
-import { ReactElement } from "react";
+import { GppBad, GppMaybe, VerifiedUser } from '@mui/icons-material';
+import { Box, Tooltip } from '@mui/material';
+import { ReactElement } from 'react';
 
-import { ValidationResult as ValidationResultType } from "@/app/_validations/types";
+import { ValidationResult as ValidationResultType } from '@/app/_validations/types';
 
 /**
  * Render a single cell in validations table
@@ -19,10 +19,13 @@ const ValidationResult = ({
    */
   const renderWithReasonOption = (
     element: ReactElement,
-    reason: string | null
+    reason: string | null,
   ) =>
     reason ? (
-      <Tooltip sx={{ cursor: "pointer" }} title={<Box whiteSpace="pre-line">{reason}</Box>}>
+      <Tooltip
+        sx={{ cursor: 'pointer' }}
+        title={<Box whiteSpace="pre-line">{reason}</Box>}
+      >
         {element}
       </Tooltip>
     ) : (
@@ -32,20 +35,20 @@ const ValidationResult = ({
   if (validationResult.isErr()) {
     return renderWithReasonOption(
       <GppMaybe color="warning" />,
-      validationResult.error.message
+      validationResult.error.message,
     );
   }
 
   if (validationResult.value.isValid) {
     return renderWithReasonOption(
       <VerifiedUser color="success" />,
-      validationResult.value.reason
+      validationResult.value.reason,
     );
   }
 
   return renderWithReasonOption(
     <GppBad color="error" />,
-    validationResult.value.reason
+    validationResult.value.reason,
   );
 };
 

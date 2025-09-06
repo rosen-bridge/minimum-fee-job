@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { MAX_CHUNK_SIZE, MIN_CHUNK_SIZE, QR_TYPE } from "../constants";
+import { MAX_CHUNK_SIZE, MIN_CHUNK_SIZE, QR_TYPE } from '../constants';
 
 /**
  * get min and max page sizes for a tx
@@ -40,12 +40,12 @@ const useChunkedTx = (tx: string) => {
       setPagesCount(newValue as number);
       setPageIndex(0);
     },
-    []
+    [],
   );
 
   const chunk = tx.substring(
     pageIndex * chunkSize,
-    (pageIndex + 1) * chunkSize
+    (pageIndex + 1) * chunkSize,
   );
 
   const value = JSON.stringify({
@@ -57,7 +57,7 @@ const useChunkedTx = (tx: string) => {
 
   const clone = () => {
     return JSON.stringify({ [QR_TYPE]: tx });
-  }
+  };
 
   const play = () => {
     clearInterval(interval.current);
@@ -71,10 +71,10 @@ const useChunkedTx = (tx: string) => {
     interval.current = window.setInterval(() => {
       setPageIndex((index) => {
         if (index + 1 > pagesCount - 1) return 0;
-        return (index + 1)
+        return index + 1;
       });
     }, 800);
-  }
+  };
 
   useEffect(() => {
     return () => {

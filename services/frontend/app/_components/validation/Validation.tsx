@@ -1,6 +1,6 @@
-import ValidationResult from "./ValidationResult";
+import ValidationResult from './ValidationResult';
 
-import { Validate } from "@/app/_validations/types";
+import { Validate } from '@/app/_validations/types';
 
 /**
  * Validate and render a single cell in validations table

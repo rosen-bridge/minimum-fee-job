@@ -1,5 +1,5 @@
-import { createClient } from "@vercel/kv";
-import { Err, Ok, Result } from "ts-results-es";
+import { createClient } from '@vercel/kv';
+import { Err, Ok, Result } from 'ts-results-es';
 
 import {
   BackendConfigParseError,
@@ -7,9 +7,9 @@ import {
   EmptyTxError,
   RedisConnectionError,
   RedisDataFetchingError,
-} from "@/app/_error/store";
+} from '@/app/_error/store';
 
-import { PartialSupportedTokenConfig } from "../_types/token-config";
+import { PartialSupportedTokenConfig } from '../_types/token-config';
 
 /**
  * connect to the redis client
@@ -47,9 +47,8 @@ export const getTokensConfig = async (): Promise<
   const client = clientResult.value;
 
   try {
-    const config = await client.get<PartialSupportedTokenConfig[]>(
-      "tokens-config"
-    );
+    const config =
+      await client.get<PartialSupportedTokenConfig[]>('tokens-config');
     if (config) {
       try {
         return Ok(config);
@@ -79,7 +78,7 @@ export const getPrices = async (): Promise<
   const client = clientResult.value;
 
   try {
-    const prices = await client.hgetall<Record<string, string>>("prices");
+    const prices = await client.hgetall<Record<string, string>>('prices');
     return Ok(prices ?? {});
   } catch (error) {
     return Err(new RedisDataFetchingError(error));
@@ -101,7 +100,7 @@ export const getTx = async (): Promise<
   const client = clientResult.value;
 
   try {
-    const tx = await client.get<Record<string, string>>("tx");
+    const tx = await client.get<Record<string, string>>('tx');
 
     if (!tx) {
       return Err(new EmptyTxError());

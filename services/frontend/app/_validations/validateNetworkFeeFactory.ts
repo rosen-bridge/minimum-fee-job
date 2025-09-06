@@ -1,23 +1,23 @@
-import { Err, Ok, Result } from "ts-results-es";
+import { Err, Ok, Result } from 'ts-results-es';
 
-import { getPrices, getTokensConfig } from "../_store";
-import getFeesByToken from "../_utils/get-fees-by-token";
-import validateActualAgainstExpected from "../_utils/validate-actual-against-expected";
+import { getPrices, getTokensConfig } from '../_store';
+import getFeesByToken from '../_utils/get-fees-by-token';
+import validateActualAgainstExpected from '../_utils/validate-actual-against-expected';
 
 import {
   ChainTokenConfigMissing,
   NetworkFeeValidationError,
   TokenConfigMissing,
-} from "../_error/network-fee-validation";
+} from '../_error/network-fee-validation';
 
-import { PartialSupportedTokenConfig } from "../_types/token-config";
-import { Validate } from "./types";
+import { PartialSupportedTokenConfig } from '../_types/token-config';
+import { Validate } from './types';
 
 const chainTokensMap = {
-  ergo: "ERG",
-  cardano: "ADA",
-  bitcoin: "BTC",
-  ethereum: "ETH",
+  ergo: 'ERG',
+  cardano: 'ADA',
+  bitcoin: 'BTC',
+  ethereum: 'ETH',
 } as const;
 
 /**
@@ -31,7 +31,7 @@ const calculateTokenNetworkFee = (
   networkFee: number,
   price: number,
   decimals: number,
-  chainTokenPrice: number
+  chainTokenPrice: number,
 ) => ((networkFee / 10 ** decimals) * price) / chainTokenPrice;
 
 /**
@@ -40,7 +40,7 @@ const calculateTokenNetworkFee = (
  */
 const validateNetworkFeeFactory: (
   network: keyof typeof chainTokensMap,
-  calculateExpected: (tokenConfig: PartialSupportedTokenConfig) => number
+  calculateExpected: (tokenConfig: PartialSupportedTokenConfig) => number,
 ) => Validate = (network, calculateExpected) => async (tokenId) => {
   const feesByTokenResult = await getFeesByToken();
   const tokensConfigResult = await getTokensConfig();
@@ -49,7 +49,7 @@ const validateNetworkFeeFactory: (
   const requirementsResult = Result.all(
     feesByTokenResult,
     tokensConfigResult,
-    pricesResult
+    pricesResult,
   );
 
   if (requirementsResult.isErr()) {
@@ -64,10 +64,10 @@ const validateNetworkFeeFactory: (
     const networkFee = newFeeConfigs[network].networkFee;
 
     const tokenConfig = tokensConfig.find(
-      (token) => token.ergoSideTokenId === tokenId
+      (token) => token.ergoSideTokenId === tokenId,
     );
     const chainTokenConfig = tokensConfig.find(
-      (token) => token.name.toUpperCase() === chainTokensMap[network]
+      (token) => token.name.toUpperCase() === chainTokensMap[network],
     );
 
     if (!tokenConfig) {
@@ -81,7 +81,7 @@ const validateNetworkFeeFactory: (
       Number(networkFee),
       +prices[tokenConfig.tokenId],
       tokenConfig.decimals,
-      +prices[chainTokenConfig.tokenId]
+      +prices[chainTokenConfig.tokenId],
     );
     const expected = calculateExpected(tokenConfig);
 

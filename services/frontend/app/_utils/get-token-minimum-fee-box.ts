@@ -1,12 +1,12 @@
-import { ErgoNetworkType, MinimumFeeBox } from "@rosen-bridge/minimum-fee";
-import { Err, Ok, Result } from "ts-results-es";
+import { ErgoNetworkType, MinimumFeeBox } from '@rosen-bridge/minimum-fee';
+import { Err, Ok, Result } from 'ts-results-es';
 
 import {
   MinimumFeeBoxFetchFailedError,
   MinimumFeeBoxInstantiationError,
-} from "@/app/_error/min-fee-box";
+} from '@/app/_error/min-fee-box';
 
-import { ERGO_EXPLORER_API_URL } from "@/app/constants";
+import { ERGO_EXPLORER_API_URL } from '@/app/constants';
 
 /**
  * A simple wrapper around MinimumFeeBox instantiation
@@ -19,8 +19,8 @@ const getUnfetchedTokenMinimumFeeBox = (tokenId: string) => {
         tokenId,
         process.env.MINIMUM_FEE_CONFIG_NFT!,
         ErgoNetworkType.explorer,
-        ERGO_EXPLORER_API_URL
-      )
+        ERGO_EXPLORER_API_URL,
+      ),
     );
   } catch (error) {
     return Err(new MinimumFeeBoxInstantiationError(error));
@@ -32,7 +32,7 @@ const getUnfetchedTokenMinimumFeeBox = (tokenId: string) => {
  * @param tokenId
  */
 const getTokenMinimumFeeBox = async (
-  tokenId: string
+  tokenId: string,
 ): Promise<
   Result<
     MinimumFeeBox,

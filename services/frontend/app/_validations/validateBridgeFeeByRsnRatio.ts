@@ -1,16 +1,16 @@
-import { Err, Ok, Result } from "ts-results-es";
+import { Err, Ok, Result } from 'ts-results-es';
 
-import { getPrices, getTokensConfig } from "../_store";
-import getFeesByToken from "../_utils/get-fees-by-token";
-import validateActualAgainstExpected from "../_utils/validate-actual-against-expected";
+import { getPrices, getTokensConfig } from '../_store';
+import getFeesByToken from '../_utils/get-fees-by-token';
+import validateActualAgainstExpected from '../_utils/validate-actual-against-expected';
 
 import {
   BridgeFeeValidationByRsnRatioError,
   RsnConfigMissing,
   TokenConfigMissing,
-} from "../_error/bridge-fee-validation-by-rsn-ratio";
+} from '../_error/bridge-fee-validation-by-rsn-ratio';
 
-import { Validate } from "./types";
+import { Validate } from './types';
 
 /**
  * Rsn ratio calculation formula
@@ -22,7 +22,7 @@ const calculateTokenRsnRatio = (
   bridgeFee: number,
   rsnRatio: number,
   rsnPrice: number,
-  rsnRatioDivisor: number
+  rsnRatioDivisor: number,
 ) => (bridgeFee * rsnRatio * rsnPrice) / (10 ** 3 * rsnRatioDivisor);
 
 /**
@@ -38,7 +38,7 @@ const validateBridgeFeeByRsnRatio: Validate = async (tokenId) => {
   const requirementsResult = Result.all(
     feesByTokenResult,
     tokensConfigResult,
-    pricesResult
+    pricesResult,
   );
 
   if (requirementsResult.isErr()) {
@@ -55,13 +55,13 @@ const validateBridgeFeeByRsnRatio: Validate = async (tokenId) => {
     const rsnRatioDivisor = newFeeConfigs.ergo.rsnRatioDivisor; // pick rsn ratio divisor from any chain, they should be all the same
 
     const tokenConfig = tokensConfig.find(
-      (token) => token.ergoSideTokenId === tokenId
+      (token) => token.ergoSideTokenId === tokenId,
     );
     if (!tokenConfig) {
       return Err(new TokenConfigMissing());
     }
 
-    const rsnConfig = tokensConfig.find((token) => token.name === "RSN");
+    const rsnConfig = tokensConfig.find((token) => token.name === 'RSN');
     if (!rsnConfig) {
       return Err(new RsnConfigMissing());
     }
@@ -70,7 +70,7 @@ const validateBridgeFeeByRsnRatio: Validate = async (tokenId) => {
       Number(bridgeFee),
       Number(rsnRatio),
       +prices[rsnConfig?.tokenId],
-      Number(rsnRatioDivisor)
+      Number(rsnRatioDivisor),
     );
     const expected = tokenConfig.fee.bridgeFeeUSD;
 

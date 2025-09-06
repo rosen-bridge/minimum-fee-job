@@ -1,6 +1,6 @@
-import { Result } from "ts-results-es";
+import { Result } from 'ts-results-es';
 
-import { AppError } from "../_error/app";
+import { AppError } from '../_error/app';
 
 export type ValidationResultOk = { isValid: boolean; reason: string | null };
 

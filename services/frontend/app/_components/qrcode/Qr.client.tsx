@@ -1,14 +1,31 @@
-"use client";
+'use client';
 
-import { QRCodeSVG } from "qrcode.react";
+import { QRCodeSVG } from 'qrcode.react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
-import { ContentCopyOutlined, DownloadOutlined, KeyboardArrowLeft, KeyboardArrowRight, PauseCircleOutline, PlayCircleOutline, ZoomIn } from "@mui/icons-material";
-import { Box, Button, Collapse, IconButton, MobileStepper, Slider, Stack, Typography } from "@mui/material";
+import {
+  ContentCopyOutlined,
+  DownloadOutlined,
+  KeyboardArrowLeft,
+  KeyboardArrowRight,
+  PauseCircleOutline,
+  PlayCircleOutline,
+  ZoomIn,
+} from '@mui/icons-material';
+import {
+  Box,
+  Button,
+  Collapse,
+  IconButton,
+  MobileStepper,
+  Slider,
+  Stack,
+  Typography,
+} from '@mui/material';
 
-import useChunkedTx from "../../_hooks/useChunkedTx";
-import { ToggleIconButton } from "./ToggleIconButton";
-import { useState } from "react";
+import useChunkedTx from '../../_hooks/useChunkedTx';
+import { ToggleIconButton } from './ToggleIconButton';
+import { useState } from 'react';
 
 /**
  * render a qr code for a chunked tx with the ability to change pages count
@@ -31,31 +48,31 @@ export const QrDisplay = ({ tx }: { tx: string }) => {
   const renderToolbar = () => {
     return (
       <Stack direction="row" justifyContent="center" spacing={1}>
-      <CopyToClipboard text={clone()}>
-        <IconButton>
-          <ContentCopyOutlined />
+        <CopyToClipboard text={clone()}>
+          <IconButton>
+            <ContentCopyOutlined />
+          </IconButton>
+        </CopyToClipboard>
+        <IconButton disabled={true}>
+          <DownloadOutlined />
         </IconButton>
-      </CopyToClipboard>
-      <IconButton disabled={true}>
-        <DownloadOutlined />
-      </IconButton>
-      <ToggleIconButton
-        selected={playing}
-        onClick={play}
-        disabled={pagesCount <= 1}
-      >
-        {playing ? <PauseCircleOutline /> : <PlayCircleOutline />}
-      </ToggleIconButton>
-      <ToggleIconButton
-        selected={showConfig && !playing}
-        disabled={playing}
-        onClick={() => setShowConfig(!showConfig)}
-      >
-        <ZoomIn />
-      </ToggleIconButton>
-    </Stack>
-    )
-  }
+        <ToggleIconButton
+          selected={playing}
+          onClick={play}
+          disabled={pagesCount <= 1}
+        >
+          {playing ? <PauseCircleOutline /> : <PlayCircleOutline />}
+        </ToggleIconButton>
+        <ToggleIconButton
+          selected={showConfig && !playing}
+          disabled={playing}
+          onClick={() => setShowConfig(!showConfig)}
+        >
+          <ZoomIn />
+        </ToggleIconButton>
+      </Stack>
+    );
+  };
 
   const renderStepper = () => (
     <Collapse in={true}>
@@ -87,8 +104,8 @@ export const QrDisplay = ({ tx }: { tx: string }) => {
           </Button>
         }
       />
-      </Collapse>
-    );
+    </Collapse>
+  );
 
   const renderSlider = () => (
     <Collapse in={showConfig && !playing}>
@@ -99,7 +116,7 @@ export const QrDisplay = ({ tx }: { tx: string }) => {
           </Typography>
           {pagesCount}
         </Typography>
-        {pageThresholds.max !== pageThresholds.min &&  (
+        {pageThresholds.max !== pageThresholds.min && (
           <Slider
             valueLabelDisplay="auto"
             step={1}
@@ -112,11 +129,17 @@ export const QrDisplay = ({ tx }: { tx: string }) => {
           />
         )}
       </Box>
-    </Collapse>  
-  ) 
+    </Collapse>
+  );
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="stretch" gap={1} pb={2}>
+    <Box
+      display="flex"
+      flexDirection="column"
+      alignItems="stretch"
+      gap={1}
+      pb={2}
+    >
       <QRCodeSVG value={value} size={380} includeMargin bgColor="transparent" />
       {renderStepper()}
       {renderSlider()}

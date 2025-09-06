@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    serverComponentsExternalPackages: ["ergo-lib-wasm-nodejs"],
+    serverComponentsExternalPackages: ['ergo-lib-wasm-nodejs'],
   },
   webpack: function (config, options) {
     config.experiments = {

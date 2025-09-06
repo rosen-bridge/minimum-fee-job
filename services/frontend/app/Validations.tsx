@@ -1,4 +1,4 @@
-import { Info } from "@mui/icons-material";
+import { Info } from '@mui/icons-material';
 import {
   CircularProgress,
   Grid,
@@ -11,16 +11,16 @@ import {
   TableRow,
   Tooltip,
   Typography,
-} from "@mui/material";
-import { keyBy } from "lodash-es";
-import { Suspense } from "react";
-import { Result } from "ts-results-es";
+} from '@mui/material';
+import { keyBy } from 'lodash-es';
+import { Suspense } from 'react';
+import { Result } from 'ts-results-es';
 
-import Validation from "./_components/validation/Validation";
+import Validation from './_components/validation/Validation';
 
-import { getPrices, getTokensConfig } from "./_store";
-import getFeesByToken from "./_utils/get-fees-by-token";
-import validations from "./_validations";
+import { getPrices, getTokensConfig } from './_store';
+import getFeesByToken from './_utils/get-fees-by-token';
+import validations from './_validations';
 
 /**
  * Render validations table
@@ -33,7 +33,7 @@ const Validations = async () => {
   const requirementsResults = Result.all(
     feesByTokenResult,
     tokensConfigResult,
-    pricesResult
+    pricesResult,
   );
 
   if (requirementsResults.isErr()) {
@@ -42,13 +42,13 @@ const Validations = async () => {
         container
         alignItems="center"
         justifyContent="center"
-        sx={{ height: "40vh" }}
+        sx={{ height: '40vh' }}
       >
         <Grid item sx={{ p: 2 }}>
           <Typography color="error" align="center" variant="h5">
             An error occurred before validation requirements are fulfilled:
             <br />
-            {requirementsResults.error.message || "Unknown"}
+            {requirementsResults.error.message || 'Unknown'}
           </Typography>
         </Grid>
       </Grid>
@@ -58,7 +58,7 @@ const Validations = async () => {
   const [feesByToken, tokensConfig, prices] = requirementsResults.value;
 
   const tokens = Object.keys(feesByToken);
-  const tokensData = keyBy(tokensConfig, "ergoSideTokenId");
+  const tokensData = keyBy(tokensConfig, 'ergoSideTokenId');
 
   const renderTableHead = () => (
     <TableHead>
@@ -99,7 +99,7 @@ const Validations = async () => {
       {tokens.map((token) => (
         <TableRow
           key={token}
-          sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+          sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
         >
           <TableCell align="left">{tokensData[token].name}</TableCell>
           <TableCell align="left">

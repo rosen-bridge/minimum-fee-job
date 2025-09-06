@@ -1,9 +1,9 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from '@mui/material';
 
-import QrDisplay from "./Qr.client";
-import TxOnBlockchainAlert from "./TxOnBlockchainAlert";
+import QrDisplay from './Qr.client';
+import TxOnBlockchainAlert from './TxOnBlockchainAlert';
 
-import { getTx } from "../../_store";
+import { getTx } from '../../_store';
 
 /**
  * wrapper server component for the Qr component
@@ -15,7 +15,7 @@ const Qr = async () => {
     <>
       <TxOnBlockchainAlert txResult={txResult} />
       {txResult.isOk() ? (
-        <QrDisplay tx={txResult.value || ""} />
+        <QrDisplay tx={txResult.value || ''} />
       ) : (
         <Box
           width={380}

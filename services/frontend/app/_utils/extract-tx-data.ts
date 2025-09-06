@@ -1,9 +1,9 @@
-import { Fee } from "@rosen-bridge/minimum-fee";
-import { extractFeeFromBox } from "@rosen-bridge/minimum-fee/dist/lib/utils";
-import * as wasm from "ergo-lib-wasm-nodejs";
-import { Err, Ok } from "ts-results-es";
+import { Fee } from '@rosen-bridge/minimum-fee';
+import { extractFeeFromBox } from '@rosen-bridge/minimum-fee/dist/lib/utils';
+import * as wasm from 'ergo-lib-wasm-nodejs';
+import { Err, Ok } from 'ts-results-es';
 
-import { TxDataExtractionError } from "../_error/tx";
+import { TxDataExtractionError } from '../_error/tx';
 
 const cache = new Map<string, any>();
 
@@ -17,12 +17,12 @@ const extractTxData = (tx: string) => {
   try {
     const reducedTxBase64 = JSON.parse(tx).reducedTx;
     const reducedTx = wasm.ReducedTransaction.sigma_parse_bytes(
-      Buffer.from(reducedTxBase64, "base64")
+      Buffer.from(reducedTxBase64, 'base64'),
     );
     const unsignedTx = reducedTx.unsigned_tx();
 
     const minimumFeeConfigErgoTree = wasm.Address.from_base58(
-      process.env.MINIMUM_FEE_CONFIG_ADDRESS!
+      process.env.MINIMUM_FEE_CONFIG_ADDRESS!,
     )
       .to_ergo_tree()
       .to_base16_bytes();
@@ -50,7 +50,7 @@ const extractTxData = (tx: string) => {
      */
     const getTokenAssociatedWithOutput = (output: wasm.ErgoBoxCandidate) =>
       output.tokens().len() === 1
-        ? "erg"
+        ? 'erg'
         : output.tokens().get(1).id().to_str();
 
     const feesByToken = Array.from({
@@ -62,7 +62,7 @@ const extractTxData = (tx: string) => {
         return {
           ...partialFeesByToken,
           [getTokenAssociatedWithOutput(output)]: extractFeeFromBox(
-            output as any
+            output as any,
           ),
         };
       }, {});

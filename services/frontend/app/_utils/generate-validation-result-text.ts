@@ -1,4 +1,4 @@
-import calculateErrorPercent from "./calculate-error-percent";
+import calculateErrorPercent from './calculate-error-percent';
 
 /**
  * Generate tooltip text based on actual and expected values
@@ -8,7 +8,7 @@ import calculateErrorPercent from "./calculate-error-percent";
 const generateValidationResultText = (actual: number, expected: number) =>
   `actual: ${actual}\nexpected: ${expected}\nerror: ~${+calculateErrorPercent(
     actual,
-    expected
+    expected,
   ).toFixed(2)}%`;
 
 export default generateValidationResultText;

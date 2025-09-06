@@ -1,11 +1,11 @@
-import { every, map, mapValues, omitBy, uniq } from "lodash-es";
-import { Err, Ok } from "ts-results-es";
+import { every, map, mapValues, omitBy, uniq } from 'lodash-es';
+import { Err, Ok } from 'ts-results-es';
 
-import getFeesByToken from "../_utils/get-fees-by-token";
+import getFeesByToken from '../_utils/get-fees-by-token';
 
-import { ChainConfigsSamenessValidationError } from "../_error/chain-configs-sameness-validation";
+import { ChainConfigsSamenessValidationError } from '../_error/chain-configs-sameness-validation';
 
-import { Validate } from "./types";
+import { Validate } from './types';
 
 /**
  * Validate that bridgeFee, feeRatio, rsnRatio, and rsnRatioDivisor is the same
@@ -26,22 +26,22 @@ const validateChainConfigsSameness: Validate = async (tokenId) => {
     const newFeeConfigs = fees.at(-1)!.configs;
 
     const configs = {
-      bridgeFees: map(newFeeConfigs, "bridgeFee"),
-      feeRatios: map(newFeeConfigs, "feeRatio"),
-      rsnRatios: map(newFeeConfigs, "rsnRatio"),
-      rsnRatioDivisors: map(newFeeConfigs, "rsnRatioDivisor"),
+      bridgeFees: map(newFeeConfigs, 'bridgeFee'),
+      feeRatios: map(newFeeConfigs, 'feeRatio'),
+      rsnRatios: map(newFeeConfigs, 'rsnRatio'),
+      rsnRatioDivisors: map(newFeeConfigs, 'rsnRatioDivisor'),
     };
 
     const uniqConfigs = mapValues(configs, uniq);
 
-    const isValid = every(uniqConfigs, ["length", 1]);
+    const isValid = every(uniqConfigs, ['length', 1]);
 
     return Ok({
       isValid,
       reason: !isValid
-        ? Object.entries(omitBy(uniqConfigs, ["length", 1]))
+        ? Object.entries(omitBy(uniqConfigs, ['length', 1]))
             .map(([key, value]) => `${key}: ${value}`)
-            .join("\n")
+            .join('\n')
         : null,
     });
   } catch (error) {
