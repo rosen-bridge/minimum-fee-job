@@ -144,4 +144,4 @@ dist
 # vercel
 .vercel
 
-config/rosen/
+services/backend/config/rosen/

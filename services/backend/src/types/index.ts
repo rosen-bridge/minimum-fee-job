@@ -7,6 +7,7 @@ export enum Chains {
   ETHEREUM = 'ethereum',
   BINANCE = 'binance',
   DOGE = 'doge',
+  BITCOIN_RUNES = 'bitcoin-runes',
 }
 
 export interface TokenConfig {
@@ -145,6 +146,7 @@ export interface ConfigInterface {
   bitcoinTxVSize: number;
   bitcoinMinUtxo: number;
   dogeTxSize: number;
+  bitcoinRunesTxVSize: number;
   dogeMinUtxo: number;
   ethereumTxFee: number;
   binanceTxFee: number;

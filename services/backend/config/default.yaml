@@ -21,6 +21,7 @@ minimumFee:
   bitcoinTxVSize: 150
   bitcoinMinUtxo: 0.00000546
   dogeTxSize: 226
+  bitcoinRunesTxVSize: 383 # 3 NS inputs -> 3 NS, 1 OP_RETURN of size 23 and 1 Taproot outputs
   dogeMinUtxo: 0.01
   ethereumTxFee: 0.001
   binanceTxFee: 0.0001
@@ -35,8 +36,6 @@ minimumFee:
     bridgeFeeUSD: 10
     ergNetworkFee: 0.0013
     adaNetworkFee: 3.4
-    bitcoinNetworkFee: 0.0000546
-    dogeNetworkFee: 0.01
     feeRatioFloat: 0.005
     bitcoinConfirmation: 6
     dogeConfirmation: 10
@@ -80,6 +79,7 @@ triggerPercent:
     ethereum: 200
     binance: 10
     doge: 100
+    bitcoin-runes: 100
 discordWebHookUrl: '' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours
 kv:

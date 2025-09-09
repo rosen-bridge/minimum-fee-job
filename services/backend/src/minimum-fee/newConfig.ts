@@ -273,6 +273,31 @@ export const feeConfigFromPrice = async (
     newFeeConfig.setChainConfig(Chains.DOGE, dogeHeight, undefined);
   }
 
+  //  BITCOIN_RUNES
+  if (chains.includes(Chains.BITCOIN_RUNES)) {
+    const bitcoinRunesNetworkFee = getBitcoinRunesNetworkFee(
+      prices,
+      configs,
+      tokenPrice,
+      tokenDecimal,
+      bitcoinFeeRatioMap,
+    );
+    const bitcoinRunesFee: ChainFee = {
+      bridgeFee: bridgeFee,
+      networkFee: bitcoinRunesNetworkFee,
+      rsnRatio: rsnRatio,
+      feeRatio: feeRatio,
+      rsnRatioDivisor,
+    };
+    newFeeConfig.setChainConfig(
+      Chains.BITCOIN_RUNES,
+      bitcoinHeight,
+      bitcoinRunesFee,
+    );
+  } else {
+    newFeeConfig.setChainConfig(Chains.BITCOIN_RUNES, bitcoinHeight, undefined);
+  }
+
   return newFeeConfig;
 };
 
@@ -385,6 +410,28 @@ const getDogeNetworkFee = (
   return BigInt(
     Math.ceil(
       (dogeValue * dogePrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8),
+    ),
+  );
+};
+
+const getBitcoinRunesNetworkFee = (
+  prices: Map<string, number>,
+  configs: SupportedTokenConfig['fee'],
+  tokenPrice: number,
+  tokenDecimal: number,
+  bitcoinFeeRatioMap: Record<string, number>,
+) => {
+  const btcPrice = prices.get(BTC);
+  if (!btcPrice) throw Error(`Btc price is required`);
+
+  // calculating network fee on Bitcoin
+  const bitcoinFeeRatio = bitcoinFeeRatioMap[configs.bitcoinConfirmation];
+  const bitcoinValue =
+    bitcoinFeeRatio * minimumFeeConfigs.bitcoinRunesTxVSize +
+    minimumFeeConfigs.bitcoinMinUtxo * 10 ** 8;
+  return BigInt(
+    Math.ceil(
+      (bitcoinValue * btcPrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8),
     ),
   );
 };
