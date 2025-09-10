@@ -21,7 +21,7 @@ import {
   getEthereumHeight,
 } from './network/clients';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger= DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 const main = async () => {
   logger.info(`Starting Job`);

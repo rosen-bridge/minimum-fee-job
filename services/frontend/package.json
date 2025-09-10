@@ -13,7 +13,9 @@
     "build": "next build",
     "start": "next start",
     "prettify": "prettier --write . --ignore-path ../../.gitignore",
-    "lint": "next lint --fix && npm run prettify"
+    "prettify:check": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "next lint --fix && npm run prettify",
+    "lint:ci": "next lint --max-warnings=0 && npm run prettify:check"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
