@@ -80,9 +80,10 @@ export const feeGuaranteeDuration = new Map<string, number>([
   ['ergo', 24 * 30], // 1 day (30 blocks per hour)
   ['cardano', 24 * 60 * 3], // 1 day (3 blocks per minute)
   ['bitcoin', 24 * 6], // 1 day (6 blocks per hour)
-  ['doge', 24 * 60], // 1 day (60 blocks per hour)
   ['ethereum', 24 * 60 * 5], // 1 day (5 blocks per minute)
   ['binance', 24 * 60 * 20], // 1 day (20 blocks per minute)
+  ['doge', 24 * 60], // 1 day (60 blocks per hour)
+  ['bitcoin-runes', 24 * 6], // 1 day (6 blocks per hour)
 ]);
 export const RunningInterval = config.get<number>('interval') * 1000; // seconds to milliseconds
 
@@ -104,6 +105,8 @@ export const minimumFeeConfigs: ConfigInterface = {
   bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
   bitcoinMinUtxo: config.get<number>('minimumFee.bitcoinMinUtxo') ?? 0.00000546,
   dogeTxSize: config.get<number>('minimumFee.dogeTxSize') ?? 226,
+  bitcoinRunesTxVSize:
+    config.get<number>('minimumFee.bitcoinRunesTxVSize') ?? 383,
   dogeMinUtxo: config.get<number>('minimumFee.dogeMinUtxo') ?? 0.01,
   ethereumTxFee: config.get<number>('minimumFee.ethereumTxFee') ?? 0.001,
   binanceTxFee: config.get<number>('minimumFee.binanceTxFee') ?? 0.0001,
