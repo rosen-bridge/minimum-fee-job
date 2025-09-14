@@ -3,6 +3,7 @@ import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
 import prettier from 'eslint-config-prettier';
 import globals from 'globals';
+import importPlugin from 'eslint-plugin-import';
 
 export default [
   // Ignore Patterns
@@ -20,10 +21,51 @@ export default [
     },
     plugins: {
       '@typescript-eslint': typescriptEslint,
+      import: importPlugin,
     },
     rules: {
       ...pluginJs.configs.recommended.rules,
       ...typescriptEslint.configs.recommended.rules,
+
+      // --- Import Sorting ---
+      'sort-imports': [
+        'error',
+        {
+          ignoreCase: true,
+          ignoreDeclarationSort: true, 
+        },
+      ],
+      'import/order': [
+        'error',
+        {
+          groups: [
+            'builtin',   
+            'external',  
+            'internal',  
+            'parent',    
+            'sibling',   
+            'index',     
+          ],
+          pathGroups: [
+            {
+              pattern: 'components/**',
+              group: 'internal',
+              position: 'before',
+            },
+            {
+              pattern: 'assets/**',
+              group: 'internal',
+              position: 'after',
+            },
+          ],
+          pathGroupsExcludedImportTypes: ['internal'],
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+          'newlines-between': 'always',
+        },
+      ],
     },
   },
 
