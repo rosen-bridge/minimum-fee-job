@@ -11,7 +11,7 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "lint": "npm run lint --workspaces",
-    "lint:ci": "npm run lint:ci --workspaces",
+    "lint:check": "npm run lint:check --workspaces",
     "prepare": "husky install",
     "release": "npm run release --workspaces",
     "type-check": "npm run type-check --workspaces",
