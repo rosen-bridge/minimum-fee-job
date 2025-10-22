@@ -86,9 +86,6 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
     logger.error(errorMsg);
     errors.push(errorMsg);
     allPricesFetched = false;
-    coingeckoTokens.forEach((token) => {
-      prices.delete(token.tokenId);
-    });
   }
 
   // fetch price from coinMarketCap
