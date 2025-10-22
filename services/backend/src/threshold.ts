@@ -78,7 +78,8 @@ const getHighAmount = (tokenId: string, price: number) => {
 };
 
 const threshold = async () => {
-  const prices = await getConfigTokenPrices();
+  const priceResult = await getConfigTokenPrices();
+  const prices = priceResult.prices;
   const tokens = loadTokens();
   const thresholds: TokenType = {};
   const chains = Object.keys(MAX_NATIVE_TRANSFER);

@@ -29,7 +29,24 @@ const main = async () => {
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
   // fetch current prices
-  const prices = await getConfigTokenPrices();
+  const priceResult = await getConfigTokenPrices();
+  const prices = priceResult.prices;
+  const allPricesFetched = priceResult.allPricesFetched;
+  const priceErrors = priceResult.errors;
+
+  if (!allPricesFetched) {
+    const errorMsg = `Not all token prices were fetched successfully. Skipping config update.`;
+    logger.error(errorMsg);
+
+    const discordNotification = Notification.getInstance();
+    await discordNotification.send(
+      DiscordPayloadType.MESSAGE,
+      `# :warning: MinimumFee Job - Price Fetching Failed\n` +
+        `Not all token prices were fetched successfully. Config update skipped.\n\n` +
+        `**Errors:**\n${priceErrors.map((error) => `- ${error}`).join('\n')}`,
+    );
+    return;
+  }
 
   // fetch current network heights
   const chainHeights = new Map<Chains, number>();
