@@ -9,8 +9,9 @@ export const sendPriceFetchFailureNotification = async (
   prices: Map<string, number>,
   priceErrors: Map<string, string>,
 ): Promise<void> => {
-  const errorMsg = `Not all token prices were fetched successfully. Skipping config update.`;
-  logger.error(errorMsg);
+  logger.error(
+    'Not all token prices were fetched successfully. Skipping config update.',
+  );
 
   const discordNotification = Notification.getInstance();
 
