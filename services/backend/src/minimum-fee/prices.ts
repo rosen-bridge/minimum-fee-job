@@ -1,3 +1,4 @@
+import { sendPriceFetchFailureNotification } from '@/utils/notifications';
 import { minimumFeeConfigs } from '../configs';
 import { fetchPriceFromCoingeckoInUSD } from '../network/fetchPriceFromCoingecko';
 import { fetchPriceFromCoinMarketCapInUSD } from '../network/fetchPriceFromCoinMarketCap';
@@ -20,7 +21,7 @@ const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
   const prices = new Map<string, number>();
-  const errors: string[] = [];
+  const errors = new Map<string, string>();
   let allPricesFetched = true;
   const coingeckoTokens: SupportedTokenConfig[] = [];
   const coinMarketCapTokens: SupportedTokenConfig[] = [];
@@ -84,7 +85,9 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
   } catch (error) {
     const errorMsg = `Failed to fetch prices from CoinGecko: ${error}`;
     logger.error(errorMsg);
-    errors.push(errorMsg);
+    coingeckoTokens.forEach((token) => {
+      errors.set(token.name, errorMsg);
+    });
     allPricesFetched = false;
   }
 
@@ -99,7 +102,7 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
     } catch (error) {
       const errorMsg = `Failed to fetch price for [${token.name}] from CoinMarketCap: ${error}`;
       logger.error(errorMsg);
-      errors.push(errorMsg);
+      errors.set(token.name, errorMsg);
       allPricesFetched = false;
     }
   }
@@ -116,14 +119,14 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
       } catch (error) {
         const errorMsg = `Failed to fetch price for [${token.name}] from Spectrum: ${error}`;
         logger.error(errorMsg);
-        errors.push(errorMsg);
+        errors.set(token.name, errorMsg);
         allPricesFetched = false;
       }
     }
   } else {
     const errorMsg = `Failed to fetch price for [erg]`;
     logger.error(errorMsg);
-    errors.push(errorMsg);
+    errors.set('erg', errorMsg);
     allPricesFetched = false;
   }
   // fetch Ada price
@@ -139,7 +142,7 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
       } catch (error) {
         const errorMsg = `Failed to fetch price for [${token.name}] from DexHunter: ${error}`;
         logger.error(errorMsg);
-        errors.push(errorMsg);
+        errors.set(token.name, errorMsg);
         allPricesFetched = false;
       }
     }
@@ -159,14 +162,14 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
       } catch (error) {
         const errorMsg = `Failed to fetch price for [${token.name}] from Minswap: ${error}`;
         logger.error(errorMsg);
-        errors.push(errorMsg);
+        errors.set(token.name, errorMsg);
         allPricesFetched = false;
       }
     }
   } else {
     const errorMsg = `Failed to fetch price for [ada]`;
     logger.error(errorMsg);
-    errors.push(errorMsg);
+    errors.set('ada', errorMsg);
     allPricesFetched = false;
   }
   // fetch duplicate token prices
@@ -177,7 +180,7 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
     if (!price) {
       const errorMsg = `Failed to fetch price for [${token.name}]`;
       logger.error(errorMsg);
-      errors.push(errorMsg);
+      errors.set(token.name, errorMsg);
       allPricesFetched = false;
     } else {
       logger.debug(`Price of [${token.name}]: ${price}$`);
@@ -185,9 +188,9 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
     }
   }
 
+  if (!allPricesFetched) sendPriceFetchFailureNotification(prices, errors);
   return {
     prices,
     allPricesFetched,
-    errors,
   };
 };

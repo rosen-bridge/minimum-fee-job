@@ -29,65 +29,7 @@ const main = async () => {
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
   const priceResult = await getConfigTokenPrices();
-  const prices = priceResult.prices;
-  const allPricesFetched = priceResult.allPricesFetched;
-  const priceErrors = priceResult.errors;
-
-  if (!allPricesFetched) {
-    const errorMsg = `Not all token prices were fetched successfully. Skipping config update.`;
-    logger.error(errorMsg);
-
-    const discordNotification = Notification.getInstance();
-
-    const failedTokens = priceErrors
-      .filter((error) => error.includes('Failed to fetch price for'))
-      .map((error) => {
-        const match = error.match(/Failed to fetch price for \[(.*?)\]/);
-        return match ? match[1] : null;
-      })
-      .filter(Boolean);
-
-    // Send summary message first
-    const summaryMessage =
-      `# :warning: MinimumFee Job - Price Fetching Failed\n` +
-      `Not all token prices were fetched successfully. Config update skipped.\n\n` +
-      `**Summary:**\n` +
-      `- Total errors: ${priceErrors.length}\n` +
-      `- Failed tokens: ${failedTokens.length}\n` +
-      `- Successful prices: ${prices.size}`;
-
-    await discordNotification.send(DiscordPayloadType.MESSAGE, summaryMessage);
-
-    if (failedTokens.length > 0) {
-      const tokenChunks = chunk(failedTokens, 20);
-
-      for (let i = 0; i < tokenChunks.length; i++) {
-        const tokenMessage =
-          `**Failed Tokens (Part ${i + 1}/${tokenChunks.length}):**\n` +
-          tokenChunks[i].map((token) => `- ${token}`).join('\n');
-
-        await discordNotification.send(
-          DiscordPayloadType.MESSAGE,
-          tokenMessage,
-        );
-      }
-    }
-
-    if (priceErrors.length > 0) {
-      const errorChunks = chunk(priceErrors, 15);
-      for (let i = 0; i < errorChunks.length; i++) {
-        const errorDetails =
-          `# Price Fetching Errors (Part ${i + 1}/${errorChunks.length})\n\n` +
-          `## Detailed Errors (${i * 15 + 1}-${Math.min((i + 1) * 15, priceErrors.length)})\n\n` +
-          errorChunks[i].map((error) => `- ${error}`).join('\n');
-
-        await discordNotification.send(DiscordPayloadType.FILE, errorDetails, {
-          filename: `price_errors_part_${i + 1}.md`,
-        });
-      }
-    }
-    return;
-  }
+  if (!priceResult.allPricesFetched) return;
 
   // fetch current network heights
   const chainHeights = new Map<Chains, number>();
@@ -101,7 +43,10 @@ const main = async () => {
 
   // new config
   logger.info(`Generating new config`);
-  const newFeeConfigs = await generateNewFeeConfig(prices, chainHeights);
+  const newFeeConfigs = await generateNewFeeConfig(
+    priceResult.prices,
+    chainHeights,
+  );
 
   newFeeConfigs.forEach((feeConfig, tokenId) => {
     logger.debug(
@@ -156,7 +101,7 @@ const main = async () => {
     logger.info(`Transaction to update minimum-fee config box generated`);
 
     // send notification to discord
-    const tables = pricesToTables(prices, feeDifferences);
+    const tables = pricesToTables(priceResult.prices, feeDifferences);
     const discordNotification = Notification.getInstance();
     await discordNotification.send(
       DiscordPayloadType.MESSAGE,
@@ -194,7 +139,7 @@ const main = async () => {
       }
       await Promise.all([
         saveTokensConfig(minimumFeeConfigs.supportedTokens),
-        savePrices(prices),
+        savePrices(priceResult.prices),
         saveTx(tx),
       ]);
       logger.info('Saved data in the store');

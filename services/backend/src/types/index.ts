@@ -185,5 +185,4 @@ export enum DiscordPayloadType {
 export interface PriceFetchResult {
   prices: Map<string, number>;
   allPricesFetched: boolean;
-  errors: string[];
 }
