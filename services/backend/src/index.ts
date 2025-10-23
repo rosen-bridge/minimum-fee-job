@@ -28,7 +28,6 @@ const main = async () => {
   if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
-  // fetch current prices
   const priceResult = await getConfigTokenPrices();
   const prices = priceResult.prices;
   const allPricesFetched = priceResult.allPricesFetched;
@@ -39,12 +38,54 @@ const main = async () => {
     logger.error(errorMsg);
 
     const discordNotification = Notification.getInstance();
-    await discordNotification.send(
-      DiscordPayloadType.MESSAGE,
+
+    const failedTokens = priceErrors
+      .filter((error) => error.includes('Failed to fetch price for'))
+      .map((error) => {
+        const match = error.match(/Failed to fetch price for \[(.*?)\]/);
+        return match ? match[1] : null;
+      })
+      .filter(Boolean);
+
+    // Send summary message first
+    const summaryMessage =
       `# :warning: MinimumFee Job - Price Fetching Failed\n` +
-        `Not all token prices were fetched successfully. Config update skipped.\n\n` +
-        `**Errors:**\n${priceErrors.map((error) => `- ${error}`).join('\n')}`,
-    );
+      `Not all token prices were fetched successfully. Config update skipped.\n\n` +
+      `**Summary:**\n` +
+      `- Total errors: ${priceErrors.length}\n` +
+      `- Failed tokens: ${failedTokens.length}\n` +
+      `- Successful prices: ${prices.size}`;
+
+    await discordNotification.send(DiscordPayloadType.MESSAGE, summaryMessage);
+
+    if (failedTokens.length > 0) {
+      const tokenChunks = chunk(failedTokens, 20);
+
+      for (let i = 0; i < tokenChunks.length; i++) {
+        const tokenMessage =
+          `**Failed Tokens (Part ${i + 1}/${tokenChunks.length}):**\n` +
+          tokenChunks[i].map((token) => `- ${token}`).join('\n');
+
+        await discordNotification.send(
+          DiscordPayloadType.MESSAGE,
+          tokenMessage,
+        );
+      }
+    }
+
+    if (priceErrors.length > 0) {
+      const errorChunks = chunk(priceErrors, 15);
+      for (let i = 0; i < errorChunks.length; i++) {
+        const errorDetails =
+          `# Price Fetching Errors (Part ${i + 1}/${errorChunks.length})\n\n` +
+          `## Detailed Errors (${i * 15 + 1}-${Math.min((i + 1) * 15, priceErrors.length)})\n\n` +
+          errorChunks[i].map((error) => `- ${error}`).join('\n');
+
+        await discordNotification.send(DiscordPayloadType.FILE, errorDetails, {
+          filename: `price_errors_part_${i + 1}.md`,
+        });
+      }
+    }
     return;
   }
 

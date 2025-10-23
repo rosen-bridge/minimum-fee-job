@@ -105,70 +105,84 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
   }
   // fetch Erg price
   const ergPrice = prices.get('erg');
-  if (!ergPrice) throw Error(`Erg price is not fetched yet!`);
-
-  // fetch price from spectrum
-  for (const token of spectrumTokens) {
-    try {
-      const price =
-        (await fetchPriceFromSpectrumInERG(token.tokenId)) * ergPrice;
-      logger.debug(`Price of [${token.name}]: ${price}$`);
-      prices.set(token.tokenId, price);
-    } catch (error) {
-      const errorMsg = `Failed to fetch price for [${token.name}] from Spectrum: ${error}`;
-      logger.error(errorMsg);
-      errors.push(errorMsg);
-      allPricesFetched = false;
+  if (ergPrice) {
+    // fetch price from spectrum
+    for (const token of spectrumTokens) {
+      try {
+        const price =
+          (await fetchPriceFromSpectrumInERG(token.tokenId)) * ergPrice;
+        logger.debug(`Price of [${token.name}]: ${price}$`);
+        prices.set(token.tokenId, price);
+      } catch (error) {
+        const errorMsg = `Failed to fetch price for [${token.name}] from Spectrum: ${error}`;
+        logger.error(errorMsg);
+        errors.push(errorMsg);
+        allPricesFetched = false;
+      }
     }
+  } else {
+    const errorMsg = `Failed to fetch price for [erg]`;
+    logger.error(errorMsg);
+    errors.push(errorMsg);
+    allPricesFetched = false;
   }
-
   // fetch Ada price
   const adaPrice = prices.get('ada');
-  if (!adaPrice) throw Error(`Ada price is not fetched yet!`);
-
-  // fetch price from dexhunter
-  for (const token of dexHunterTokens) {
-    try {
-      const price =
-        (await fetchPriceFromDexHunterInADA(token.tokenId)) * adaPrice;
-      logger.debug(`Price of [${token.name}]: ${price}$`);
-      prices.set(token.tokenId, price);
-    } catch (error) {
-      const errorMsg = `Failed to fetch price for [${token.name}] from DexHunter: ${error}`;
-      logger.error(errorMsg);
-      errors.push(errorMsg);
-      allPricesFetched = false;
+  if (adaPrice) {
+    // fetch price from dexhunter
+    for (const token of dexHunterTokens) {
+      try {
+        const price =
+          (await fetchPriceFromDexHunterInADA(token.tokenId)) * adaPrice;
+        logger.debug(`Price of [${token.name}]: ${price}$`);
+        prices.set(token.tokenId, price);
+      } catch (error) {
+        const errorMsg = `Failed to fetch price for [${token.name}] from DexHunter: ${error}`;
+        logger.error(errorMsg);
+        errors.push(errorMsg);
+        allPricesFetched = false;
+      }
     }
-  }
 
-  // fetch price from minswap
-  for (const token of minswapTokens) {
-    try {
-      const params = token.priceBackendParams as MinswapParams;
-      const price =
-        (await fetchPriceFromMinswapInADA(
-          token.tokenId,
-          params.lpPolicyId,
-          params.lpAssetName,
-        )) * adaPrice;
-      logger.debug(`Price of [${token.name}]: ${price}$`);
-      prices.set(token.tokenId, price);
-    } catch (error) {
-      const errorMsg = `Failed to fetch price for [${token.name}] from Minswap: ${error}`;
-      logger.error(errorMsg);
-      errors.push(errorMsg);
-      allPricesFetched = false;
+    // fetch price from minswap
+    for (const token of minswapTokens) {
+      try {
+        const params = token.priceBackendParams as MinswapParams;
+        const price =
+          (await fetchPriceFromMinswapInADA(
+            token.tokenId,
+            params.lpPolicyId,
+            params.lpAssetName,
+          )) * adaPrice;
+        logger.debug(`Price of [${token.name}]: ${price}$`);
+        prices.set(token.tokenId, price);
+      } catch (error) {
+        const errorMsg = `Failed to fetch price for [${token.name}] from Minswap: ${error}`;
+        logger.error(errorMsg);
+        errors.push(errorMsg);
+        allPricesFetched = false;
+      }
     }
+  } else {
+    const errorMsg = `Failed to fetch price for [ada]`;
+    logger.error(errorMsg);
+    errors.push(errorMsg);
+    allPricesFetched = false;
   }
-
   // fetch duplicate token prices
   for (const token of duplicateTokens) {
     const price = prices.get(
       (token.priceBackendParams as DuplicateTokenParams).tokenId,
     );
-    if (!price) throw Error(`Token [${price}] price is not fetched yet!`);
-    logger.debug(`Price of [${token.name}]: ${price}$`);
-    prices.set(token.tokenId, price);
+    if (!price) {
+      const errorMsg = `Failed to fetch price for [${token.name}]`;
+      logger.error(errorMsg);
+      errors.push(errorMsg);
+      allPricesFetched = false;
+    } else {
+      logger.debug(`Price of [${token.name}]: ${price}$`);
+      prices.set(token.tokenId, price);
+    }
   }
 
   return {
