@@ -10,7 +10,7 @@ export class Migration1739000000000 implements MigrationInterface {
     await queryRunner.query(`
             CREATE TABLE "token_price_entity" (
                 "id" SERIAL NOT NULL,
-                "timestamp" BIGINT NOT NULL,
+                "timestamp" INTEGER  NOT NULL,
                 "ergoSideTokenId" character varying NOT NULL,
                 "price" decimal(20,10) NOT NULL,
                 CONSTRAINT "PK_token_price_entity_id" PRIMARY KEY ("id")

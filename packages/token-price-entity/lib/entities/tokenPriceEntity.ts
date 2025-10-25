@@ -9,7 +9,7 @@ export class TokenPriceEntity {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'bigint' })
+  @Column({ type: 'int' })
   timestamp!: number;
 
   @Column({ type: 'varchar' })
