@@ -181,3 +181,9 @@ export enum DiscordPayloadType {
   MESSAGE = 'message',
   FILE = 'file',
 }
+
+export interface PriceFetchResult {
+  prices: Map<string, number>;
+  fetched: boolean;
+  errors: Map<string, string>;
+}

@@ -20,6 +20,7 @@ import {
   getErgoHeight,
   getEthereumHeight,
 } from './network/clients';
+import { sendPriceFetchFailureNotification } from './utils/notifications';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -28,8 +29,14 @@ const main = async () => {
   if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
-  // fetch current prices
-  const prices = await getConfigTokenPrices();
+  const priceResult = await getConfigTokenPrices();
+  if (!priceResult.fetched) {
+    await sendPriceFetchFailureNotification(
+      priceResult.prices,
+      priceResult.errors,
+    );
+    return;
+  }
 
   // fetch current network heights
   const chainHeights = new Map<Chains, number>();
@@ -43,7 +50,10 @@ const main = async () => {
 
   // new config
   logger.info(`Generating new config`);
-  const newFeeConfigs = await generateNewFeeConfig(prices, chainHeights);
+  const newFeeConfigs = await generateNewFeeConfig(
+    priceResult.prices,
+    chainHeights,
+  );
 
   newFeeConfigs.forEach((feeConfig, tokenId) => {
     logger.debug(
@@ -98,7 +108,7 @@ const main = async () => {
     logger.info(`Transaction to update minimum-fee config box generated`);
 
     // send notification to discord
-    const tables = pricesToTables(prices, feeDifferences);
+    const tables = pricesToTables(priceResult.prices, feeDifferences);
     const discordNotification = Notification.getInstance();
     await discordNotification.send(
       DiscordPayloadType.MESSAGE,
@@ -136,7 +146,7 @@ const main = async () => {
       }
       await Promise.all([
         saveTokensConfig(minimumFeeConfigs.supportedTokens),
-        savePrices(prices),
+        savePrices(priceResult.prices),
         saveTx(tx),
       ]);
       logger.info('Saved data in the store');

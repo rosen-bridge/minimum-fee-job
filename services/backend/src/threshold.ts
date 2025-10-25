@@ -78,7 +78,10 @@ const getHighAmount = (tokenId: string, price: number) => {
 };
 
 const threshold = async () => {
-  const prices = await getConfigTokenPrices();
+  const priceResult = await getConfigTokenPrices();
+  if (!priceResult.fetched)
+    throw Error(`Some token prices could not be fetched`);
+  const prices = priceResult.prices;
   const tokens = loadTokens();
   const thresholds: TokenType = {};
   const chains = Object.keys(MAX_NATIVE_TRANSFER);
