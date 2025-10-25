@@ -31,7 +31,10 @@ const main = async () => {
 
   const priceResult = await getConfigTokenPrices();
   if (!priceResult.fetched) {
-    sendPriceFetchFailureNotification(priceResult.prices, priceResult.errors);
+    await sendPriceFetchFailureNotification(
+      priceResult.prices,
+      priceResult.errors,
+    );
     return;
   }
 
