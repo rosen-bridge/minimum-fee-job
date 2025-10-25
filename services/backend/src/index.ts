@@ -20,6 +20,7 @@ import {
   getErgoHeight,
   getEthereumHeight,
 } from './network/clients';
+import { sendPriceFetchFailureNotification } from './utils/notifications';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -29,7 +30,10 @@ const main = async () => {
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
   const priceResult = await getConfigTokenPrices();
-  if (!priceResult.allPricesFetched) return;
+  if (!priceResult.fetched) {
+    sendPriceFetchFailureNotification(priceResult.prices, priceResult.errors);
+    return;
+  }
 
   // fetch current network heights
   const chainHeights = new Map<Chains, number>();

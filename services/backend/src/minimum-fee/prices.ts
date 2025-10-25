@@ -1,4 +1,3 @@
-import { sendPriceFetchFailureNotification } from '@/utils/notifications';
 import { minimumFeeConfigs } from '../configs';
 import { fetchPriceFromCoingeckoInUSD } from '../network/fetchPriceFromCoingecko';
 import { fetchPriceFromCoinMarketCapInUSD } from '../network/fetchPriceFromCoinMarketCap';
@@ -22,7 +21,7 @@ const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
   const prices = new Map<string, number>();
   const errors = new Map<string, string>();
-  let allPricesFetched = true;
+  let fetched = true;
   const coingeckoTokens: SupportedTokenConfig[] = [];
   const coinMarketCapTokens: SupportedTokenConfig[] = [];
   const spectrumTokens: SupportedTokenConfig[] = [];
@@ -88,7 +87,7 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
     coingeckoTokens.forEach((token) => {
       errors.set(token.name, errorMsg);
     });
-    allPricesFetched = false;
+    fetched = false;
   }
 
   // fetch price from coinMarketCap
@@ -103,7 +102,7 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
       const errorMsg = `Failed to fetch price for [${token.name}] from CoinMarketCap: ${error}`;
       logger.error(errorMsg);
       errors.set(token.name, errorMsg);
-      allPricesFetched = false;
+      fetched = false;
     }
   }
   // fetch Erg price
@@ -120,14 +119,16 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
         const errorMsg = `Failed to fetch price for [${token.name}] from Spectrum: ${error}`;
         logger.error(errorMsg);
         errors.set(token.name, errorMsg);
-        allPricesFetched = false;
+        fetched = false;
       }
     }
   } else {
-    const errorMsg = `Failed to fetch price for [erg]`;
+    const errorMsg = `Skipped fetching prices from Spectrum due to unavailable [ERG] price.`;
     logger.error(errorMsg);
-    errors.set('erg', errorMsg);
-    allPricesFetched = false;
+    spectrumTokens.forEach((token) => {
+      errors.set(token.name, errorMsg);
+    });
+    fetched = false;
   }
   // fetch Ada price
   const adaPrice = prices.get('ada');
@@ -143,7 +144,7 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
         const errorMsg = `Failed to fetch price for [${token.name}] from DexHunter: ${error}`;
         logger.error(errorMsg);
         errors.set(token.name, errorMsg);
-        allPricesFetched = false;
+        fetched = false;
       }
     }
 
@@ -163,34 +164,39 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
         const errorMsg = `Failed to fetch price for [${token.name}] from Minswap: ${error}`;
         logger.error(errorMsg);
         errors.set(token.name, errorMsg);
-        allPricesFetched = false;
+        fetched = false;
       }
     }
   } else {
-    const errorMsg = `Failed to fetch price for [ada]`;
+    const errorMsg = `Skipped fetching prices from minswap and dexhunter due to unavailable [ADA] price.`;
     logger.error(errorMsg);
-    errors.set('ada', errorMsg);
-    allPricesFetched = false;
+    dexHunterTokens.forEach((token) => {
+      errors.set(token.name, errorMsg);
+    });
+    minswapTokens.forEach((token) => {
+      errors.set(token.name, errorMsg);
+    });
+    fetched = false;
   }
   // fetch duplicate token prices
   for (const token of duplicateTokens) {
-    const price = prices.get(
-      (token.priceBackendParams as DuplicateTokenParams).tokenId,
-    );
+    const dependantToken = (token.priceBackendParams as DuplicateTokenParams)
+      .tokenId;
+    const price = prices.get(dependantToken);
     if (!price) {
-      const errorMsg = `Failed to fetch price for [${token.name}]`;
+      const errorMsg = `Cannot set price for [${token.name}]: Price of [${dependantToken}] is unavailable`;
       logger.error(errorMsg);
       errors.set(token.name, errorMsg);
-      allPricesFetched = false;
+      fetched = false;
     } else {
       logger.debug(`Price of [${token.name}]: ${price}$`);
       prices.set(token.tokenId, price);
     }
   }
 
-  if (!allPricesFetched) sendPriceFetchFailureNotification(prices, errors);
   return {
     prices,
-    allPricesFetched,
+    fetched,
+    errors,
   };
 };

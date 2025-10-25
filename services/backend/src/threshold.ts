@@ -79,11 +79,8 @@ const getHighAmount = (tokenId: string, price: number) => {
 
 const threshold = async () => {
   const priceResult = await getConfigTokenPrices();
-  if (!priceResult.allPricesFetched) {
-    const errorMsg = `Not all token prices were fetched successfully.`;
-    logger.error(errorMsg);
-    throw Error(errorMsg);
-  }
+  if (!priceResult.fetched)
+    throw Error(`Some token prices could not be fetched`);
   const prices = priceResult.prices;
   const tokens = loadTokens();
   const thresholds: TokenType = {};

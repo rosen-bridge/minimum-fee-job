@@ -5,12 +5,19 @@ import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
+/**
+ * Sends detailed notifications to Discord when price fetching for tokens fails.
+ *
+ * @param prices - A map of successfully fetched token prices (`token` → `price`)
+ * @param priceErrors - A map of tokens that failed price fetching (`token` → `errorMessage`)
+ * @returns Promise<void>
+ */
 export const sendPriceFetchFailureNotification = async (
   prices: Map<string, number>,
   priceErrors: Map<string, string>,
 ): Promise<void> => {
   logger.error(
-    'Not all token prices were fetched successfully. Skipping config update.',
+    'Some token prices could not be fetched. Configuration update skipped',
   );
 
   const discordNotification = Notification.getInstance();
