@@ -15,6 +15,6 @@ export class TokenPriceEntity {
   @Column({ type: 'varchar' })
   ergoSideTokenId!: string;
 
-  @Column({ type: 'decimal', precision: 20, scale: 10 })
+  @Column({ type: 'float' })
   price!: number;
 }
