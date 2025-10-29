@@ -7,14 +7,14 @@ import {
 @Entity('token_price_entity')
 export class TokenPriceEntity {
   @PrimaryGeneratedColumn()
-  id!: number;
+  id: number;
 
   @Column({ type: 'int' })
-  timestamp!: number;
+  timestamp: number;
 
   @Column({ type: 'varchar' })
-  ergoSideTokenId!: string;
+  ergoSideTokenId: string;
 
   @Column({ type: 'float' })
-  price!: number;
+  price: number;
 }
