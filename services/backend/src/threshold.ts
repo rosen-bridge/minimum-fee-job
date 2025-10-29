@@ -5,6 +5,7 @@ import { tokens as loadTokens } from './configs';
 import JsonBi from '@rosen-bridge/json-bigint';
 import { getConfigTokenPrices } from './minimum-fee/prices';
 import { writeFileSync } from 'fs';
+import { saveTokenPrices } from './utils/saveTokenPrices';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -79,6 +80,7 @@ const getHighAmount = (tokenId: string, price: number) => {
 
 const threshold = async () => {
   const priceResult = await getConfigTokenPrices();
+  await saveTokenPrices(priceResult.prices);
   if (!priceResult.fetched)
     throw Error(`Some token prices could not be fetched`);
   const prices = priceResult.prices;

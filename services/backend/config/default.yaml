@@ -85,3 +85,11 @@ interval: 14400 # every 4 hours
 kv:
   restApiUrl: # Upstash URL
   restApiToken: # Upstash token
+database:
+  type: # sqlite or postgres
+  path: # only for sqlite
+  host: # only for postgres
+  port: # only for postgres
+  user: # only for postgres
+  password: # only for postgres
+  name: # only for postgress

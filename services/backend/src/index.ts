@@ -21,6 +21,8 @@ import {
   getEthereumHeight,
 } from './network/clients';
 import { sendPriceFetchFailureNotification } from './utils/notifications';
+import { init } from './init';
+import { saveTokenPrices } from './utils/saveTokenPrices';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -30,6 +32,8 @@ const main = async () => {
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
   const priceResult = await getConfigTokenPrices();
+  await saveTokenPrices(priceResult.prices);
+
   if (!priceResult.fetched) {
     await sendPriceFetchFailureNotification(
       priceResult.prices,
@@ -217,5 +221,10 @@ const interval = () => {
       setTimeout(interval, RunningInterval);
     });
 };
+
+init().catch((e) => {
+  console.error('Failed to initialize:', e);
+  process.exit(1);
+});
 
 interval();
