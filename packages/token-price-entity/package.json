@@ -1,0 +1,36 @@
+{
+  "name": "@rosen-bridge/token-price-entity",
+  "version": "0.1.0",
+  "description": "Token price history tracking entity and migrations",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rosen-bridge/minimum-fee-job.git"
+  },
+  "license": "MIT",
+  "author": "Rosen Team",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "tsc --build tsconfig.build.json",
+    "lint": "eslint --fix . && npm run prettify",
+    "lint:check": "eslint . && npm run prettify:check",
+    "prettify": "prettier --write . --ignore-path ../../.gitignore",
+    "prettify:check": "prettier --check . --ignore-path ../../.gitignore",
+    "release": "npm run build && npm publish --access public",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "dependencies": {
+    "@rosen-bridge/extended-typeorm": "^1.0.1"
+  }
+}
