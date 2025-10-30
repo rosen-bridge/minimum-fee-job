@@ -1,6 +1,6 @@
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { dataSource } from './dataSource';
-import { exit } from 'process';
+import { exit } from 'node:process';
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 export const initDataSource = async () => {

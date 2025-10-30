@@ -8,7 +8,7 @@ const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
  * Stores fetched token prices into the TokenPriceEntity table as historical records.
  *
  * @function saveTokenPrices
- * @param {Map<string, number>} prices - A map of token IDs on the Ergo chain
+ * @param {Map<string, number>} prices - A map of token IDs with its price
  *
  * @returns {Promise<void>} Resolves once all valid token prices are saved.
  */
@@ -20,9 +20,9 @@ export const saveTokenPrices = async (
       const timestamp = Math.floor(Date.now() / 1000);
 
       await dataSource.getRepository(TokenPriceEntity).insert(
-        Array.from(prices, ([ergoSideTokenId, price]) => ({
+        Array.from(prices, ([tokenId, price]) => ({
           timestamp,
-          ergoSideTokenId,
+          tokenId,
           price,
         })),
       );
