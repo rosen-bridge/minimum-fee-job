@@ -1,5 +1,5 @@
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import { dataSource } from '../../config/dataSource';
+import { dataSource } from '../database/dataSource';
 import { TokenPriceEntity } from '@rosen-bridge/token-price-entity';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
@@ -17,23 +17,22 @@ export const saveTokenPrices = async (
 ): Promise<void> => {
   try {
     if (prices.size > 0) {
-      const priceRepository = dataSource.getRepository(TokenPriceEntity);
       const timestamp = Math.floor(Date.now() / 1000);
 
-      const tokenPriceEntities = Array.from(prices.entries()).map(
-        ([ergoSideTokenId, price]) =>
-          priceRepository.create({
-            timestamp,
-            ergoSideTokenId,
-            price,
-          }),
+      await dataSource.getRepository(TokenPriceEntity).insert(
+        Array.from(prices, ([ergoSideTokenId, price]) => ({
+          timestamp,
+          ergoSideTokenId,
+          price,
+        })),
       );
-      await priceRepository.save(tokenPriceEntities);
-      logger.info(`Stored ${tokenPriceEntities.length} prices at ${timestamp}`);
-    } else {
-      logger.debug('No valid prices to store');
+
+      logger.info(`Stored ${prices.size} prices at ${timestamp}`);
     }
-  } catch (error) {
-    logger.error('Failed to store prices:', error);
+  } catch (err) {
+    logger.error('Failed to store prices:', {
+      error: err instanceof Error ? err.message : err,
+      stack: err instanceof Error ? err.stack : undefined,
+    });
   }
 };

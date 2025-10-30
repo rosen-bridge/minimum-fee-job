@@ -86,10 +86,10 @@ kv:
   restApiUrl: # Upstash URL
   restApiToken: # Upstash token
 database:
-  type: # sqlite or postgres
-  path: # only for sqlite
-  host: # only for postgres
-  port: # only for postgres
-  user: # only for postgres
-  password: # only for postgres
-  name: # only for postgress
+  type: 'sqlite' # options: postgres, sqlite
+  path: './sqlite/tokenPrice.sqlite' # database path (for sqlite)
+  # host: '' # database host (for postgres)
+  # port: 5432 # database port (for postgres)
+  # user: '' # database user (for postgres)
+  # password: '' # database password (for postgres)
+  # name: '' # database name (for postgres)

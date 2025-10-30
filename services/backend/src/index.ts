@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import './bootstrap';
 import { RunningInterval, minimumFeeConfigs, kvRestApiUrl } from './configs';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
@@ -21,12 +22,13 @@ import {
   getEthereumHeight,
 } from './network/clients';
 import { sendPriceFetchFailureNotification } from './utils/notifications';
-import { init } from './init';
+import { initDataSource } from './database/initDataSource';
 import { saveTokenPrices } from './utils/saveTokenPrices';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 const main = async () => {
+  await initDataSource();
   logger.info(`Starting Job`);
   if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
@@ -221,10 +223,5 @@ const interval = () => {
       setTimeout(interval, RunningInterval);
     });
 };
-
-init().catch((e) => {
-  console.error('Failed to initialize:', e);
-  process.exit(1);
-});
 
 interval();
