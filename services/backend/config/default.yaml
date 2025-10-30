@@ -87,7 +87,7 @@ kv:
   restApiToken: # Upstash token
 database:
   type: 'sqlite' # options: postgres, sqlite
-  path: './sqlite/tokenPrice.sqlite' # database path (for sqlite)
+  path: './sqlite/minFeeJob.sqlite' # database path (for sqlite)
   # host: '' # database host (for postgres)
   # port: 5432 # database port (for postgres)
   # user: '' # database user (for postgres)

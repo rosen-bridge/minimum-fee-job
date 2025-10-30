@@ -1,4 +1,3 @@
-import 'reflect-metadata';
 import './bootstrap';
 import { RunningInterval, minimumFeeConfigs, kvRestApiUrl } from './configs';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
