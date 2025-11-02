@@ -27,7 +27,6 @@ import { saveTokenPrices } from './utils/saveTokenPrices';
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
 const main = async () => {
-  await initDataSource();
   logger.info(`Starting Job`);
   if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
@@ -223,4 +222,5 @@ const interval = () => {
     });
 };
 
+await initDataSource();
 interval();

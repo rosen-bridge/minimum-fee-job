@@ -27,12 +27,12 @@ export const saveTokenPrices = async (
         })),
       );
 
-      logger.info(`Stored ${prices.size} prices at ${timestamp}`);
+      logger.info(`Stored [${prices.size}] prices at [${timestamp}]`);
     }
   } catch (err) {
-    logger.error('Failed to store prices:', {
-      error: err instanceof Error ? err.message : err,
-      stack: err instanceof Error ? err.stack : undefined,
-    });
+    logger.error(
+      `Failed to store prices: ${err instanceof Error ? err.message : err}`,
+    );
+    if (err instanceof Error && err.stack) logger.error(err.stack);
   }
 };
