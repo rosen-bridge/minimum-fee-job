@@ -11,5 +11,6 @@
       "@/utils/*": ["./src/utils/*"]
     }
   },
+  "references": [{ "path": "../../packages/token-price-entity" }],
   "include": ["./**/*.ts"]
 }

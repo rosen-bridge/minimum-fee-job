@@ -85,3 +85,11 @@ interval: 14400 # every 4 hours
 kv:
   restApiUrl: # Upstash URL
   restApiToken: # Upstash token
+database:
+  type: 'sqlite' # options: postgres, sqlite
+  path: './sqlite/minFeeJob.sqlite' # database path (for sqlite)
+  # host: '' # database host (for postgres)
+  # port: 5432 # database port (for postgres)
+  # user: '' # database user (for postgres)
+  # password: '' # database password (for postgres)
+  # name: '' # database name (for postgres)
