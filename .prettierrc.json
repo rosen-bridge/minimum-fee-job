@@ -2,7 +2,7 @@
   "singleQuote": true,
   "quoteProps": "consistent",
   "importOrder": [
-    "^\\./bootstrap$",
+    "^(.*)/bootstrap",
     "^(@?react|@?next)",
     "<THIRD_PARTY_MODULES>",
     "^@rosen(.*)/(.*)$",
