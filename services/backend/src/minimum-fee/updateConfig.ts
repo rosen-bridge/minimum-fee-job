@@ -1,3 +1,7 @@
+import { isEqual } from 'lodash-es';
+
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import {
   ErgoNetworkType,
   Fee,
@@ -5,6 +9,7 @@ import {
   MinimumFeeBoxBuilder,
   MinimumFeeConfig,
 } from '@rosen-bridge/minimum-fee';
+
 import {
   bridgeFeeTriggerPercent,
   feeGuaranteeDuration,
@@ -13,15 +18,12 @@ import {
   rsnRatioTriggerPercent,
   urls,
 } from '../configs';
+import { Chains, FeeDifferencePercents, UpdatedFeeConfig } from '../types';
+import { SUPPORTED_CHAINS } from '../utils/consts';
 import {
   getConfigDifferencePercent,
   isDifferencePercentSufficient,
 } from '../utils/utils';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import { SUPPORTED_CHAINS } from '../utils/consts';
-import { Chains, FeeDifferencePercents, UpdatedFeeConfig } from '../types';
-import JsonBigInt from '@rosen-bridge/json-bigint';
-import { isEqual } from 'lodash-es';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 

@@ -1,10 +1,8 @@
 import { every, map, mapValues, omitBy, uniq } from 'lodash-es';
 import { Err, Ok } from 'ts-results-es';
 
-import getFeesByToken from '../_utils/get-fees-by-token';
-
 import { ChainConfigsSamenessValidationError } from '../_error/chain-configs-sameness-validation';
-
+import getFeesByToken from '../_utils/get-fees-by-token';
 import { Validate } from './types';
 
 /**

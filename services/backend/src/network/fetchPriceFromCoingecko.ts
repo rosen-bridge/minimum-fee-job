@@ -1,4 +1,5 @@
 import axios from 'axios';
+
 import { urls } from '../configs';
 
 const axiosCoingecko = axios.create({

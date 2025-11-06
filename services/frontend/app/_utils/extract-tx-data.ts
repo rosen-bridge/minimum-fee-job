@@ -1,10 +1,14 @@
+import * as wasm from 'ergo-lib-wasm-nodejs';
+import { Buffer } from 'node:buffer';
+import process from 'node:process';
+import { Err, Ok } from 'ts-results-es';
+
 import { Fee } from '@rosen-bridge/minimum-fee';
 import { extractFeeFromBox } from '@rosen-bridge/minimum-fee/dist/lib/utils';
-import * as wasm from 'ergo-lib-wasm-nodejs';
-import { Err, Ok } from 'ts-results-es';
 
 import { TxDataExtractionError } from '../_error/tx';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cache = new Map<string, any>();
 
 /**
@@ -62,7 +66,7 @@ const extractTxData = (tx: string) => {
         return {
           ...partialFeesByToken,
           [getTokenAssociatedWithOutput(output)]: extractFeeFromBox(
-            output as any,
+            output as wasm.ErgoBox,
           ),
         };
       }, {});

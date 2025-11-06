@@ -1,7 +1,9 @@
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
-
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import React from 'react';
+
+import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter';
+
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });

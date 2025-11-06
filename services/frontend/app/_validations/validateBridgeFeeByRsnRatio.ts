@@ -1,15 +1,13 @@
 import { Err, Ok, Result } from 'ts-results-es';
 
-import { getPrices, getTokensConfig } from '../_store';
-import getFeesByToken from '../_utils/get-fees-by-token';
-import validateActualAgainstExpected from '../_utils/validate-actual-against-expected';
-
 import {
   BridgeFeeValidationByRsnRatioError,
   RsnConfigMissing,
   TokenConfigMissing,
 } from '../_error/bridge-fee-validation-by-rsn-ratio';
-
+import { getPrices, getTokensConfig } from '../_store';
+import getFeesByToken from '../_utils/get-fees-by-token';
+import validateActualAgainstExpected from '../_utils/validate-actual-against-expected';
 import { Validate } from './types';
 
 /**

@@ -1,7 +1,6 @@
 import { createClient } from '@vercel/kv';
 
 import { kvRestApiUrl, kvRestApiToken } from './configs';
-
 import { SupportedTokenConfig } from './types';
 
 const kv =

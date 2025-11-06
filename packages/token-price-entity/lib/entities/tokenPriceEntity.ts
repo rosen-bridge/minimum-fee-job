@@ -13,7 +13,7 @@ export class TokenPriceEntity {
   timestamp: number;
 
   @Column({ type: 'varchar' })
-  ergoSideTokenId: string;
+  tokenId: string;
 
   @Column({ type: 'float' })
   price: number;

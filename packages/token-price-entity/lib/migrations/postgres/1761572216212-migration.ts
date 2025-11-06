@@ -11,7 +11,7 @@ export class Migration1761572216212 implements MigrationInterface {
             CREATE TABLE "token_price_entity" (
                 "id" SERIAL NOT NULL,
                 "timestamp" integer NOT NULL,
-                "ergoSideTokenId" character varying NOT NULL,
+                "tokenId" character varying NOT NULL,
                 "price" double precision NOT NULL,
                 CONSTRAINT "PK_a61101a1eb27676da13dfff4ab6" PRIMARY KEY ("id")
             )

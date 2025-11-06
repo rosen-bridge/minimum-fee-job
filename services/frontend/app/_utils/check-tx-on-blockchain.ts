@@ -1,4 +1,5 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
+import { Buffer } from 'node:buffer';
 import { Err, Ok } from 'ts-results-es';
 
 import {

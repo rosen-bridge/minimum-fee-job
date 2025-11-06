@@ -1,7 +1,9 @@
-import { Notification } from '../network/Notification';
-import { DiscordPayloadType } from '../types';
 import { chunk } from 'lodash-es';
+
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+
+import { Notification } from '../network/notification';
+import { DiscordPayloadType } from '../types';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 

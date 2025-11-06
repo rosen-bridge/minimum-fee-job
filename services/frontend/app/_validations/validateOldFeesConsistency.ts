@@ -1,12 +1,11 @@
-import JsonBigInt from '@rosen-bridge/json-bigint';
 import { differenceWith, initial, isEqual } from 'lodash-es';
 import { Err, Ok, Result } from 'ts-results-es';
 
-import getFeesByToken from '../_utils/get-fees-by-token';
-import getUnfetchedTokenMinimumFeeBox from '../_utils/get-token-minimum-fee-box';
+import JsonBigInt from '@rosen-bridge/json-bigint';
 
 import { OldFeesConsistencyValidationError } from '../_error/old-configs-consistency-validation';
-
+import getFeesByToken from '../_utils/get-fees-by-token';
+import getUnfetchedTokenMinimumFeeBox from '../_utils/get-token-minimum-fee-box';
 import { Validate } from './types';
 
 /**

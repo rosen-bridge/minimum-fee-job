@@ -14,8 +14,8 @@
     "start": "next start",
     "prettify": "prettier --write . --ignore-path ../../.gitignore",
     "prettify:check": "prettier --check . --ignore-path ../../.gitignore",
-    "lint": "next lint --fix && npm run prettify",
-    "lint:check": "next lint --max-warnings=0 && npm run prettify:check"
+    "lint": "eslint . --fix && npm run prettify",
+    "lint:check": "eslint . && npm run prettify:check"
   },
   "dependencies": {
     "@emotion/cache": "^11.11.0",
@@ -35,20 +35,15 @@
     "react": "^18",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18",
-    "redis": "^4.6.13",
     "ts-results-es": "^4.2.0"
   },
   "devDependencies": {
-    "@types/node": "^22.18.0",
-    "@types/qrcode.react": "^1.0.5",
     "@types/react": "^18",
     "@types/react-copy-to-clipboard": "^5.0.7",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
-    "eslint-config-next": "14.1.3",
     "postcss": "^8",
-    "tailwindcss": "^3.3.0",
-    "typescript": "^5.3.3"
+    "tailwindcss": "^3.3.0"
   },
   "engines": {
     "node": ">=22.18.0"

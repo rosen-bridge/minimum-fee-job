@@ -1,10 +1,11 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
 
 const perPackage = (resolver) => (files) => {
   return Array.from(
     files.reduce((packages, file) => {
-      let directory = path.dirname(file);
+      let directory = path.dirname(path.resolve(file));
       while (directory && directory !== process.cwd()) {
         if (fs.existsSync(path.join(directory, 'package.json'))) {
           packages.add(resolver(directory, file));
@@ -19,14 +20,27 @@ const perPackage = (resolver) => (files) => {
   );
 };
 
+const getKnipCommand = (dir) => {
+  const posixRelative = path.posix.relative(process.cwd(), dir);
+  return `knip --dependencies --workspace ${posixRelative}`;
+};
+
+const runKnipConditional = (files) => {
+  const rootChanged = files.some((f) => {
+    const relative = path.relative(process.cwd(), path.resolve(f));
+    return !relative.includes(path.sep);
+  });
+  if (rootChanged) {
+    return ['knip --dependencies'];
+  } else {
+    return perPackage(getKnipCommand)(files);
+  }
+};
+
 export default {
-  '*': 'prettier --ignore-unknown --write',
+  '*': ['prettier --ignore-unknown --write', runKnipConditional],
 
-  '**/{packages,services/backend}/**/*.{js,ts}': 'eslint --fix',
-
-  'services/frontend/**/*.{js,jsx,ts,tsx}': perPackage((directory, file) => {
-    return `next lint ${directory} --fix --file ${path.relative(directory, file)}`;
-  }),
+  '**/{packages,services/**}/**/*.{js,jsx,ts,tsx}': 'eslint --fix',
 
   '**/*.{ts,tsx}': perPackage((directory) => {
     return `npm run type-check --workspace ${path.relative(process.cwd(), directory)}`;

@@ -1,9 +1,11 @@
 import axios from 'axios';
-import { ErgTokenVolumes } from '../types';
-import { ERG_ID } from '../utils/consts';
-import { spectrumPoolTimeLength, urls } from '../configs';
-import { SpectrumPool } from '../types/spectrum';
+
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+
+import { spectrumPoolTimeLength, urls } from '../configs';
+import { ErgTokenVolumes } from '../types';
+import { SpectrumPool } from '../types/spectrum';
+import { ERG_ID } from '../utils/consts';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 

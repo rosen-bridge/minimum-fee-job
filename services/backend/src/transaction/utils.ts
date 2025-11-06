@@ -1,6 +1,8 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
-import { AssetBalance, TokenInfo } from './types';
+
 import { BoxInfo, ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
+
+import { AssetBalance, TokenInfo } from './types';
 
 /**
  * extracts box id and assets of a box

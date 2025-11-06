@@ -1,10 +1,9 @@
+import { Validation } from './types';
 import validateBridgeFeeByRsnRatio from './validateBridgeFeeByRsnRatio';
 import validateBridgeFeeByToken from './validateBridgeFeeByToken';
 import validateChainConfigsSameness from './validateChainConfigsSameness';
 import validateNetworkFeeFactory from './validateNetworkFeeFactory';
 import validateOldFeesConsistency from './validateOldFeesConsistency';
-
-import { Validation } from './types';
 
 /**
  * A list of all validations that should be run for supported bridge tokens

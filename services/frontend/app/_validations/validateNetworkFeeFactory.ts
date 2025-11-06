@@ -1,16 +1,14 @@
 import { Err, Ok, Result } from 'ts-results-es';
 
-import { getPrices, getTokensConfig } from '../_store';
-import getFeesByToken from '../_utils/get-fees-by-token';
-import validateActualAgainstExpected from '../_utils/validate-actual-against-expected';
-
 import {
   ChainTokenConfigMissing,
   NetworkFeeValidationError,
   TokenConfigMissing,
 } from '../_error/network-fee-validation';
-
+import { getPrices, getTokensConfig } from '../_store';
 import { PartialSupportedTokenConfig } from '../_types/token-config';
+import getFeesByToken from '../_utils/get-fees-by-token';
+import validateActualAgainstExpected from '../_utils/validate-actual-against-expected';
 import { Validate } from './types';
 
 const chainTokensMap = {

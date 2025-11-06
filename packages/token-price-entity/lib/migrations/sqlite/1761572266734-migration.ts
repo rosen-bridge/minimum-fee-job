@@ -11,7 +11,7 @@ export class Migration1761572266734 implements MigrationInterface {
             CREATE TABLE "token_price_entity" (
                 "id" integer PRIMARY KEY AUTOINCREMENT NOT NULL,
                 "timestamp" integer NOT NULL,
-                "ergoSideTokenId" varchar NOT NULL,
+                "tokenId" varchar NOT NULL,
                 "price" float NOT NULL
             )
         `);

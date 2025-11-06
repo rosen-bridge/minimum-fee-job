@@ -1,17 +1,16 @@
 import './bootstrap';
+
+import { chunk } from 'lodash-es';
+
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import JsonBigInt from '@rosen-bridge/json-bigint';
+
 import { RunningInterval, minimumFeeConfigs, kvRestApiUrl } from './configs';
+import { initDataSource } from './database/initDataSource';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
+import { getConfigTokenPrices } from './minimum-fee/prices';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
 import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
-import { feeConfigToRegisterValues, pricesToTables } from './utils/utils';
-import JsonBigInt from '@rosen-bridge/json-bigint';
-import { Notification } from './network/Notification';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-
-import { flushStore, saveTokensConfig, savePrices, saveTx } from './store';
-import { getConfigTokenPrices } from './minimum-fee/prices';
-import { chunk } from 'lodash-es';
-import { Chains, DiscordPayloadType, UpdatedFeeConfig } from './types';
 import {
   getBinanceHeight,
   getBitcoinHeight,
@@ -20,7 +19,12 @@ import {
   getErgoHeight,
   getEthereumHeight,
 } from './network/clients';
+import { Notification } from './network/notification';
+import { flushStore, saveTokensConfig, savePrices, saveTx } from './store';
+import { Chains, DiscordPayloadType, UpdatedFeeConfig } from './types';
 import { sendPriceFetchFailureNotification } from './utils/notifications';
+import { saveTokenPrices } from './utils/saveTokenPrices';
+import { feeConfigToRegisterValues, pricesToTables } from './utils/utils';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -30,6 +34,8 @@ const main = async () => {
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
   const priceResult = await getConfigTokenPrices();
+  await saveTokenPrices(priceResult.prices);
+
   if (!priceResult.fetched) {
     await sendPriceFetchFailureNotification(
       priceResult.prices,
@@ -218,4 +224,5 @@ const interval = () => {
     });
 };
 
+await initDataSource();
 interval();

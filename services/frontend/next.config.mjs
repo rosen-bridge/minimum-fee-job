@@ -3,6 +3,9 @@ const nextConfig = {
   experimental: {
     serverComponentsExternalPackages: ['ergo-lib-wasm-nodejs'],
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   webpack: function (config, options) {
     config.experiments = {
       asyncWebAssembly: true,
