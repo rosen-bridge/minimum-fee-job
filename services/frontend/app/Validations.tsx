@@ -1,3 +1,5 @@
+import { Suspense } from 'react';
+
 import { Info } from '@mui/icons-material';
 import {
   CircularProgress,
@@ -13,11 +15,9 @@ import {
   Typography,
 } from '@mui/material';
 import { keyBy } from 'lodash-es';
-import { Suspense } from 'react';
 import { Result } from 'ts-results-es';
 
 import Validation from './_components/validation/Validation';
-
 import { getPrices, getTokensConfig } from './_store';
 import getFeesByToken from './_utils/get-fees-by-token';
 import validations from './_validations';

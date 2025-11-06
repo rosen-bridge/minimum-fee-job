@@ -1,8 +1,9 @@
-import { minimumFeeConfigs } from '../configs';
-import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
-import { ConfigOrder } from '../transaction/types';
-import { generateTransaction } from '../transaction/generate';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
+
+import { minimumFeeConfigs } from '../configs';
+import { generateTransaction } from '../transaction/generate';
+import { ConfigOrder } from '../transaction/types';
 import { UpdatedFeeConfig } from '../types';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);

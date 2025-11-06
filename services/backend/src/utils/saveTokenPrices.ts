@@ -1,6 +1,7 @@
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import { dataSource } from '../database/dataSource';
 import { TokenPriceEntity } from '@rosen-bridge/token-price-entity';
+
+import { dataSource } from '../database/dataSource';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 

@@ -1,3 +1,5 @@
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+
 import { minimumFeeConfigs } from '../configs';
 import { fetchPriceFromCoingeckoInUSD } from '../network/fetchPriceFromCoingecko';
 import { fetchPriceFromCoinMarketCapInUSD } from '../network/fetchPriceFromCoinMarketCap';
@@ -14,7 +16,6 @@ import {
   SupportedTokenConfig,
   PriceFetchResult,
 } from '../types';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 

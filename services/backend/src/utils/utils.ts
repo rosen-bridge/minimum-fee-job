@@ -1,4 +1,7 @@
+import { intersection, chunk } from 'lodash-es';
+
 import { Fee } from '@rosen-bridge/minimum-fee';
+
 import {
   bridgeFeeTriggerPercent,
   minimumFeeConfigs,
@@ -15,7 +18,6 @@ import {
   TableRow,
 } from '../types';
 import { SUPPORTED_CHAINS, TABLE_CHUNK_SIZE } from './consts';
-import { intersection, chunk } from 'lodash-es';
 
 export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
   // generate register values

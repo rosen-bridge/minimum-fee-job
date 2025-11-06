@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { CoinMarketCapPricePool, Price } from '../types';
+
 import { urls } from '../configs';
+import { CoinMarketCapPricePool, Price } from '../types';
 
 const axiosCoinMarketCap = axios.create({
   baseURL: `${urls.coinMarketCap}/data-api/v3/cryptocurrency/market-pairs/latest`,

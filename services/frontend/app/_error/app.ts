@@ -8,15 +8,18 @@ export class AppError extends Error {
 }
 
 export class AppErrorWithCause extends AppError {
-  constructor(message: string, cause: Error['cause']) {
+  constructor(message: string, cause?: unknown) {
+    let reason: string;
+
     if (cause instanceof Error) {
-      super(`${message} (reason: ${cause.message})`);
+      reason = cause.message;
     } else {
       try {
-        super(`${message} (reason: ${JSON.stringify(cause)})`);
+        reason = JSON.stringify(cause);
       } catch {
-        super(`${message} (reason cannot be logged)`);
+        reason = 'reason cannot be logged';
       }
     }
+    super(`${message} (reason: ${reason})`, { cause });
   }
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { QRCodeSVG } from 'qrcode.react';
+import { useState } from 'react';
 import CopyToClipboard from 'react-copy-to-clipboard';
 
 import {
@@ -22,10 +22,10 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
+import { QRCodeSVG } from 'qrcode.react';
 
 import useChunkedTx from '../../_hooks/useChunkedTx';
 import { ToggleIconButton } from './ToggleIconButton';
-import { useState } from 'react';
 
 /**
  * render a qr code for a chunked tx with the ability to change pages count

@@ -1,6 +1,7 @@
+import { ReactElement } from 'react';
+
 import { GppBad, GppMaybe, VerifiedUser } from '@mui/icons-material';
 import { Box, Tooltip } from '@mui/material';
-import { ReactElement } from 'react';
 
 import { ValidationResult as ValidationResultType } from '@/app/_validations/types';
 

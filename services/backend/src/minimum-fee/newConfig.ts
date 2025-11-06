@@ -1,3 +1,6 @@
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { ChainFee, MinimumFeeConfig } from '@rosen-bridge/minimum-fee';
+
 import {
   ADA,
   BNB,
@@ -8,11 +11,9 @@ import {
   minimumFeeConfigs,
   tokens,
 } from '../configs';
-import { Chains, SupportedTokenConfig } from '../types';
 import { getBitcoinFeeRatio, getDogeFeeRatio } from '../network/clients';
+import { Chains, SupportedTokenConfig } from '../types';
 import { feeRatioDivisor } from '../utils/consts';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import { ChainFee, MinimumFeeConfig } from '@rosen-bridge/minimum-fee';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 

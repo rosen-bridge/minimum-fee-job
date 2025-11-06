@@ -1,6 +1,7 @@
-import { TokenPriceEntity, migrations } from '@rosen-bridge/token-price-entity';
 import config from 'config';
+
 import { DataSource } from '@rosen-bridge/extended-typeorm';
+import { TokenPriceEntity, migrations } from '@rosen-bridge/token-price-entity';
 
 const dbType = config.get<string>('database.type') as keyof typeof migrations;
 const dbConfigs = {

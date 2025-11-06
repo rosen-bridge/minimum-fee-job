@@ -1,6 +1,8 @@
 import { WebhookClient } from 'discord.js';
-import { discordWebHookUrl } from '../configs';
+
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+
+import { discordWebHookUrl } from '../configs';
 import { DiscordPayloadType } from '../types';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);

@@ -1,9 +1,8 @@
 import { Box, Typography } from '@mui/material';
 
+import { getTx } from '../../_store';
 import QrDisplay from './Qr.client';
 import TxOnBlockchainAlert from './TxOnBlockchainAlert';
-
-import { getTx } from '../../_store';
 
 /**
  * wrapper server component for the Qr component

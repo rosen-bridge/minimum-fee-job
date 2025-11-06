@@ -1,10 +1,13 @@
 import './bootstrap';
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+
 import axios from 'axios';
-import { tokens as loadTokens } from './configs';
-import JsonBi from '@rosen-bridge/json-bigint';
-import { getConfigTokenPrices } from './minimum-fee/prices';
 import { writeFileSync } from 'fs';
+
+import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import JsonBi from '@rosen-bridge/json-bigint';
+
+import { tokens as loadTokens } from './configs';
+import { getConfigTokenPrices } from './minimum-fee/prices';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 

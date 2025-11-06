@@ -1,11 +1,12 @@
-import { ErgoNetworkType, MinimumFeeBox } from '@rosen-bridge/minimum-fee';
+import process from 'node:process';
 import { Err, Ok, Result } from 'ts-results-es';
+
+import { ErgoNetworkType, MinimumFeeBox } from '@rosen-bridge/minimum-fee';
 
 import {
   MinimumFeeBoxFetchFailedError,
   MinimumFeeBoxInstantiationError,
 } from '@/app/_error/min-fee-box';
-
 import { ERGO_EXPLORER_API_URL } from '@/app/constants';
 
 /**

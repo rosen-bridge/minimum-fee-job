@@ -1,8 +1,10 @@
-import fs from 'fs';
 import config from 'config';
-import { ConfigInterface, FeeParameters, SupportedTokenConfig } from '../types';
-import { TransportOptions } from '@rosen-bridge/winston-logger';
+import fs from 'fs';
+
 import { RosenTokens } from '@rosen-bridge/tokens';
+import { TransportOptions } from '@rosen-bridge/winston-logger';
+
+import { ConfigInterface, FeeParameters, SupportedTokenConfig } from '../types';
 
 export const logConfigs = () => {
   const logs = config.get<TransportOptions[]>('logs');
