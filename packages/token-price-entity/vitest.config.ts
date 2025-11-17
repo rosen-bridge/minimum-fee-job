@@ -1,17 +1,6 @@
-import { defineConfig } from 'vitest/config';
+import { defineProject, mergeConfig } from 'vitest/config';
 
-export default defineConfig({
-  test: {
-    globals: true,
-    coverage: {
-      all: true,
-      provider: 'istanbul',
-      reporter: 'cobertura',
-    },
-    poolOptions: {
-      forks: {
-        singleFork: true,
-      },
-    },
-  },
-});
+// @ts-expect-error – allow importing shared config
+import configShared from '../../vitest.shared.ts';
+
+export default mergeConfig(configShared, defineProject({}));
