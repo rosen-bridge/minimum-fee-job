@@ -1,7 +1,5 @@
 import config from 'config';
-import fs from 'fs';
 
-import { RosenTokens } from '@rosen-bridge/tokens';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 
 import { ConfigInterface, FeeParameters, SupportedTokenConfig } from '../types';
@@ -126,12 +124,4 @@ export const kvRestApiToken = config.has('kv.restApiToken')
   ? config.get<string>('kv.restApiToken')
   : undefined;
 
-export const tokens = (): RosenTokens => {
-  const tokensPath = config.get<string>('tokensPath');
-  if (!fs.existsSync(tokensPath)) {
-    throw new Error(`Tokens config file with path ${tokensPath} doesn't exist`);
-  } else {
-    const configJson: string = fs.readFileSync(tokensPath, 'utf8');
-    return JSON.parse(configJson).tokens;
-  }
-};
+export const tokensPath = config.get<string>('tokensPath');

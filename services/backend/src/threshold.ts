@@ -6,8 +6,9 @@ import { writeFileSync } from 'fs';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import JsonBi from '@rosen-bridge/json-bigint';
 
-import { tokens as loadTokens } from './configs';
+import { tokensPath } from './configs';
 import { getConfigTokenPrices } from './minimum-fee/prices';
+import { TokenHandler } from './tokenMap/tokenHandler';
 
 const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
 
@@ -81,11 +82,14 @@ const getHighAmount = (tokenId: string, price: number) => {
 };
 
 const threshold = async () => {
+  // Initialize the TokenHandler
+  await TokenHandler.init(tokensPath);
+
   const priceResult = await getConfigTokenPrices();
   if (!priceResult.fetched)
     throw Error(`Some token prices could not be fetched`);
   const prices = priceResult.prices;
-  const tokens = loadTokens();
+  const tokens = TokenHandler.getInstance().getTokenMap().getConfig();
   const thresholds: TokenType = {};
   const chains = Object.keys(MAX_NATIVE_TRANSFER);
   chains.forEach((chain) => {

@@ -5,7 +5,12 @@ import { chunk } from 'lodash-es';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 
-import { RunningInterval, minimumFeeConfigs, kvRestApiUrl } from './configs';
+import {
+  RunningInterval,
+  minimumFeeConfigs,
+  kvRestApiUrl,
+  tokensPath,
+} from './configs';
 import { initDataSource } from './database/initDataSource';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
 import { getConfigTokenPrices } from './minimum-fee/prices';
@@ -20,7 +25,14 @@ import {
   getEthereumHeight,
 } from './network/clients';
 import { Notification } from './network/notification';
-import { flushStore, saveTokensConfig, savePrices, saveTx } from './store';
+import {
+  flushStore,
+  saveTokensConfig,
+  savePrices,
+  saveTx,
+  saveTokenMap,
+} from './store';
+import { TokenHandler } from './tokenMap/tokenHandler';
 import { Chains, DiscordPayloadType, UpdatedFeeConfig } from './types';
 import { sendPriceFetchFailureNotification } from './utils/notifications';
 import { saveTokenPrices } from './utils/saveTokenPrices';
@@ -152,6 +164,7 @@ const main = async () => {
       }
       await Promise.all([
         saveTokensConfig(minimumFeeConfigs.supportedTokens),
+        saveTokenMap(TokenHandler.getInstance().getTokenMap()),
         savePrices(priceResult.prices),
         saveTx(tx),
       ]);
@@ -224,5 +237,10 @@ const interval = () => {
     });
 };
 
-await initDataSource();
+const initializeService = async () => {
+  await initDataSource();
+  await TokenHandler.init(tokensPath);
+};
+
+await initializeService();
 interval();

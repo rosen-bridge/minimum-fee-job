@@ -1,17 +1,9 @@
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { ChainFee, MinimumFeeConfig } from '@rosen-bridge/minimum-fee';
 
-import {
-  ADA,
-  BNB,
-  BTC,
-  DOGE,
-  ERG,
-  ETH,
-  minimumFeeConfigs,
-  tokens,
-} from '../configs';
+import { ADA, BNB, BTC, DOGE, ERG, ETH, minimumFeeConfigs } from '../configs';
 import { getBitcoinFeeRatio, getDogeFeeRatio } from '../network/clients';
+import { TokenHandler } from '../tokenMap/tokenHandler';
 import { Chains, SupportedTokenConfig } from '../types';
 import { feeRatioDivisor } from '../utils/consts';
 
@@ -84,7 +76,7 @@ export const feeConfigFromPrice = async (
     Math.ceil((configs.bridgeFeeUSD / tokenPrice) * 10 ** tokenDecimal),
   );
 
-  const tokenMapData = tokens();
+  const tokenMapData = TokenHandler.getInstance().getTokenMap().getConfig();
   const tokenSet = tokenMapData.find((set) => {
     for (const chain of Object.keys(set)) {
       if (set[chain].tokenId === tokenId) return true;
