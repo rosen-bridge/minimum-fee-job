@@ -6,6 +6,7 @@ stages:
   - build
   - type-check
   - lint
+  - test
   - changeset
 
 installation:
@@ -17,6 +18,7 @@ installation:
       - node_modules
       - '**/node_modules'
   script:
+    - npm install -g npm@11.6.2
     - npm ci
 knip:
   stage: knip
@@ -64,6 +66,24 @@ lint:
       - '**/dist'
   script:
     - npm run lint:check
+
+test:
+  stage: test
+  cache:
+    key: $CI_COMMIT_REF_NAME
+    policy: pull
+    paths:
+      - node_modules
+      - '**/node_modules'
+      - '**/dist'
+  script:
+    - npm run coverage
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: '**/coverage/cobertura-coverage.xml'
 
 changeset:
   stage: changeset

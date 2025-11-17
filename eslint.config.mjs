@@ -3,6 +3,7 @@ import nextPlugin from '@next/eslint-plugin-next';
 import pluginJs from '@eslint/js';
 import typescriptEslint from '@typescript-eslint/eslint-plugin';
 import typescriptParser from '@typescript-eslint/parser';
+import vitestPlugin from '@vitest/eslint-plugin';
 import prettier from 'eslint-config-prettier';
 import pluginCheckFile from 'eslint-plugin-check-file';
 import reactHooks from 'eslint-plugin-react-hooks';
@@ -42,10 +43,12 @@ export default [
     languageOptions: {
       globals: {
         ...globals.node,
+        ...vitestPlugin.environments.env.globals,
       },
     },
     plugins: {
       'check-file': pluginCheckFile,
+      'vitest': vitestPlugin,
     },
     rules: {
       'check-file/filename-naming-convention': [
@@ -53,6 +56,7 @@ export default [
         { '**/!(*-migration).{js,ts,jsx,tsx}': 'CAMEL_CASE' },
         { ignoreMiddleExtensions: true },
       ],
+      ...vitestPlugin.configs.recommended.rules,
     },
   },
 
