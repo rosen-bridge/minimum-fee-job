@@ -4,6 +4,5 @@
     "packages/**": {
       "entry": ["lib/{index,cli,main}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"]
     }
-  },
-  "ignoreBinaries": ["vitest"]
+  }
 }

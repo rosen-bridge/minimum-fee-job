@@ -6,11 +6,11 @@ import { TokenPriceAction } from '../../lib/actions';
 import { TokenPriceEntity } from '../../lib/entities';
 import { createDatabase } from '../utils';
 
-let dataSource: DataSource;
-let action: TokenPriceAction;
-let repository: Repository<TokenPriceEntity>;
-
 describe('TokenPriceAction', () => {
+  let dataSource: DataSource;
+  let action: TokenPriceAction;
+  let repository: Repository<TokenPriceEntity>;
+
   beforeEach(async () => {
     dataSource = await createDatabase();
     action = new TokenPriceAction(dataSource);
@@ -22,11 +22,11 @@ describe('TokenPriceAction', () => {
    * @dependency database
    * @scenario
    * - insert multiple prices for a token
-   * - call action.getLatestTokenPrice with a timestamp
+   * - call getLatestTokenPrice with a timestamp
    * @expected
-   * - should return most recent price less than timestamp
+   * - return the most recent price before timestamp
    */
-  it('should return latest valid price before timestamp', async () => {
+  it('should return the most recent price before timestamp', async () => {
     await repository.insert([
       { tokenId: 'ERG', price: 10, timestamp: 100 },
       { tokenId: 'ERG', price: 20, timestamp: 200 },
@@ -38,11 +38,11 @@ describe('TokenPriceAction', () => {
   });
 
   /**
-   * @target getLatestTokenPrice should return undefined if no price exists before timestamp
+   * @target getLatestTokenPrice should return undefined when no price exists before timestamp
    * @dependency database
    * @scenario
-   * - insert some prices
-   * - call with timestamp earlier than all records
+   * - insert prices with timestamps greater than query timestamp
+   * - call getLatestTokenPrice
    * @expected
    * - return undefined
    */
@@ -57,15 +57,15 @@ describe('TokenPriceAction', () => {
   });
 
   /**
-   * @target getLatestTokenPrice should enforce max age and return undefined if record too old
+   * @target getLatestTokenPrice should return undefined when the latest price is older than maxAgeSeconds
    * @dependency database
    * @scenario
    * - insert a single price
-   * - timestamp - priceTimestamp > maxAge
+   * - ensure timestamp - priceTimestamp > maxAgeSeconds
    * @expected
    * - return undefined
    */
-  it('should return undefined if the most recent price is older than maxAgeSeconds', async () => {
+  it('should return undefined when the latest price is older than maxAgeSeconds', async () => {
     await repository.insert({
       tokenId: 'ERG',
       price: 100,
@@ -77,15 +77,35 @@ describe('TokenPriceAction', () => {
   });
 
   /**
-   * @target getLatestTokenPrice should return price if exactly on maxAgeSeconds boundary
+   * @target getLatestTokenPrice should return undefined when the latest price is older than default maxAgeSeconds
    * @dependency database
    * @scenario
-   * - insert price
-   * - timestamp - priceTimestamp === maxAgeSeconds
+   * - insert a price
+   * - call without passing maxAgeSeconds (use default)
    * @expected
-   * - should return price
+   * - return undefined
    */
-  it('should return price when exactly at maxAgeSeconds boundary', async () => {
+  it('should return undefined when the latest price is older than default maxAgeSeconds', async () => {
+    await repository.insert({
+      tokenId: 'ERG',
+      price: 100,
+      timestamp: 1000,
+    });
+
+    const result = await action.getLatestTokenPrice('ERG', 20000);
+    expect(result).toBeUndefined();
+  });
+
+  /**
+   * @target getLatestTokenPrice should return price when record age equals maxAgeSeconds
+   * @dependency database
+   * @scenario
+   * - insert a price
+   * - call with (timestamp - priceTimestamp) equals maxAgeSeconds
+   * @expected
+   * - return the price
+   */
+  it('should return the price when record age equals maxAgeSeconds', async () => {
     await repository.insert({
       tokenId: 'ERG',
       price: 77,
@@ -97,15 +117,15 @@ describe('TokenPriceAction', () => {
   });
 
   /**
-   * @target getLatestTokenPrice should return latest price regardless of age when maxAgeSeconds = -1
+   * @target getLatestTokenPrice should return price regardless of age when maxAgeSeconds = -1
    * @dependency database
    * @scenario
-   * - insert price older than default max
+   * - insert an old price
    * - call with maxAgeSeconds = -1
    * @expected
-   * - should return price
+   * - return the price
    */
-  it('should return price regardless of age when validation disabled using -1', async () => {
+  it('should return the price when maxAgeSeconds is disabled (-1)', async () => {
     await repository.insert({
       tokenId: 'ERG',
       price: 55,
@@ -117,10 +137,10 @@ describe('TokenPriceAction', () => {
   });
 
   /**
-   * @target getLatestTokenPrice should throw error for invalid negative maxAgeSeconds
+   * @target getLatestTokenPrice should throw error for invalid maxAgeSeconds
    * @dependency none
    * @scenario
-   * - call with invalid negative maxAgeSeconds (< -1)
+   * - call with a negative maxAgeSeconds less than -1
    * @expected
    * - throw error
    */
@@ -128,25 +148,5 @@ describe('TokenPriceAction', () => {
     await expect(action.getLatestTokenPrice('ERG', 1000, -5)).rejects.toThrow(
       'Invalid maxAgeSeconds',
     );
-  });
-
-  /**
-   * @target getLatestTokenPrice should select correct record from multiple timestamps
-   * @dependency repository
-   * @scenario
-   * - insert prices with timestamps 100, 500, 900
-   * - call with timestamp 850
-   * @expected
-   * - return price @ timestamp 500
-   */
-  it('should select most recent valid price from multiple entries', async () => {
-    await repository.insert([
-      { tokenId: 'ERG', price: 15, timestamp: 100 },
-      { tokenId: 'ERG', price: 25, timestamp: 500 },
-      { tokenId: 'ERG', price: 35, timestamp: 900 },
-    ]);
-
-    const result = await action.getLatestTokenPrice('ERG', 850);
-    expect(result).toEqual(25);
   });
 });
