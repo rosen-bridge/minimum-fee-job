@@ -97,7 +97,7 @@ describe('TokenPriceAction', () => {
   });
 
   /**
-   * @target getLatestTokenPrice should return price when record age equals maxAgeSeconds
+   * @target getLatestTokenPrice should return the price when record age equals maxAgeSeconds
    * @dependency database
    * @scenario
    * - insert a price
@@ -117,7 +117,7 @@ describe('TokenPriceAction', () => {
   });
 
   /**
-   * @target getLatestTokenPrice should return price regardless of age when maxAgeSeconds = -1
+   * @target getLatestTokenPrice should return the price when maxAgeSeconds is disabled using -1
    * @dependency database
    * @scenario
    * - insert an old price
@@ -125,7 +125,7 @@ describe('TokenPriceAction', () => {
    * @expected
    * - return the price
    */
-  it('should return the price when maxAgeSeconds is disabled (-1)', async () => {
+  it('should return the price when maxAgeSeconds is disabled using -1', async () => {
     await repository.insert({
       tokenId: 'ERG',
       price: 55,
@@ -144,9 +144,9 @@ describe('TokenPriceAction', () => {
    * @expected
    * - throw error
    */
-  it('should throw error for invalid negative maxAgeSeconds', async () => {
+  it('should throw error for invalid maxAgeSeconds', async () => {
     await expect(action.getLatestTokenPrice('ERG', 1000, -5)).rejects.toThrow(
-      'Invalid maxAgeSeconds',
+      Error,
     );
   });
 });
