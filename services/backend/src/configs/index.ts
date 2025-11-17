@@ -2,7 +2,11 @@ import config from 'config';
 
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 
-import { ConfigInterface, FeeParameters, SupportedTokenConfig } from '../types';
+import {
+  ConfigInterface,
+  FeeParameters,
+  SupportedTokenRawConfig,
+} from '../types';
 
 export const logConfigs = () => {
   const logs = config.get<TransportOptions[]>('logs');
@@ -95,7 +99,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   minBoxErg: 200000n,
   txFee: 1100000n,
   supportedTokens: config
-    .get<Array<SupportedTokenConfig>>('minimumFee.supportedTokens')
+    .get<Array<SupportedTokenRawConfig>>('minimumFee.supportedTokens')
     .map((supportedToken) => ({
       ...supportedToken,
       fee: supportedToken.fee ? supportedToken.fee : defaultFeeParameters,

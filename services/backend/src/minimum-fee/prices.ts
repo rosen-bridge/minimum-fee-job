@@ -1,11 +1,11 @@
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 
-import { minimumFeeConfigs } from '../configs';
 import { fetchPriceFromCoingeckoInUSD } from '../network/fetchPriceFromCoingecko';
 import { fetchPriceFromCoinMarketCapInUSD } from '../network/fetchPriceFromCoinMarketCap';
 import { fetchPriceFromDexHunterInADA } from '../network/fetchPriceFromDexHunter';
 import { fetchPriceFromMinswapInADA } from '../network/fetchPriceFromMinswap';
 import { fetchPriceFromSpectrumInERG } from '../network/fetchPriceFromSpectrum';
+import { TokenHandler } from '../tokenMap/tokenHandler';
 import {
   CoinGeckoParams,
   CoinMarketCapParams,
@@ -30,7 +30,7 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
   const minswapTokens: SupportedTokenConfig[] = [];
   const duplicateTokens: SupportedTokenConfig[] = [];
 
-  for (const token of minimumFeeConfigs.supportedTokens) {
+  for (const token of TokenHandler.getInstance().getSupportedTokens()) {
     switch (token.priceBackend) {
       case PriceBackends.CoinGecko: {
         coingeckoTokens.push(token);

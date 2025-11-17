@@ -13,11 +13,10 @@ export const generateNewFeeConfig = async (
   prices: Map<string, number>,
   chainHeights: Map<Chains, number>,
 ) => {
+  const supportedTokens = TokenHandler.getInstance().getSupportedTokens();
   const newFeeConfigs: Map<string, MinimumFeeConfig> = new Map();
 
-  const rsnTokenConfig = minimumFeeConfigs.supportedTokens.find(
-    (token) => token.name === 'RSN',
-  );
+  const rsnTokenConfig = supportedTokens.find((token) => token.name === 'RSN');
   if (!rsnTokenConfig) throw Error(`Token [RSN] is not found in config`);
   const rsnPrice = prices.get(rsnTokenConfig.tokenId);
   if (!rsnPrice) throw Error(`RSN price is required`);
@@ -28,7 +27,7 @@ export const generateNewFeeConfig = async (
   logger.debug(`Fetching doge fee ratio`);
   const dogeFeeRatio = await getDogeFeeRatio();
 
-  for (const token of minimumFeeConfigs.supportedTokens) {
+  for (const token of supportedTokens) {
     logger.debug(`Generating new config for token [${token.name}]`);
 
     const feeConfig = await feeConfigFromPrice(

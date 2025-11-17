@@ -18,6 +18,7 @@ import {
   rsnRatioTriggerPercent,
   urls,
 } from '../configs';
+import { TokenHandler } from '../tokenMap/tokenHandler';
 import { Chains, FeeDifferencePercents, UpdatedFeeConfig } from '../types';
 import { SUPPORTED_CHAINS } from '../utils/consts';
 import {
@@ -34,7 +35,7 @@ export const updateAndGenerateFeeConfig = async (
   const updatedFeeConfigs: Map<string, UpdatedFeeConfig> = new Map();
   const feeDifferences: Map<string, FeeDifferencePercents | undefined> =
     new Map();
-  for (const token of minimumFeeConfigs.supportedTokens) {
+  for (const token of TokenHandler.getInstance().getSupportedTokens()) {
     logger.debug(`Combining old and new config of token [${token.name}]`);
     const newConfig = newConfigs.get(token.tokenId)!;
 

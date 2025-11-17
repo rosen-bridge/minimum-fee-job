@@ -41,9 +41,6 @@ minimumFee:
     dogeConfirmation: 10
   supportedTokens:
     - tokenId: ''
-      ergoSideTokenId: ''
-      name: ''
-      decimals: 0
       priceBackend: ''
       priceBackendParams: # depends on priceBackend
         network: ''

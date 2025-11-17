@@ -1,10 +1,14 @@
 import fs from 'node:fs';
 
-import { TokenMap } from '@rosen-bridge/tokens';
+import { ERGO_CHAIN, NATIVE_RESIDENCY, TokenMap } from '@rosen-bridge/tokens';
+
+import { minimumFeeConfigs } from '../configs';
+import { SupportedTokenConfig } from '../types';
 
 class TokenHandler {
   private static instance: TokenHandler;
   protected tokenMap: TokenMap;
+  protected supportedTokens: Array<SupportedTokenConfig>;
 
   private constructor() {
     // do nothing
@@ -22,8 +26,48 @@ class TokenHandler {
       TokenHandler.instance = new TokenHandler();
       const tokensJson: string = fs.readFileSync(tokensPath, 'utf8');
       const tokens = JSON.parse(tokensJson).tokens;
-      TokenHandler.instance.tokenMap = new TokenMap();
-      await TokenHandler.instance.tokenMap.updateConfigByJson(tokens);
+      const tokenMap = new TokenMap();
+      await tokenMap.updateConfigByJson(tokens);
+      TokenHandler.instance.tokenMap = tokenMap;
+
+      // initialize supported tokens
+      const rawSupportedTokens = minimumFeeConfigs.supportedTokens;
+      const supportedTokens: Array<SupportedTokenConfig> = [];
+
+      for (const token of rawSupportedTokens) {
+        const tokenSet = tokenMap.getTokenSet(token.tokenId);
+        if (tokenSet === undefined) {
+          throw new Error(`Token [${token.tokenId}] is not found in TokenMap`);
+        }
+        const significantDecimals = tokenMap.getSignificantDecimals(
+          token.tokenId,
+        );
+        if (significantDecimals === undefined) {
+          throw new Error(
+            `ImpossibleBehavior: Failed to get significant decimals for token [${token.tokenId}]`,
+          );
+        }
+
+        const ergoSideTokenId = tokenSet[ERGO_CHAIN].tokenId;
+        const nativeChain = Object.keys(tokenSet).find(
+          (chain) => tokenSet[chain].residency === NATIVE_RESIDENCY,
+        );
+        if (nativeChain === undefined) {
+          throw new Error(
+            `ImpossibleBehavior: Native chain for token [${token.tokenId}] is not found`,
+          );
+        }
+        const name = tokenSet[nativeChain].name;
+
+        supportedTokens.push({
+          ...token,
+          ergoSideTokenId: ergoSideTokenId,
+          name: name,
+          decimals: significantDecimals,
+        });
+      }
+
+      TokenHandler.instance.supportedTokens = supportedTokens;
     }
   };
 
@@ -43,6 +87,13 @@ class TokenHandler {
    */
   getTokenMap = (): TokenMap => {
     return this.tokenMap;
+  };
+
+  /**
+   * @returns the supported tokens
+   */
+  getSupportedTokens = (): Array<SupportedTokenConfig> => {
+    return this.supportedTokens;
   };
 }
 
