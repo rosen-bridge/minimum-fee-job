@@ -1,5 +1,6 @@
 {
   "name": "minfee-app",
+  "private": "true",
   "version": "0.1.0",
   "description": "Minimum fee app",
   "repository": {
@@ -46,6 +47,7 @@
     "tailwindcss": "^3.3.0"
   },
   "engines": {
-    "node": ">=22.18.0"
+    "node": ">=22.18.0",
+    "npm": ">=11.6.2"
   }
 }
