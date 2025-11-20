@@ -20,6 +20,11 @@ export class TokenPriceAction {
   /**
    * Fetch the most recent price entry BEFORE the given timestamp.
    *
+   * If maxAgeSeconds != -1 → timestamp must be in
+   * [timestamp - maxAgeSeconds, timestamp] (inclusive).
+   *
+   * If maxAgeSeconds = -1 → only timestamp < input timestamp is applied.
+   *
    * @param tokenId      native token id of the network
    * @param timestamp    reference timestamp (seconds)
    * @param maxAgeSeconds max allowed age (default: -1). Use -1 to disable.
