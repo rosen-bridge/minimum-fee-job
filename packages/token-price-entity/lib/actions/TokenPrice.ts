@@ -39,10 +39,13 @@ export class TokenPriceAction {
       `Fetching latest token price for tokenId [${tokenId}] with timestamp [${timestamp}] and maxAge [${maxAgeSeconds}]`,
     );
 
-    const whereFilter = { tokenId, timestamp: LessThan(timestamp) };
-    if (maxAgeSeconds !== -1) {
-      whereFilter.timestamp = Between(timestamp - maxAgeSeconds, timestamp);
-    }
+    const whereFilter = {
+      tokenId,
+      timestamp:
+        maxAgeSeconds !== -1
+          ? Between(timestamp - maxAgeSeconds, timestamp)
+          : LessThan(timestamp),
+    };
 
     const record = await this.repository.findOne({
       where: whereFilter,
