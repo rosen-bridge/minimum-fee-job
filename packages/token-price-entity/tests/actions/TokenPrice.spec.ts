@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 
 import { DataSource, Repository } from '@rosen-bridge/extended-typeorm';
 
@@ -15,9 +15,6 @@ describe('TokenPriceAction', () => {
     dataSource = await createDatabase();
     action = new TokenPriceAction(dataSource);
     repository = dataSource.getRepository(TokenPriceEntity);
-  });
-  afterEach(async () => {
-    await repository.clear();
   });
 
   /**
