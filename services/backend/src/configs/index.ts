@@ -94,7 +94,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   minimumFeeNFT: config.get<string>('minimumFee.NFT'),
   minimumFeeAddress: config.get<string>('minimumFee.minimumFeeAddress'),
   feeAddress: config.get<string>('minimumFee.feeAddress'),
-  minBoxErg: 200000n,
+  minBoxErg: BigInt(config.get<string>('minimumFee.minBoxErg')),
   txFee: 1100000n,
   supportedTokens: config
     .get<Array<SupportedTokenConfig>>('minimumFee.supportedTokens')
