@@ -1,5 +1,6 @@
 {
   "name": "minimum-fee-job",
+  "private": "true",
   "version": "0.1.0",
   "description": "A process to check minimum fee config with current price of tokens",
   "repository": {
@@ -59,6 +60,7 @@
     "typescript": "^5.0.0"
   },
   "engines": {
-    "node": ">=22.18.0"
+    "node": ">=22.18.0",
+    "npm": ">=11.6.2"
   }
 }
