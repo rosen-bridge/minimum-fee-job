@@ -91,6 +91,7 @@ database:
   path: './sqlite/minFeeJob.sqlite' # database path (for sqlite)
   # host: '' # database host (for postgres)
   # port: 5432 # database port (for postgres)
+  # ssl: false # use ssl for database (for postgres)
   # user: '' # database user (for postgres)
   # password: '' # database password (for postgres)
   # name: '' # database name (for postgres)

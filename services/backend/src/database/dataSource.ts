@@ -22,6 +22,7 @@ if (dbType === 'sqlite') {
     type: 'postgres',
     host: config.get<string>('database.host'),
     port: config.get<number>('database.port'),
+    ssl: config.get<boolean>('database.ssl'),
     username: config.get<string>('database.user'),
     password: config.get<string>('database.password'),
     database: config.get<string>('database.name'),
