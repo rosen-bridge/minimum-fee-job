@@ -31,7 +31,6 @@ installation:
       - '**/node_modules'
       - .npm
   script:
-    - npm install -g npm@11.6.2
     - npm ci
 
 build:
