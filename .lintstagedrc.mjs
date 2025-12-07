@@ -40,6 +40,8 @@ const runKnipConditional = (files) => {
 export default {
   '*': ['prettier --ignore-unknown --write', runKnipConditional],
 
+  '*.{js,ts}': 'npm run test -- related --run',
+
   '**/{packages,services/**}/**/*.{js,jsx,ts,tsx}': 'eslint --fix',
 
   '**/*.{ts,tsx}': perPackage((directory) => {
