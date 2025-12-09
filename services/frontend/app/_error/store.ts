@@ -29,3 +29,9 @@ export class EmptyTxError extends AppError {
     super('Tx is empty');
   }
 }
+
+export class EmptyTokensError extends AppError {
+  constructor() {
+    super('Token map is empty');
+  }
+}

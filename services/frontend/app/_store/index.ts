@@ -2,9 +2,12 @@ import { createClient } from '@vercel/kv';
 import process from 'node:process';
 import { Err, Ok, Result } from 'ts-results-es';
 
+import { RosenTokens, TokenMap } from '@rosen-bridge/tokens';
+
 import {
   BackendConfigParseError,
   EmptyBackendConfigError,
+  EmptyTokensError,
   EmptyTxError,
   RedisConnectionError,
   RedisDataFetchingError,
@@ -107,6 +110,40 @@ export const getTx = async (): Promise<
       return Err(new EmptyTxError());
     }
     return Ok(JSON.stringify(tx));
+  } catch (error) {
+    return Err(new RedisDataFetchingError(error));
+  }
+};
+
+/**
+ * get token map data from the store
+ */
+export const getTokenMap = async (): Promise<
+  Result<
+    TokenMap,
+    RedisDataFetchingError | RedisConnectionError | EmptyTokensError
+  >
+> => {
+  const clientResult = await connectRedisClient();
+
+  if (clientResult.isErr()) {
+    return clientResult;
+  }
+
+  const client = clientResult.value;
+
+  try {
+    const tokens = await client.get<{ tokenMap: RosenTokens }>('token-map');
+
+    if (!tokens) {
+      return Err(new EmptyTokensError());
+    }
+
+    const tokenMap = new TokenMap();
+
+    await tokenMap.updateConfigByJson(tokens.tokenMap);
+
+    return Ok(tokenMap);
   } catch (error) {
     return Err(new RedisDataFetchingError(error));
   }

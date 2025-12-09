@@ -5,9 +5,10 @@ import {
   NetworkFeeValidationError,
   TokenConfigMissing,
 } from '../_error/network-fee-validation';
-import { getPrices, getTokensConfig } from '../_store';
+import { getPrices, getTokenMap, getTokensConfig } from '../_store';
 import { PartialSupportedTokenConfig } from '../_types/token-config';
 import getFeesByToken from '../_utils/get-fees-by-token';
+import { getTokenInfo } from '../_utils/get-token-info';
 import validateActualAgainstExpected from '../_utils/validate-actual-against-expected';
 import { Validate } from './types';
 
@@ -41,11 +42,13 @@ const validateNetworkFeeFactory: (
   calculateExpected: (tokenConfig: PartialSupportedTokenConfig) => number,
 ) => Validate = (network, calculateExpected) => async (tokenId) => {
   const feesByTokenResult = await getFeesByToken();
+  const tokenMapResult = await getTokenMap();
   const tokensConfigResult = await getTokensConfig();
   const pricesResult = await getPrices();
 
   const requirementsResult = Result.all(
     feesByTokenResult,
+    tokenMapResult,
     tokensConfigResult,
     pricesResult,
   );
@@ -54,7 +57,8 @@ const validateNetworkFeeFactory: (
     return requirementsResult;
   }
 
-  const [feesByToken, tokensConfig, prices] = requirementsResult.value;
+  const [feesByToken, tokenMap, tokensConfig, prices] =
+    requirementsResult.value;
 
   try {
     const fees = feesByToken[tokenId];
@@ -78,9 +82,10 @@ const validateNetworkFeeFactory: (
     const actual = calculateTokenNetworkFee(
       Number(networkFee),
       +prices[tokenConfig.tokenId],
-      tokenConfig.decimals,
+      getTokenInfo(tokenMap, tokenId).significantDecimals,
       +prices[chainTokenConfig.tokenId],
     );
+
     const expected = calculateExpected(tokenConfig);
 
     return Ok(validateActualAgainstExpected(actual, expected));

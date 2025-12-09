@@ -27,6 +27,7 @@
     "@mui/material-nextjs": "^5.15.11",
     "@rosen-bridge/json-bigint": "^0.1.0",
     "@rosen-bridge/minimum-fee": "^2.2.0",
+    "@rosen-bridge/tokens": "^4.0.1",
     "@types/lodash-es": "^4.17.12",
     "@vercel/kv": "^3.0.0",
     "ergo-lib-wasm-nodejs": "^0.24.1",
