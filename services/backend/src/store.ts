@@ -1,4 +1,7 @@
 import { createClient } from '@vercel/kv';
+import * as crypto from 'node:crypto';
+
+import { TokenMap } from '@rosen-bridge/tokens';
 
 import { kvRestApiUrl, kvRestApiToken } from './configs';
 import { SupportedTokenConfig } from './types';
@@ -16,6 +19,18 @@ const kv =
  */
 const saveTokensConfig = async (config: SupportedTokenConfig[]) => {
   return void (await kv?.set('tokens-config', JSON.stringify(config)));
+};
+
+/**
+ * save token map config into store
+ */
+const saveTokenMap = async (tokenMap: TokenMap) => {
+  const tokenMapJSON = JSON.stringify(tokenMap.getConfig());
+  const tokenMapHash = crypto.hash('sha256', tokenMapJSON);
+  return void (await kv?.set('token-map', {
+    hash: tokenMapHash,
+    tokenMap: tokenMap.getConfig(),
+  }));
 };
 
 /**
@@ -39,4 +54,4 @@ const flushStore = async () => {
   return void (await kv?.flushdb());
 };
 
-export { flushStore, saveTokensConfig, savePrices, saveTx };
+export { flushStore, saveTokensConfig, saveTokenMap, savePrices, saveTx };

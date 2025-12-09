@@ -4,10 +4,10 @@ import { Fee } from '@rosen-bridge/minimum-fee';
 
 import {
   bridgeFeeTriggerPercent,
-  minimumFeeConfigs,
   networkFeeTriggerPercent,
   rsnRatioTriggerPercent,
 } from '../configs';
+import { TokenHandler } from '../tokenMap/tokenHandler';
 import {
   AnsiColor,
   DifferencePercent,
@@ -193,9 +193,9 @@ export const pricesToTables = (
   const fullTableData: TableData = [];
   const briefTableData: TableData = [];
   prices.forEach((value, key) => {
-    const token = minimumFeeConfigs.supportedTokens.find(
-      (token) => token.tokenId === key,
-    )!;
+    const token = TokenHandler.getInstance()
+      .getSupportedTokens()
+      .find((token) => token.tokenId === key)!;
     const feeDifference = feeDifferences.get(key);
 
     const bridgeFeeDifference = conditionalColorize(

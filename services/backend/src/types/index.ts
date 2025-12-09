@@ -124,6 +124,13 @@ export interface FeeParameters {
   rsnRatioDivisor: number;
 }
 
+export interface SupportedTokenRawConfig {
+  tokenId: string;
+  priceBackend: string;
+  priceBackendParams: PriceBackendParams;
+  fee: FeeParameters;
+}
+
 export interface SupportedTokenConfig {
   tokenId: string;
   ergoSideTokenId: string;
@@ -140,7 +147,7 @@ export interface ConfigInterface {
   feeAddress: string;
   minBoxErg: bigint;
   txFee: bigint;
-  supportedTokens: Array<SupportedTokenConfig>;
+  supportedTokens: Array<SupportedTokenRawConfig>;
   fetchBoxRetry: number;
   rsnRatioPrecision: number;
   bitcoinTxVSize: number;

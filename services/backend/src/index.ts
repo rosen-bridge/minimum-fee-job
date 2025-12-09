@@ -5,7 +5,12 @@ import { chunk } from 'lodash-es';
 import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 
-import { RunningInterval, minimumFeeConfigs, kvRestApiUrl } from './configs';
+import {
+  RunningInterval,
+  minimumFeeConfigs,
+  kvRestApiUrl,
+  tokensPath,
+} from './configs';
 import { initDataSource } from './database/initDataSource';
 import { generateNewFeeConfig } from './minimum-fee/newConfig';
 import { getConfigTokenPrices } from './minimum-fee/prices';
@@ -20,7 +25,14 @@ import {
   getEthereumHeight,
 } from './network/clients';
 import { Notification } from './network/notification';
-import { flushStore, saveTokensConfig, savePrices, saveTx } from './store';
+import {
+  flushStore,
+  saveTokensConfig,
+  savePrices,
+  saveTx,
+  saveTokenMap,
+} from './store';
+import { TokenHandler } from './tokenMap/tokenHandler';
 import { Chains, DiscordPayloadType, UpdatedFeeConfig } from './types';
 import { sendPriceFetchFailureNotification } from './utils/notifications';
 import { saveTokenPrices } from './utils/saveTokenPrices';
@@ -33,6 +45,7 @@ const main = async () => {
   if (minimumFeeConfigs.feeAddress === minimumFeeConfigs.minimumFeeAddress)
     throw Error(`Fee address and Minimum-fee config address cannot be equal`);
 
+  const tokenHandler = TokenHandler.getInstance();
   const priceResult = await getConfigTokenPrices();
   await saveTokenPrices(priceResult.prices);
 
@@ -136,9 +149,9 @@ const main = async () => {
       // send info to redis
       const tokenIdChunks = chunk(
         tokenIds.map((tokenId) => {
-          const token = minimumFeeConfigs.supportedTokens.find(
-            (token) => token.tokenId === tokenId,
-          )!;
+          const token = tokenHandler
+            .getSupportedTokens()
+            .find((token) => token.tokenId === tokenId)!;
           return `- ${token.name} [\`${token.ergoSideTokenId}\`]`;
         }),
         15,
@@ -151,7 +164,8 @@ const main = async () => {
         await discordNotification.send(DiscordPayloadType.MESSAGE, chunk);
       }
       await Promise.all([
-        saveTokensConfig(minimumFeeConfigs.supportedTokens),
+        saveTokensConfig(tokenHandler.getSupportedTokens()),
+        saveTokenMap(tokenHandler.getTokenMap()),
         savePrices(priceResult.prices),
         saveTx(tx),
       ]);
@@ -159,9 +173,9 @@ const main = async () => {
     } else {
       // send info to discord
       for (const tokenId of tokenIds) {
-        const token = minimumFeeConfigs.supportedTokens.find(
-          (token) => token.tokenId === tokenId,
-        )!;
+        const token = tokenHandler
+          .getSupportedTokens()
+          .find((token) => token.tokenId === tokenId)!;
         await discordNotification.send(
           DiscordPayloadType.MESSAGE,
           `## Token ${token.name} [${token.tokenId}]
@@ -224,5 +238,10 @@ const interval = () => {
     });
 };
 
-await initDataSource();
+const initializeService = async () => {
+  await initDataSource();
+  await TokenHandler.init(tokensPath);
+};
+
+await initializeService();
 interval();

@@ -2,6 +2,7 @@ import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
 import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
 
 import { minimumFeeConfigs } from '../configs';
+import { TokenHandler } from '../tokenMap/tokenHandler';
 import { generateTransaction } from '../transaction/generate';
 import { ConfigOrder } from '../transaction/types';
 import { UpdatedFeeConfig } from '../types';
@@ -13,7 +14,7 @@ export const updateConfigsTransaction = async (
 ) => {
   const inputs: Array<ErgoBoxProxy> = [];
   const order: ConfigOrder = [];
-  for (const token of minimumFeeConfigs.supportedTokens) {
+  for (const token of TokenHandler.getInstance().getSupportedTokens()) {
     const feeConfig = feeConfigs.get(token.tokenId);
     if (!feeConfig) continue;
 

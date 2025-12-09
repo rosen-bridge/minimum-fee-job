@@ -1,10 +1,12 @@
 import config from 'config';
-import fs from 'fs';
 
-import { RosenTokens } from '@rosen-bridge/tokens';
 import { TransportOptions } from '@rosen-bridge/winston-logger';
 
-import { ConfigInterface, FeeParameters, SupportedTokenConfig } from '../types';
+import {
+  ConfigInterface,
+  FeeParameters,
+  SupportedTokenRawConfig,
+} from '../types';
 
 export const logConfigs = () => {
   const logs = config.get<TransportOptions[]>('logs');
@@ -97,7 +99,7 @@ export const minimumFeeConfigs: ConfigInterface = {
   minBoxErg: BigInt(config.get<string>('minimumFee.minBoxErg')),
   txFee: 1100000n,
   supportedTokens: config
-    .get<Array<SupportedTokenConfig>>('minimumFee.supportedTokens')
+    .get<Array<SupportedTokenRawConfig>>('minimumFee.supportedTokens')
     .map((supportedToken) => ({
       ...supportedToken,
       fee: supportedToken.fee ? supportedToken.fee : defaultFeeParameters,
@@ -126,12 +128,4 @@ export const kvRestApiToken = config.has('kv.restApiToken')
   ? config.get<string>('kv.restApiToken')
   : undefined;
 
-export const tokens = (): RosenTokens => {
-  const tokensPath = config.get<string>('tokensPath');
-  if (!fs.existsSync(tokensPath)) {
-    throw new Error(`Tokens config file with path ${tokensPath} doesn't exist`);
-  } else {
-    const configJson: string = fs.readFileSync(tokensPath, 'utf8');
-    return JSON.parse(configJson).tokens;
-  }
-};
+export const tokensPath = config.get<string>('tokensPath');
