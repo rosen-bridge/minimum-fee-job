@@ -14,12 +14,12 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { keyBy } from 'lodash-es';
 import { Result } from 'ts-results-es';
 
 import Validation from './_components/validation/Validation';
-import { getPrices, getTokensConfig } from './_store';
+import { getPrices, getTokenMap } from './_store';
 import getFeesByToken from './_utils/get-fees-by-token';
+import { getTokenInfo } from './_utils/get-token-info';
 import validations from './_validations';
 
 /**
@@ -27,12 +27,12 @@ import validations from './_validations';
  */
 const Validations = async () => {
   const feesByTokenResult = await getFeesByToken();
-  const tokensConfigResult = await getTokensConfig();
+  const tokenMapResult = await getTokenMap();
   const pricesResult = await getPrices();
 
   const requirementsResults = Result.all(
     feesByTokenResult,
-    tokensConfigResult,
+    tokenMapResult,
     pricesResult,
   );
 
@@ -55,10 +55,20 @@ const Validations = async () => {
     );
   }
 
-  const [feesByToken, tokensConfig, prices] = requirementsResults.value;
+  const [feesByToken, tokenMap, prices] = requirementsResults.value;
 
-  const tokens = Object.keys(feesByToken);
-  const tokensData = keyBy(tokensConfig, 'ergoSideTokenId');
+  const tokens = Object.keys(feesByToken).map((tokenId) => {
+    const token = getTokenInfo(tokenMap, tokenId);
+
+    const price =
+      +(+prices[token.tokenId]).toFixed(6) ||
+      +(+prices[token.tokenId]).toExponential(3);
+
+    return {
+      price,
+      ...token,
+    };
+  });
 
   const renderTableHead = () => (
     <TableHead>
@@ -98,18 +108,18 @@ const Validations = async () => {
     <TableBody>
       {tokens.map((token) => (
         <TableRow
-          key={token}
+          key={token.tokenId}
           sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
         >
-          <TableCell align="left">{tokensData[token].name}</TableCell>
-          <TableCell align="left">
-            {+(+prices[tokensData[token].tokenId]).toFixed(6) ||
-              +(+prices[tokensData[token].tokenId]).toExponential(3)}
-          </TableCell>
+          <TableCell align="left">{token.name}</TableCell>
+          <TableCell align="left">{token.price}</TableCell>
           {validations.map((validation) => (
             <TableCell align="center" key={validation.id}>
               <Suspense fallback={<CircularProgress size={10} />}>
-                <Validation tokenId={token} validator={validation.validate} />
+                <Validation
+                  tokenId={token.tokenId}
+                  validator={validation.validate}
+                />
               </Suspense>
             </TableCell>
           ))}

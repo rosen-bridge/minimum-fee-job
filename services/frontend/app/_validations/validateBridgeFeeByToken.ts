@@ -4,8 +4,9 @@ import {
   BridgeFeeValidationByTokenError,
   TokenConfigMissing,
 } from '../_error/bridge-fee-validation-by-token';
-import { getPrices, getTokensConfig } from '../_store';
+import { getPrices, getTokenMap, getTokensConfig } from '../_store';
 import getFeesByToken from '../_utils/get-fees-by-token';
+import { getTokenInfo } from '../_utils/get-token-info';
 import validateActualAgainstExpected from '../_utils/validate-actual-against-expected';
 import { Validate } from './types';
 
@@ -28,11 +29,13 @@ const calculateTokenBridgeFee = (
  */
 const validateBridgeFeeByToken: Validate = async (tokenId) => {
   const feesByTokenResult = await getFeesByToken();
+  const tokenMapResult = await getTokenMap();
   const tokensConfigResult = await getTokensConfig();
   const pricesResult = await getPrices();
 
   const requirementsResult = Result.all(
     feesByTokenResult,
+    tokenMapResult,
     tokensConfigResult,
     pricesResult,
   );
@@ -41,7 +44,8 @@ const validateBridgeFeeByToken: Validate = async (tokenId) => {
     return requirementsResult;
   }
 
-  const [feesByToken, tokensConfig, prices] = requirementsResult.value;
+  const [feesByToken, tokenMap, tokensConfig, prices] =
+    requirementsResult.value;
 
   try {
     const fees = feesByToken[tokenId];
@@ -59,8 +63,9 @@ const validateBridgeFeeByToken: Validate = async (tokenId) => {
     const actual = calculateTokenBridgeFee(
       Number(bridgeFee),
       +prices[tokenConfig.tokenId],
-      tokenConfig.decimals,
+      getTokenInfo(tokenMap, tokenId).significantDecimals,
     );
+
     const expected = tokenConfig.fee.bridgeFeeUSD;
 
     return Ok(validateActualAgainstExpected(actual, expected));
