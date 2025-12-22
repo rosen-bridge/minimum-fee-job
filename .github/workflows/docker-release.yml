@@ -47,7 +47,7 @@ jobs:
           npx @rosen-bridge/cli@${{ vars.ROSEN_CLI_VERSION || 'latest' }} download-assets -c ${{ vars.RELEASE_NAME }} ${{ vars.RELEASE_TAG }} -o ./rosen -s mainnet
           mv ./rosen/tokens*.json ./services/backend/config/tokens.json
 
-      - name: Move Contracts files
+      - name: Move Docker Config files
         shell: bash
         run: |
           mv ./docker/*.yaml ./services/backend/config/
@@ -91,7 +91,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           outputs: type=image,name=${{ env.IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
-          target: minimum-fee-job-service
 
       - name: Export digest file
         shell: bash
@@ -159,6 +158,6 @@ jobs:
           TAGS: ${{ steps.meta.outputs.tags }}
         run: |
           docker buildx imagetools create \
-            --annotation "index:org.opencontainers.image.description=Rosen Bridge relay service" \
+            --annotation "index:org.opencontainers.image.description=Rosen Bridge minimum-fee-job Backend Service" \
             $(printf ' -t %s' $TAGS) \
             $(printf '${{ env.IMAGE_NAME }}@sha256:%s ' *)

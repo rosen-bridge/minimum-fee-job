@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/root/.npm npm ci
 COPY . /app
 RUN npm run build --workspace=packages/token-price-entity --workspace=services/backend
 
-FROM node:22.18 AS minimum-fee-job-service
+FROM node:22.18
 COPY --from=minimum-fee-job-builder /app/node_modules/ /app/node_modules/
 COPY --from=minimum-fee-job-builder /app/package*.json /app/
 COPY --from=minimum-fee-job-builder /app/services/backend/ /app/services/backend/
