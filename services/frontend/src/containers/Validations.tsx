@@ -47,6 +47,7 @@ export const Validations = () => {
 
       return {
         price,
+        ergoSideTokenId: tokenId,
         ...token,
       };
     });
@@ -87,7 +88,7 @@ export const Validations = () => {
 
   return (
     <>
-      <TableContainer className="max-h-[80vh] [clip-path:inset(0_round_1rem)]">
+      <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
@@ -131,7 +132,7 @@ export const Validations = () => {
                 {validations.map((validation) => (
                   <TableCell align="center" key={validation.id}>
                     <Validation
-                      tokenId={token.tokenId}
+                      tokenId={token.ergoSideTokenId}
                       validator={validation.validate}
                     />
                   </TableCell>
