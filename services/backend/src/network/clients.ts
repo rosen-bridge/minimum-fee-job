@@ -7,7 +7,6 @@ import {
 } from 'ergo-lib-wasm-nodejs';
 import { JsonRpcProvider } from 'ethers';
 
-import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import cardanoKoiosClientFactory from '@rosen-clients/cardano-koios';
 import ergoExplorerClientFactory from '@rosen-clients/ergo-explorer';
@@ -29,7 +28,7 @@ export const getErgoHeight = async (): Promise<number> =>
   Number((await explorerClient.v1.getApiV1Networkstate()).height);
 
 export const getCardanoHeight = async (): Promise<number> =>
-  Number((await koiosClient.getTip())[0].block_no!);
+  Number((await koiosClient.tip())[0].block_no!);
 
 export const getBitcoinHeight = async (): Promise<number> =>
   Number((await esploraClient.get<number>(`/api/blocks/tip/height`)).data);
@@ -45,11 +44,11 @@ export const getBinanceHeight = async (): Promise<number> =>
 
 export const getAddressBoxes = async (
   address: string,
-): Promise<Array<ErgoBoxProxy>> => {
+): Promise<Array<ErgoBox>> => {
   const explorerBoxes =
     await explorerClient.v1.getApiV1BoxesUnspentByaddressP1(address);
   const result = explorerBoxes.items?.map((box) =>
-    ErgoBox.from_json(JsonBigInt.stringify(box)).to_js_eip12(),
+    ErgoBox.from_json(JsonBigInt.stringify(box)),
   );
   if (!result) return [];
   return result;
@@ -57,7 +56,7 @@ export const getAddressBoxes = async (
 
 export const getMinimumFeeConfigBox = async (
   tokenId: string,
-): Promise<ErgoBoxProxy | undefined> => {
+): Promise<ErgoBox | undefined> => {
   const boxes = (
     await explorerClient.v1.getApiV1BoxesUnspentBytokenidP1(
       minimumFeeConfigs.minimumFeeNFT,
@@ -76,7 +75,7 @@ export const getMinimumFeeConfigBox = async (
             tokenId === ergoBox.tokens().get(1).id().to_str())) &&
         ergoBox.tokens().get(0).amount().as_i64().to_str() == '1'
       )
-        return ergoBox.to_js_eip12();
+        return ergoBox;
       else return undefined;
     })
     .filter((val) => val !== undefined);

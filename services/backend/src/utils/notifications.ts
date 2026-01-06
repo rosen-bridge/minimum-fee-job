@@ -1,11 +1,11 @@
 import { chunk } from 'lodash-es';
 
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
 import { Notification } from '../network/notification';
 import { DiscordPayloadType } from '../types';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 /**
  * Sends detailed notifications to Discord when price fetching for tokens fails.

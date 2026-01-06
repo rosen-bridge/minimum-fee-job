@@ -2,7 +2,7 @@ import './bootstrap';
 
 import { chunk } from 'lodash-es';
 
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 
 import {
@@ -38,7 +38,7 @@ import { sendPriceFetchFailureNotification } from './utils/notifications';
 import { saveTokenPrices } from './utils/saveTokenPrices';
 import { feeConfigToRegisterValues, pricesToTables } from './utils/utils';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const main = async () => {
   logger.info(`Starting Job`);
