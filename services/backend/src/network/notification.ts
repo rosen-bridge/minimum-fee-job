@@ -1,11 +1,11 @@
 import { WebhookClient } from 'discord.js';
 
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
 import { discordWebHookUrl } from '../configs';
 import { DiscordPayloadType } from '../types';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 export class Notification {
   private static instance: Notification;

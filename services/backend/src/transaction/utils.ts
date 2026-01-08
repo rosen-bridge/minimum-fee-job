@@ -1,26 +1,6 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
-import { BoxInfo, ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
-
 import { AssetBalance, TokenInfo } from './types';
-
-/**
- * extracts box id and assets of a box
- * @param box the box
- * @returns an object containing the box id and assets
- */
-export const getBoxInfo = (box: ErgoBoxProxy): BoxInfo => {
-  return {
-    id: box.boxId,
-    assets: {
-      nativeToken: BigInt(box.value),
-      tokens: box.assets.map((token) => ({
-        id: token.tokenId,
-        value: BigInt(token.amount),
-      })),
-    },
-  };
-};
 
 /**
  * gets Ergo box assets

@@ -1,10 +1,7 @@
 import * as wasm from 'ergo-lib-wasm-nodejs';
 
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import {
-  ErgoBoxProxy,
-  selectErgoBoxes,
-} from '@rosen-bridge/ergo-box-selection';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
+import { ErgoBoxSelection } from '@rosen-bridge/ergo-box-selection';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 
 import { minimumFeeConfigs } from '../configs';
@@ -14,14 +11,12 @@ import {
   getStateContext,
 } from '../network/clients';
 import { AssetBalance, ConfigOrder, TransactionEIP19 } from './types';
-import {
-  getBoxAssets,
-  getBoxInfo,
-  subtractAssetBalance,
-  sumAssetBalance,
-} from './utils';
+import { getBoxAssets, subtractAssetBalance, sumAssetBalance } from './utils';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
+const boxSelection = new ErgoBoxSelection(
+  DefaultLogger.getInstance().child(`ergo-box-selection`),
+);
 
 /**
  * generates unsigned transaction for config order
@@ -31,7 +26,7 @@ const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
  */
 export const generateTransaction = async (
   order: ConfigOrder,
-  inputs: Array<ErgoBoxProxy>,
+  inputs: Array<wasm.ErgoBox>,
 ): Promise<TransactionEIP19> => {
   logger.debug(
     `Generating Ergo transaction for Order: ${JsonBigInt.stringify(order)}`,
@@ -44,27 +39,28 @@ export const generateTransaction = async (
     `Order required assets: ${JsonBigInt.stringify(orderRequiredAssets)}`,
   );
   const inputAssets = inputs
-    .map((box) => getBoxInfo(box).assets)
+    .map((box) => boxSelection.getBoxInfo(box).assets)
     .reduce(sumAssetBalance, { nativeToken: 0n, tokens: [] });
   logger.debug(
     `Pre-selected boxes assets: ${JsonBigInt.stringify(inputAssets)}`,
   );
-  const requiredAssets = sumAssetBalance(
-    subtractAssetBalance(orderRequiredAssets, inputAssets, 0n, true),
-    {
-      nativeToken: minimumFeeConfigs.minBoxErg + minimumFeeConfigs.txFee,
-      tokens: [],
-    },
+  const requiredAssets = subtractAssetBalance(
+    orderRequiredAssets,
+    inputAssets,
+    0n,
+    true,
   );
-  logger.debug(`Required assets: ${JsonBigInt.stringify(requiredAssets)}`);
+  logger.debug(`Required assets: ${JsonBigInt.stringify(requiredAssets)}`); // it does not consider required Erg for change box and tx fee, which is calculated by the selection package
 
   // call getCovering to get enough boxes
-  const coveredBoxes = await selectErgoBoxes(
+  const coveredBoxes = await boxSelection.getCoveringBoxes(
     requiredAssets,
     [],
     new Map(),
     (await getAddressBoxes(minimumFeeConfigs.feeAddress)).values(),
-    DefaultLoggerFactory.getInstance().getLogger(`ergo-box-selection`),
+    minimumFeeConfigs.minBoxErg,
+    undefined,
+    () => minimumFeeConfigs.txFee,
   );
 
   // check if boxes covered requirements
@@ -84,11 +80,8 @@ export const generateTransaction = async (
     nativeToken: 0n,
     tokens: [],
   };
-  const inBoxes = inputs.map((serializedBox) =>
-    wasm.ErgoBox.from_json(JsonBigInt.stringify(serializedBox)),
-  );
   const inErgoBoxes = wasm.ErgoBoxes.empty();
-  inBoxes.forEach((box) => {
+  inputs.forEach((box) => {
     inErgoBoxes.add(box);
 
     // add box assets to `remainingAssets`
@@ -170,7 +163,7 @@ export const generateTransaction = async (
   const ergoTx: TransactionEIP19 = {
     reducedTx: serializedTx,
     sender: minimumFeeConfigs.feeAddress,
-    inputs: inBoxes.map((input) =>
+    inputs: inputs.map((input) =>
       Buffer.from(input.sigma_serialize_bytes()).toString('base64'),
     ),
   };

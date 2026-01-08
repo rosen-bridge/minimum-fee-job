@@ -1,4 +1,4 @@
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ChainFee, MinimumFeeConfig } from '@rosen-bridge/minimum-fee';
 
 import { ADA, BNB, BTC, DOGE, ERG, ETH, minimumFeeConfigs } from '../configs';
@@ -7,7 +7,7 @@ import { TokenHandler } from '../tokenMap/tokenHandler';
 import { Chains, SupportedTokenConfig } from '../types';
 import { feeRatioDivisor } from '../utils/consts';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 export const generateNewFeeConfig = async (
   prices: Map<string, number>,

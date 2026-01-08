@@ -3,14 +3,14 @@ import './bootstrap';
 import axios from 'axios';
 import { writeFileSync } from 'fs';
 
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import JsonBi from '@rosen-bridge/json-bigint';
 
 import { tokensPath } from './configs';
 import { getConfigTokenPrices } from './minimum-fee/prices';
 import { TokenHandler } from './tokenMap/tokenHandler';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 interface TokenType {
   [chain: string]: {

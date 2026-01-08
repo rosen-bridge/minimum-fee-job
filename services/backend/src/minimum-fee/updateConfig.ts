@@ -1,6 +1,6 @@
 import { isEqual } from 'lodash-es';
 
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import {
   ErgoNetworkType,
@@ -26,7 +26,7 @@ import {
   isDifferencePercentSufficient,
 } from '../utils/utils';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 export const updateAndGenerateFeeConfig = async (
   newConfigs: Map<string, MinimumFeeConfig>,

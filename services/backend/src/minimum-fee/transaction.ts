@@ -1,5 +1,6 @@
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
-import { ErgoBoxProxy } from '@rosen-bridge/ergo-box-selection';
+import { ErgoBox } from 'ergo-lib-wasm-nodejs';
+
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
 import { minimumFeeConfigs } from '../configs';
 import { TokenHandler } from '../tokenMap/tokenHandler';
@@ -7,12 +8,12 @@ import { generateTransaction } from '../transaction/generate';
 import { ConfigOrder } from '../transaction/types';
 import { UpdatedFeeConfig } from '../types';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 export const updateConfigsTransaction = async (
   feeConfigs: Map<string, UpdatedFeeConfig>,
 ) => {
-  const inputs: Array<ErgoBoxProxy> = [];
+  const inputs: Array<ErgoBox> = [];
   const order: ConfigOrder = [];
   for (const token of TokenHandler.getInstance().getSupportedTokens()) {
     const feeConfig = feeConfigs.get(token.tokenId);
@@ -22,7 +23,7 @@ export const updateConfigsTransaction = async (
 
     if (!currentConfigBox)
       logger.warn(`found no current config box for token [${token.tokenId}]`);
-    else inputs.push(currentConfigBox.to_js_eip12());
+    else inputs.push(currentConfigBox);
 
     const requiredTokens = [
       {

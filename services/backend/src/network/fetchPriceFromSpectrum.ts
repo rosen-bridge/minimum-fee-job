@@ -1,13 +1,13 @@
 import axios from 'axios';
 
-import { DefaultLoggerFactory } from '@rosen-bridge/abstract-logger';
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
 import { spectrumPoolTimeLength, urls } from '../configs';
 import { ErgTokenVolumes } from '../types';
 import { SpectrumPool } from '../types/spectrum';
 import { ERG_ID } from '../utils/consts';
 
-const logger = DefaultLoggerFactory.getInstance().getLogger(import.meta.url);
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const axiosSpectrum = axios.create({
   baseURL: urls.spectrum,
