@@ -112,7 +112,10 @@ export const minimumFeeConfigs: ConfigInterface = {
   bitcoinRunesTxVSize:
     config.get<number>('minimumFee.bitcoinRunesTxVSize') ?? 383,
   dogeMinUtxo: config.get<number>('minimumFee.dogeMinUtxo') ?? 0.01,
-  ethereumTxFee: config.get<number>('minimumFee.ethereumTxFee') ?? 0.001,
+  ethereumAvgGasPricePeriod:
+    config.get<number>('minimumFee.ethereumAvgGasPricePeriod') ?? 7200,
+  ethereumNetworkFeeMultiplier:
+    config.get<number>('minimumFee.ethereumNetworkFeeMultiplier') ?? 1.5,
   binanceTxFee: config.get<number>('minimumFee.binanceTxFee') ?? 0.0001,
 };
 

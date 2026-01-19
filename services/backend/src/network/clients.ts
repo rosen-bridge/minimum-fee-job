@@ -12,6 +12,7 @@ import cardanoKoiosClientFactory from '@rosen-clients/cardano-koios';
 import ergoExplorerClientFactory from '@rosen-clients/ergo-explorer';
 
 import { auth, minimumFeeConfigs, urls } from '../configs';
+import { EvmJsonRpcFeeHistoryResponse } from '../types';
 
 const explorerClient = ergoExplorerClientFactory(urls.ergoExplorer);
 const koiosClient = cardanoKoiosClientFactory(urls.cardanoKoios, auth.koios);
@@ -114,3 +115,11 @@ export const getDogeFeeRatio = async (): Promise<number> => {
   const response = await dogeBlockcypherClient.get(`v1/doge/main`);
   return response.data.medium_fee_per_kb / 1000;
 };
+
+export const getEthereumFeeHistory =
+  async (): Promise<EvmJsonRpcFeeHistoryResponse> => {
+    return ethereumRpcClient.send('eth_feeHistory', [
+      minimumFeeConfigs.ethereumAvgGasPricePeriod,
+      'latest',
+    ]);
+  };

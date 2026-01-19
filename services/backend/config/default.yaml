@@ -24,8 +24,9 @@ minimumFee:
   dogeTxSize: 226
   bitcoinRunesTxVSize: 383 # 3 NS inputs -> 3 NS, 1 OP_RETURN of size 23 and 1 Taproot outputs
   dogeMinUtxo: 0.01
-  ethereumTxFee: 0.001
-  binanceTxFee: 0.0001
+  ethereumAvgGasPricePeriod: 7200 # blocks (1 day long)
+  ethereumNetworkFeeMultiplier: 1.5
+  binanceTxFee: 0.00002
   defaultFee:
     delays:
       ergo: 5

@@ -19,6 +19,12 @@ import {
 } from '../types';
 import { SUPPORTED_CHAINS, TABLE_CHUNK_SIZE } from './consts';
 
+export const applyHighDecimal = (value: string, decimal: number): string => {
+  return value.length >= decimal
+    ? '0' + value.slice(0, -decimal) + '.' + value.slice(-decimal)
+    : '0.' + '0'.repeat(decimal - value.length) + value;
+};
+
 export const feeConfigToRegisterValues = (feeConfig: Fee[]): Registers => {
   // generate register values
   //  extract chains

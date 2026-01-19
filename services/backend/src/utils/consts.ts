@@ -7,3 +7,5 @@ export const feeRatioDivisor = 10000;
 export const TABLE_CHUNK_SIZE = 12;
 
 export const SUPPORTED_CHAINS = Object.values(Chains);
+
+export const ERC20_TRANSFER_GAS = 53000n;

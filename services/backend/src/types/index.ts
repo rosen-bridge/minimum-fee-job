@@ -155,7 +155,8 @@ export interface ConfigInterface {
   dogeTxSize: number;
   bitcoinRunesTxVSize: number;
   dogeMinUtxo: number;
-  ethereumTxFee: number;
+  ethereumAvgGasPricePeriod: number;
+  ethereumNetworkFeeMultiplier: number;
   binanceTxFee: number;
 }
 
@@ -193,4 +194,12 @@ export interface PriceFetchResult {
   prices: Map<string, number>;
   fetched: boolean;
   errors: Map<string, string>;
+}
+
+export interface EvmJsonRpcFeeHistoryResponse {
+  baseFeePerGas: string[];
+  gasUsedRatio: number[];
+  baseFeePerBlobGas: string[];
+  blobGasUsedRatio: number[];
+  oldestBlock: string;
 }

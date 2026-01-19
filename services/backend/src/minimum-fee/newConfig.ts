@@ -2,10 +2,15 @@ import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ChainFee, MinimumFeeConfig } from '@rosen-bridge/minimum-fee';
 
 import { ADA, BNB, BTC, DOGE, ERG, ETH, minimumFeeConfigs } from '../configs';
-import { getBitcoinFeeRatio, getDogeFeeRatio } from '../network/clients';
+import {
+  getBitcoinFeeRatio,
+  getDogeFeeRatio,
+  getEthereumFeeHistory,
+} from '../network/clients';
 import { TokenHandler } from '../tokenMap/tokenHandler';
 import { Chains, SupportedTokenConfig } from '../types';
-import { feeRatioDivisor } from '../utils/consts';
+import { ERC20_TRANSFER_GAS, feeRatioDivisor } from '../utils/consts';
+import { applyHighDecimal } from '../utils/utils';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -21,11 +26,29 @@ export const generateNewFeeConfig = async (
   const rsnPrice = prices.get(rsnTokenConfig.tokenId);
   if (!rsnPrice) throw Error(`RSN price is required`);
 
-  logger.debug(`Fetching bitcoin fee ratio`);
+  logger.debug(`Fetching Bitcoin fee ratio`);
   const bitcoinFeeRatioMap = await getBitcoinFeeRatio();
 
-  logger.debug(`Fetching doge fee ratio`);
+  logger.debug(`Fetching Doge fee ratio`);
   const dogeFeeRatio = await getDogeFeeRatio();
+
+  logger.debug(
+    `Fetching Ethereum fee history (for [${minimumFeeConfigs.ethereumAvgGasPricePeriod}] latest blocks)`,
+  );
+  const ethereumFeeHistory = await getEthereumFeeHistory();
+  const ethereumAvgGasPrice =
+    ethereumFeeHistory.baseFeePerGas.reduce(
+      (acc, cur) => acc + BigInt(cur),
+      0n,
+    ) / BigInt(ethereumFeeHistory.baseFeePerGas.length);
+  logger.debug(`Avg Ethereum gas price: ${ethereumAvgGasPrice}`);
+  const estimatedEthereumNetworkFeeInWei = (
+    ethereumAvgGasPrice * ERC20_TRANSFER_GAS
+  ).toString();
+  const ethereumNetworkFeeInEther =
+    Number(applyHighDecimal(estimatedEthereumNetworkFeeInWei, 18)) *
+    minimumFeeConfigs.ethereumNetworkFeeMultiplier;
+  logger.debug(`Ethereum network fee in Ether: ${ethereumNetworkFeeInEther}`);
 
   for (const token of supportedTokens) {
     logger.debug(`Generating new config for token [${token.name}]`);
@@ -40,6 +63,7 @@ export const generateNewFeeConfig = async (
       token.fee,
       bitcoinFeeRatioMap,
       dogeFeeRatio,
+      ethereumNetworkFeeInEther,
     );
     newFeeConfigs.set(token.tokenId, feeConfig);
   }
@@ -56,6 +80,7 @@ export const feeConfigFromPrice = async (
   configs: SupportedTokenConfig['fee'],
   bitcoinFeeRatioMap: Record<string, number>,
   dogeFeeRatio: number,
+  ethereumNetworkFeeInEther: number,
 ): Promise<MinimumFeeConfig> => {
   const getCurrentHeight = (chain: Chains) => {
     const currentHeight = chainHeights.get(chain);
@@ -208,6 +233,7 @@ export const feeConfigFromPrice = async (
       configs,
       tokenPrice,
       tokenDecimal,
+      ethereumNetworkFeeInEther,
     );
     const ethereumFee: ChainFee = {
       bridgeFee: bridgeFee,
@@ -354,16 +380,14 @@ const getEthereumNetworkFee = (
   configs: SupportedTokenConfig['fee'],
   tokenPrice: number,
   tokenDecimal: number,
+  networkFeeInEther: number,
 ) => {
   const ethPrice = prices.get(ETH);
   if (!ethPrice) throw Error(`Eth price is required`);
 
   // calculating network fee on Ethereum
   return BigInt(
-    Math.ceil(
-      (minimumFeeConfigs.ethereumTxFee * ethPrice * 10 ** tokenDecimal) /
-        tokenPrice,
-    ),
+    Math.ceil((networkFeeInEther * ethPrice * 10 ** tokenDecimal) / tokenPrice),
   );
 };
 
