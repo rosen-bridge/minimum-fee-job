@@ -1,6 +1,6 @@
 {
   "name": "@rosen-bridge/token-price-entity",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Token price history tracking entity and migrations",
   "repository": {
     "type": "git",
