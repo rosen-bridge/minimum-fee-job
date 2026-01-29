@@ -84,10 +84,12 @@ export interface DuplicateTokenParams {
   tokenId: string;
 }
 
-export interface MinswapParams {
-  lpPolicyId: string;
-  lpAssetName: string;
-}
+/**
+ * TODO: fix lint error (an empty interface declaration)
+ * local:ergo/rosen-bridge/minimum-fee-job#36
+ */
+// eslint-disable-next-line
+export interface MinswapParams {}
 
 /**
  * TODO: fix lint error (an empty interface declaration)
