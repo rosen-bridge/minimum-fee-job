@@ -9,7 +9,7 @@ urls:
   dogeBlockcypher: 'https://api.blockcypher.com'
   ethereumRpc: 'https://eth-mainnet.public.blastapi.io'
   binanceRpc: 'https://bsc-mainnet.public.blastapi.io'
-  minswap: 'https://monorepo-mainnet-prod.minswap.org/graphql'
+  minswap: 'https://monorepo-mainnet-prod.minswap.org'
 auth:
   koios: ''
 minimumFee:

@@ -1,5 +1,7 @@
+import { AxiosError } from 'axios';
 import { intersection, chunk } from 'lodash-es';
 
+import JsonBigInt from '@rosen-bridge/json-bigint';
 import { Fee } from '@rosen-bridge/minimum-fee';
 
 import {
@@ -363,4 +365,14 @@ const generateAsciiTable = (data: TableData): string => {
   const body = data.slice(1).map(formatRow).join('\n');
 
   return [topBorder, header, midBorder, body, bottomBorder].join('\n');
+};
+
+/**
+ * @param error Axios error
+ * @returns the response of exists, otherwise returns the message
+ */
+export const extractAxiosErrorMessage = (error: AxiosError) => {
+  if (error.response)
+    return `${error}: ${JsonBigInt.stringify(error.response.data)}`;
+  else return error.message;
 };
