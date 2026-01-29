@@ -59,7 +59,7 @@ minimumFee:
         adaNetworkFee: 3.4
         feeRatioFloat: 0.005
         bitcoinConfirmation: 6
-tokensPath: './config/rosen/tokens.json' # path to supported tokens of bridge
+tokensPath: './config/tokens.json' # path to supported tokens of bridge
 logs:
   - type: 'file'
     path: './logs/'
