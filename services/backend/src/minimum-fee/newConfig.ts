@@ -21,7 +21,9 @@ export const generateNewFeeConfig = async (
   const supportedTokens = TokenHandler.getInstance().getSupportedTokens();
   const newFeeConfigs: Map<string, MinimumFeeConfig> = new Map();
 
-  const rsnTokenConfig = supportedTokens.find((token) => token.name === 'RSN');
+  const rsnTokenConfig = supportedTokens.find(
+    (token) => token.tokenId === minimumFeeConfigs.RSNTokenId,
+  );
   if (!rsnTokenConfig) throw Error(`Token [RSN] is not found in config`);
   const rsnPrice = prices.get(rsnTokenConfig.tokenId);
   if (!rsnPrice) throw Error(`RSN price is required`);

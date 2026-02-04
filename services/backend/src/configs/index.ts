@@ -93,6 +93,7 @@ export const RunningInterval = config.get<number>('interval') * 1000; // seconds
 
 const defaultFeeParameters = config.get<FeeParameters>('minimumFee.defaultFee');
 export const minimumFeeConfigs: ConfigInterface = {
+  RSNTokenId: config.get<string>('minimumFee.RSN'),
   minimumFeeNFT: config.get<string>('minimumFee.NFT'),
   minimumFeeAddress: config.get<string>('minimumFee.minimumFeeAddress'),
   feeAddress: config.get<string>('minimumFee.feeAddress'),

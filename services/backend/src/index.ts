@@ -31,6 +31,7 @@ import {
   savePrices,
   saveTx,
   saveTokenMap,
+  saveRsnTokenId,
 } from './store';
 import { TokenHandler } from './tokenMap/tokenHandler';
 import { Chains, DiscordPayloadType, UpdatedFeeConfig } from './types';
@@ -168,6 +169,7 @@ const main = async () => {
         saveTokenMap(tokenHandler.getTokenMap()),
         savePrices(priceResult.prices),
         saveTx(tx),
+        saveRsnTokenId(minimumFeeConfigs.RSNTokenId),
       ]);
       logger.info('Saved data in the store');
     } else {

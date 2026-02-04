@@ -144,6 +144,7 @@ export interface SupportedTokenConfig {
 }
 
 export interface ConfigInterface {
+  RSNTokenId: string;
   minimumFeeNFT: string;
   minimumFeeAddress: string;
   feeAddress: string;
