@@ -95,6 +95,26 @@ export const getTx = async (): Promise<string> => {
 export const getTxSafe = wrap(getTx);
 
 /**
+ * get tx data from the store
+ */
+export const getRsnTokenId = async (): Promise<string> => {
+  const client = await connectRedisClient();
+
+  try {
+    const rsnTokenId = await client.get<Record<string, string>>('rsn-token-id');
+
+    if (!rsnTokenId) {
+      throw new EmptyTxError();
+    }
+    return JSON.stringify(rsnTokenId);
+  } catch (error) {
+    throw new RedisDataFetchingError(error);
+  }
+};
+
+export const getRsnTokenIdSafe = wrap(getRsnTokenId);
+
+/**
  * get token map data from the store
  */
 export const getRosenTokens = async (): Promise<RosenTokens> => {

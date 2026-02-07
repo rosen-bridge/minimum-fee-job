@@ -3,7 +3,12 @@ import {
   RsnConfigMissing,
   TokenConfigMissing,
 } from '@/error';
-import { fetchFeesByToken, fetchPrices, fetchTokensConfig } from '@/queries';
+import {
+  fetchFeesByToken,
+  fetchRsnTokenId,
+  fetchPrices,
+  fetchTokensConfig,
+} from '@/queries';
 import { Validate } from '@/types';
 import { validateActualAgainstExpected } from '@/utils';
 
@@ -29,6 +34,7 @@ export const validateBridgeFeeByRsnRatio: Validate = async (tokenId) => {
   const feesByToken = await fetchFeesByToken();
   const tokensConfig = await fetchTokensConfig();
   const prices = await fetchPrices();
+  const rsnTokenId = await fetchRsnTokenId();
 
   try {
     const fees = feesByToken[tokenId];
@@ -44,7 +50,9 @@ export const validateBridgeFeeByRsnRatio: Validate = async (tokenId) => {
       throw new TokenConfigMissing();
     }
 
-    const rsnConfig = tokensConfig.find((token) => token.name === 'RSN');
+    const rsnConfig = tokensConfig.find(
+      (token) => token.tokenId === rsnTokenId,
+    );
     if (!rsnConfig) {
       throw new RsnConfigMissing();
     }

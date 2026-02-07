@@ -54,4 +54,18 @@ const flushStore = async () => {
   return void (await kv?.flushdb());
 };
 
-export { flushStore, saveTokensConfig, saveTokenMap, savePrices, saveTx };
+/**
+ * save tokens config into store
+ */
+const saveRsnTokenId = async (rsnTokenId: string) => {
+  return void (await kv?.set('rsn-token-id', rsnTokenId));
+};
+
+export {
+  flushStore,
+  saveTokensConfig,
+  saveTokenMap,
+  savePrices,
+  saveTx,
+  saveRsnTokenId,
+};
