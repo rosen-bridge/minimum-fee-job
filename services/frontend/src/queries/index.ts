@@ -6,3 +6,4 @@ export * from './tokenMap';
 export * from './tokenMinimumFeeBox';
 export * from './tokensConfig';
 export * from './tx';
+export * from './rsnTokenId';

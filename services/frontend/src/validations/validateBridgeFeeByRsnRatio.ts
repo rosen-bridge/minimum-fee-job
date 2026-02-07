@@ -3,11 +3,14 @@ import {
   RsnConfigMissing,
   TokenConfigMissing,
 } from '@/error';
-import { fetchFeesByToken, fetchPrices, fetchTokensConfig } from '@/queries';
+import {
+  fetchFeesByToken,
+  fetchRsnTokenId,
+  fetchPrices,
+  fetchTokensConfig,
+} from '@/queries';
 import { Validate } from '@/types';
 import { validateActualAgainstExpected } from '@/utils';
-
-import { fetchRsnTokenId } from '../queries/rsnTokenId';
 
 /**
  * Rsn ratio calculation formula

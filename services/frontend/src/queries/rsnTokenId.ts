@@ -5,7 +5,7 @@ import { queryClient } from './queryClient';
 
 export const fetchRsnTokenId = async () => {
   return await queryClient.fetchQuery({
-    queryKey: ['feesByToken'],
+    queryKey: ['rsnTokenId'],
     queryFn: async () => {
       return await unwrap(getRsnTokenIdSafe)();
     },
