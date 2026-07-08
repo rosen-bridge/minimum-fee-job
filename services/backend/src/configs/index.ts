@@ -60,6 +60,7 @@ export const BTC = 'btc';
 export const ETH = 'eth';
 export const BNB = 'bnb';
 export const DOGE = 'doge';
+export const FIRO = 'firo';
 
 export const urls = {
   coinMarketCap: config.get<string>('urls.coinMarketCap'),
@@ -73,6 +74,10 @@ export const urls = {
   ethereumRpc: config.get<string>('urls.ethereumRpc'),
   binanceRpc: config.get<string>('urls.binanceRpc'),
   minswap: config.get<string>('urls.minswap'),
+  firoElectrumX: {
+    host: config.get<string>('urls.firoElectrumX.host'),
+    port: config.get<number>('urls.firoElectrumX.port'),
+  },
 };
 
 export const auth = {
@@ -88,6 +93,7 @@ export const feeGuaranteeDuration = new Map<string, number>([
   ['binance', 24 * 60 * 20], // 1 day (20 blocks per minute)
   ['doge', 24 * 60], // 1 day (60 blocks per hour)
   ['bitcoin-runes', 24 * 6], // 1 day (6 blocks per hour)
+  ['firo', 24 * 24], // 1 day (24 blocks per hour)
 ]);
 export const RunningInterval = config.get<number>('interval') * 1000; // seconds to milliseconds
 
@@ -110,9 +116,11 @@ export const minimumFeeConfigs: ConfigInterface = {
   bitcoinTxVSize: config.get<number>('minimumFee.bitcoinTxVSize') ?? 150,
   bitcoinMinUtxo: config.get<number>('minimumFee.bitcoinMinUtxo') ?? 0.00000546,
   dogeTxSize: config.get<number>('minimumFee.dogeTxSize') ?? 226,
+  firoTxSize: config.get<number>('minimumFee.firoTxSize') ?? 226,
   bitcoinRunesTxVSize:
     config.get<number>('minimumFee.bitcoinRunesTxVSize') ?? 383,
   dogeMinUtxo: config.get<number>('minimumFee.dogeMinUtxo') ?? 0.01,
+  firoMinUtxo: config.get<number>('minimumFee.firoMinUtxo') ?? 0.005,
   ethereumAvgGasPricePeriod:
     config.get<number>('minimumFee.ethereumAvgGasPricePeriod') ?? 7200,
   ethereumNetworkFeeMultiplier:

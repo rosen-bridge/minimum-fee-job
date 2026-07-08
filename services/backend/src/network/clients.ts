@@ -7,12 +7,17 @@ import {
 } from 'ergo-lib-wasm-nodejs';
 import { JsonRpcProvider } from 'ethers';
 
+import { DefaultLogger } from '@rosen-bridge/abstract-logger';
+import { ElectrumXSocket } from '@rosen-bridge/firo-scanner/dist/network/electrumXSocket';
+// TODO: import directly (local:ergo/rosen-bridge/scanner#245)
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import cardanoKoiosClientFactory from '@rosen-clients/cardano-koios';
 import ergoExplorerClientFactory from '@rosen-clients/ergo-explorer';
 
 import { auth, minimumFeeConfigs, urls } from '../configs';
 import { EvmJsonRpcFeeHistoryResponse } from '../types';
+
+const logger = DefaultLogger.getInstance().child(import.meta.url);
 
 const explorerClient = ergoExplorerClientFactory(urls.ergoExplorer);
 const koiosClient = cardanoKoiosClientFactory(urls.cardanoKoios, auth.koios);
@@ -24,6 +29,13 @@ const dogeBlockcypherClient = axios.create({
 });
 const ethereumRpcClient = new JsonRpcProvider(urls.ethereumRpc);
 const binanceRpcClient = new JsonRpcProvider(urls.binanceRpc);
+const firoClient = new ElectrumXSocket(
+  urls.firoElectrumX.host,
+  urls.firoElectrumX.port,
+  undefined,
+  undefined,
+  logger.child('electrumXSocket'),
+);
 
 export const getErgoHeight = async (): Promise<number> =>
   Number((await explorerClient.v1.getApiV1Networkstate()).height);
@@ -42,6 +54,16 @@ export const getEthereumHeight = async (): Promise<number> =>
 
 export const getBinanceHeight = async (): Promise<number> =>
   await binanceRpcClient.getBlockNumber();
+
+export const getFiroHeight = async (): Promise<number> => {
+  firoClient.setupSocket();
+  const result = await firoClient.sendRequest<{ hex: string; height: number }>(
+    'blockchain.headers.subscribe',
+    [],
+  );
+  firoClient.disconnect();
+  return result.height;
+};
 
 export const getAddressBoxes = async (
   address: string,
@@ -114,6 +136,25 @@ export const getBitcoinFeeRatio = async (): Promise<Record<string, number>> => {
 export const getDogeFeeRatio = async (): Promise<number> => {
   const response = await dogeBlockcypherClient.get(`v1/doge/main`);
   return response.data.medium_fee_per_kb / 1000;
+};
+
+export const getFiroFeeRatio = async (): Promise<number> => {
+  firoClient.setupSocket();
+  const feeRate = await firoClient.sendRequest<number>(
+    'blockchain.estimatefee',
+    [6],
+  );
+  if (feeRate <= 0) {
+    logger.warn(
+      `ElectrumX estimatefee returned ${feeRate}, ` +
+        `using fallback 10 sat/byte`,
+    );
+    return 10;
+  }
+  const feeSatoshis = Math.ceil(feeRate * 100000000);
+  const feePerByte = Math.ceil(feeSatoshis / 1000);
+  firoClient.disconnect();
+  return feePerByte;
 };
 
 export const getEthereumFeeHistory =

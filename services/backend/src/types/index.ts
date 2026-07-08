@@ -8,7 +8,9 @@ export enum Chains {
   BINANCE = 'binance',
   DOGE = 'doge',
   BITCOIN_RUNES = 'bitcoin-runes',
+  FIRO = 'firo',
 }
+export const SUPPORTED_CHAINS = Object.values(Chains);
 
 export interface TokenConfig {
   tokenId: string;
@@ -113,6 +115,7 @@ export interface HeightDelays {
   ethereum: number;
   binance: number;
   doge: number;
+  firo: number;
 }
 
 export interface FeeParameters {
@@ -156,8 +159,10 @@ export interface ConfigInterface {
   bitcoinTxVSize: number;
   bitcoinMinUtxo: number;
   dogeTxSize: number;
+  firoTxSize: number;
   bitcoinRunesTxVSize: number;
   dogeMinUtxo: number;
+  firoMinUtxo: number;
   ethereumAvgGasPricePeriod: number;
   ethereumNetworkFeeMultiplier: number;
   binanceTxFee: number;
