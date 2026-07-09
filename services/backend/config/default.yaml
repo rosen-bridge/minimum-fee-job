@@ -13,6 +13,7 @@ urls:
   firoElectrumX:
     host: 'electrumx.firo.org'
     port: 50002
+    reconnectDelay: 5
 auth:
   koios: ''
 minimumFee:

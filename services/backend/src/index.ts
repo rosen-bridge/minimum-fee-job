@@ -17,6 +17,7 @@ import { getConfigTokenPrices } from './minimum-fee/prices';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
 import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
 import {
+  firoClient,
   getBinanceHeight,
   getBitcoinHeight,
   getCardanoHeight,
@@ -245,6 +246,7 @@ const interval = () => {
 const initializeService = async () => {
   await initDataSource();
   await TokenHandler.init(tokensPath);
+  firoClient.setupSocket();
 };
 
 await initializeService();

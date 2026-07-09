@@ -77,6 +77,7 @@ export const urls = {
   firoElectrumX: {
     host: config.get<string>('urls.firoElectrumX.host'),
     port: config.get<number>('urls.firoElectrumX.port'),
+    reconnectDelay: config.get<number>('urls.firoElectrumX.reconnectDelay'),
   },
 };
 

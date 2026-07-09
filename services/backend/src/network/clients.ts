@@ -29,10 +29,10 @@ const dogeBlockcypherClient = axios.create({
 });
 const ethereumRpcClient = new JsonRpcProvider(urls.ethereumRpc);
 const binanceRpcClient = new JsonRpcProvider(urls.binanceRpc);
-const firoClient = new ElectrumXSocket(
+export const firoClient = new ElectrumXSocket(
   urls.firoElectrumX.host,
   urls.firoElectrumX.port,
-  undefined,
+  urls.firoElectrumX.reconnectDelay,
   undefined,
   logger.child('electrumXSocket'),
 );
@@ -56,12 +56,10 @@ export const getBinanceHeight = async (): Promise<number> =>
   await binanceRpcClient.getBlockNumber();
 
 export const getFiroHeight = async (): Promise<number> => {
-  firoClient.setupSocket();
   const result = await firoClient.sendRequest<{ hex: string; height: number }>(
     'blockchain.headers.subscribe',
     [],
   );
-  firoClient.disconnect();
   return result.height;
 };
 
@@ -139,7 +137,6 @@ export const getDogeFeeRatio = async (): Promise<number> => {
 };
 
 export const getFiroFeeRatio = async (): Promise<number> => {
-  firoClient.setupSocket();
   const feeRate = await firoClient.sendRequest<number>(
     'blockchain.estimatefee',
     [6],
@@ -153,7 +150,6 @@ export const getFiroFeeRatio = async (): Promise<number> => {
   }
   const feeSatoshis = Math.ceil(feeRate * 100000000);
   const feePerByte = Math.ceil(feeSatoshis / 1000);
-  firoClient.disconnect();
   return feePerByte;
 };
 
