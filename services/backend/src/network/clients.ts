@@ -8,8 +8,7 @@ import {
 import { JsonRpcProvider } from 'ethers';
 
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
-import { ElectrumXSocket } from '@rosen-bridge/firo-scanner/dist/network/electrumXSocket';
-// TODO: import directly (local:ergo/rosen-bridge/scanner#245)
+import { ElectrumXSocket } from '@rosen-bridge/firo-scanner';
 import JsonBigInt from '@rosen-bridge/json-bigint';
 import cardanoKoiosClientFactory from '@rosen-clients/cardano-koios';
 import ergoExplorerClientFactory from '@rosen-clients/ergo-explorer';
