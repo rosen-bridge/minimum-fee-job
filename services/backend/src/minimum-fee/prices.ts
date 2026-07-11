@@ -1,3 +1,5 @@
+import { isAxiosError } from 'axios';
+
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 
 import { fetchPriceFromCoingeckoInUSD } from '../network/fetchPriceFromCoingecko';
@@ -11,11 +13,11 @@ import {
   CoinMarketCapParams,
   DuplicateTokenParams,
   ManualParams,
-  MinswapParams,
   PriceBackends,
   SupportedTokenConfig,
   PriceFetchResult,
 } from '../types';
+import { extractAxiosErrorMessage } from '../utils/utils';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -83,8 +85,10 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
       prices.set(token.tokenId, price);
     });
   } catch (error) {
-    const errorMsg = `Failed to fetch prices from CoinGecko: ${error}`;
-    logger.error(errorMsg);
+    const errorMsg = isAxiosError(error)
+      ? extractAxiosErrorMessage(error)
+      : `${error}`;
+    logger.error(`Failed to fetch prices from CoinGecko: ${errorMsg}`);
     coingeckoTokens.forEach((token) => {
       errors.set(token.name, errorMsg);
     });
@@ -100,8 +104,12 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
       logger.debug(`Price of [${token.name}]: ${price}$`);
       prices.set(token.tokenId, price);
     } catch (error) {
-      const errorMsg = `Failed to fetch price for [${token.name}] from CoinMarketCap: ${error}`;
-      logger.error(errorMsg);
+      const errorMsg = isAxiosError(error)
+        ? extractAxiosErrorMessage(error)
+        : `${error}`;
+      logger.error(
+        `Failed to fetch price for [${token.name}] from CoinMarketCap: ${errorMsg}`,
+      );
       errors.set(token.name, errorMsg);
       fetched = false;
     }
@@ -117,8 +125,12 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
         logger.debug(`Price of [${token.name}]: ${price}$`);
         prices.set(token.tokenId, price);
       } catch (error) {
-        const errorMsg = `Failed to fetch price for [${token.name}] from Spectrum: ${error}`;
-        logger.error(errorMsg);
+        const errorMsg = isAxiosError(error)
+          ? extractAxiosErrorMessage(error)
+          : `${error}`;
+        logger.error(
+          `Failed to fetch price for [${token.name}] from Spectrum: ${errorMsg}`,
+        );
         errors.set(token.name, errorMsg);
         fetched = false;
       }
@@ -142,8 +154,12 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
         logger.debug(`Price of [${token.name}]: ${price}$`);
         prices.set(token.tokenId, price);
       } catch (error) {
-        const errorMsg = `Failed to fetch price for [${token.name}] from DexHunter: ${error}`;
-        logger.error(errorMsg);
+        const errorMsg = isAxiosError(error)
+          ? extractAxiosErrorMessage(error)
+          : `${error}`;
+        logger.error(
+          `Failed to fetch price for [${token.name}] from DexHunter: ${errorMsg}`,
+        );
         errors.set(token.name, errorMsg);
         fetched = false;
       }
@@ -152,18 +168,17 @@ export const getConfigTokenPrices = async (): Promise<PriceFetchResult> => {
     // fetch price from minswap
     for (const token of minswapTokens) {
       try {
-        const params = token.priceBackendParams as MinswapParams;
         const price =
-          (await fetchPriceFromMinswapInADA(
-            token.tokenId,
-            params.lpPolicyId,
-            params.lpAssetName,
-          )) * adaPrice;
+          (await fetchPriceFromMinswapInADA(token.tokenId)) * adaPrice;
         logger.debug(`Price of [${token.name}]: ${price}$`);
         prices.set(token.tokenId, price);
       } catch (error) {
-        const errorMsg = `Failed to fetch price for [${token.name}] from Minswap: ${error}`;
-        logger.error(errorMsg);
+        const errorMsg = isAxiosError(error)
+          ? extractAxiosErrorMessage(error)
+          : `${error}`;
+        logger.error(
+          `Failed to fetch price for [${token.name}] from Minswap: ${errorMsg}`,
+        );
         errors.set(token.name, errorMsg);
         fetched = false;
       }

@@ -1,14 +1,26 @@
+import { difference } from 'lodash-es';
+
 import { DefaultLogger } from '@rosen-bridge/abstract-logger';
 import { ChainFee, MinimumFeeConfig } from '@rosen-bridge/minimum-fee';
 
-import { ADA, BNB, BTC, DOGE, ERG, ETH, minimumFeeConfigs } from '../configs';
+import {
+  ADA,
+  BNB,
+  BTC,
+  DOGE,
+  ERG,
+  ETH,
+  FIRO,
+  minimumFeeConfigs,
+} from '../configs';
 import {
   getBitcoinFeeRatio,
   getDogeFeeRatio,
   getEthereumFeeHistory,
+  getFiroFeeRatio,
 } from '../network/clients';
 import { TokenHandler } from '../tokenMap/tokenHandler';
-import { Chains, SupportedTokenConfig } from '../types';
+import { Chains, SUPPORTED_CHAINS, SupportedTokenConfig } from '../types';
 import { ERC20_TRANSFER_GAS, feeRatioDivisor } from '../utils/consts';
 import { applyHighDecimal } from '../utils/utils';
 
@@ -21,7 +33,9 @@ export const generateNewFeeConfig = async (
   const supportedTokens = TokenHandler.getInstance().getSupportedTokens();
   const newFeeConfigs: Map<string, MinimumFeeConfig> = new Map();
 
-  const rsnTokenConfig = supportedTokens.find((token) => token.name === 'RSN');
+  const rsnTokenConfig = supportedTokens.find(
+    (token) => token.tokenId === minimumFeeConfigs.RSNTokenId,
+  );
   if (!rsnTokenConfig) throw Error(`Token [RSN] is not found in config`);
   const rsnPrice = prices.get(rsnTokenConfig.tokenId);
   if (!rsnPrice) throw Error(`RSN price is required`);
@@ -31,6 +45,9 @@ export const generateNewFeeConfig = async (
 
   logger.debug(`Fetching Doge fee ratio`);
   const dogeFeeRatio = await getDogeFeeRatio();
+
+  logger.debug(`Fetching Firo fee ratio`);
+  const firoFeeRatio = await getFiroFeeRatio();
 
   logger.debug(
     `Fetching Ethereum fee history (for [${minimumFeeConfigs.ethereumAvgGasPricePeriod}] latest blocks)`,
@@ -63,6 +80,7 @@ export const generateNewFeeConfig = async (
       token.fee,
       bitcoinFeeRatioMap,
       dogeFeeRatio,
+      firoFeeRatio,
       ethereumNetworkFeeInEther,
     );
     newFeeConfigs.set(token.tokenId, feeConfig);
@@ -80,6 +98,7 @@ export const feeConfigFromPrice = async (
   configs: SupportedTokenConfig['fee'],
   bitcoinFeeRatioMap: Record<string, number>,
   dogeFeeRatio: number,
+  firoFeeRatio: number,
   ethereumNetworkFeeInEther: number,
 ): Promise<MinimumFeeConfig> => {
   const getCurrentHeight = (chain: Chains) => {
@@ -113,6 +132,11 @@ export const feeConfigFromPrice = async (
     );
   const chains = Object.keys(tokenSet);
   logger.debug(`supported chains for token [${tokenId}]: ${chains}`);
+  const unsupportedChains = difference(chains, SUPPORTED_CHAINS);
+  if (unsupportedChains.length > 0)
+    throw Error(
+      `Failed to create Fee Config for token [${tokenId}]: Token exists on chains [${unsupportedChains.join(',')}] but they are not supported`,
+    );
 
   // calculating rsn ratio
   const rsnRatioRaw =
@@ -316,6 +340,28 @@ export const feeConfigFromPrice = async (
     newFeeConfig.setChainConfig(Chains.BITCOIN_RUNES, bitcoinHeight, undefined);
   }
 
+  //  FIRO
+  const firoHeight = getCurrentHeight(Chains.FIRO) + configs.delays.firo;
+  if (chains.includes(Chains.FIRO)) {
+    const firoNetworkFee = getFiroNetworkFee(
+      prices,
+      configs,
+      tokenPrice,
+      tokenDecimal,
+      firoFeeRatio,
+    );
+    const firoFee: ChainFee = {
+      bridgeFee: bridgeFee,
+      networkFee: firoNetworkFee,
+      rsnRatio: rsnRatio,
+      feeRatio: feeRatio,
+      rsnRatioDivisor,
+    };
+    newFeeConfig.setChainConfig(Chains.FIRO, firoHeight, firoFee);
+  } else {
+    newFeeConfig.setChainConfig(Chains.FIRO, firoHeight, undefined);
+  }
+
   return newFeeConfig;
 };
 
@@ -448,6 +494,27 @@ const getBitcoinRunesNetworkFee = (
   return BigInt(
     Math.ceil(
       (bitcoinValue * btcPrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8),
+    ),
+  );
+};
+
+const getFiroNetworkFee = (
+  prices: Map<string, number>,
+  configs: SupportedTokenConfig['fee'],
+  tokenPrice: number,
+  tokenDecimal: number,
+  firoFeeRatio: number,
+) => {
+  const firoPrice = prices.get(FIRO);
+  if (!firoPrice) throw Error(`Firo price is required`);
+
+  // calculating network fee on Firo
+  const firoValue =
+    firoFeeRatio * minimumFeeConfigs.firoTxSize +
+    minimumFeeConfigs.firoMinUtxo * 10 ** 8;
+  return BigInt(
+    Math.ceil(
+      (firoValue * firoPrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8),
     ),
   );
 };

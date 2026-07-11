@@ -1,5 +1,11 @@
 # minfee-app
 
+## 1.0.1
+
+### Patch Changes
+
+- Find RSN using it's token Id in redis instead of finding it by it's name
+
 ## 1.0.0
 
 ### Major Changes

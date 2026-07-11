@@ -17,12 +17,14 @@ import { getConfigTokenPrices } from './minimum-fee/prices';
 import { updateConfigsTransaction } from './minimum-fee/transaction';
 import { updateAndGenerateFeeConfig } from './minimum-fee/updateConfig';
 import {
+  firoClient,
   getBinanceHeight,
   getBitcoinHeight,
   getCardanoHeight,
   getDogeHeight,
   getErgoHeight,
   getEthereumHeight,
+  getFiroHeight,
 } from './network/clients';
 import { Notification } from './network/notification';
 import {
@@ -31,6 +33,7 @@ import {
   savePrices,
   saveTx,
   saveTokenMap,
+  saveRsnTokenId,
 } from './store';
 import { TokenHandler } from './tokenMap/tokenHandler';
 import { Chains, DiscordPayloadType, UpdatedFeeConfig } from './types';
@@ -66,6 +69,7 @@ const main = async () => {
   chainHeights.set(Chains.BINANCE, await getBinanceHeight());
   chainHeights.set(Chains.DOGE, await getDogeHeight());
   chainHeights.set(Chains.BITCOIN_RUNES, chainHeights.get(Chains.BITCOIN)!);
+  chainHeights.set(Chains.FIRO, await getFiroHeight());
 
   // new config
   logger.info(`Generating new config`);
@@ -168,6 +172,7 @@ const main = async () => {
         saveTokenMap(tokenHandler.getTokenMap()),
         savePrices(priceResult.prices),
         saveTx(tx),
+        saveRsnTokenId(minimumFeeConfigs.RSNTokenId),
       ]);
       logger.info('Saved data in the store');
     } else {
@@ -241,6 +246,7 @@ const interval = () => {
 const initializeService = async () => {
   await initDataSource();
   await TokenHandler.init(tokensPath);
+  firoClient.setupSocket();
 };
 
 await initializeService();

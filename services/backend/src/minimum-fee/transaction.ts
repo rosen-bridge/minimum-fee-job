@@ -42,7 +42,7 @@ export const updateConfigsTransaction = async (
         nativeToken: minimumFeeConfigs.minBoxErg,
         tokens: requiredTokens,
       },
-      box: feeConfig.new?.build(),
+      box: feeConfig.new?.setValue(minimumFeeConfigs.minBoxErg).build(),
     });
   }
 

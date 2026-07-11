@@ -8,7 +8,9 @@ export enum Chains {
   BINANCE = 'binance',
   DOGE = 'doge',
   BITCOIN_RUNES = 'bitcoin-runes',
+  FIRO = 'firo',
 }
+export const SUPPORTED_CHAINS = Object.values(Chains);
 
 export interface TokenConfig {
   tokenId: string;
@@ -84,10 +86,12 @@ export interface DuplicateTokenParams {
   tokenId: string;
 }
 
-export interface MinswapParams {
-  lpPolicyId: string;
-  lpAssetName: string;
-}
+/**
+ * TODO: fix lint error (an empty interface declaration)
+ * local:ergo/rosen-bridge/minimum-fee-job#36
+ */
+// eslint-disable-next-line
+export interface MinswapParams {}
 
 /**
  * TODO: fix lint error (an empty interface declaration)
@@ -111,6 +115,7 @@ export interface HeightDelays {
   ethereum: number;
   binance: number;
   doge: number;
+  firo: number;
 }
 
 export interface FeeParameters {
@@ -142,6 +147,7 @@ export interface SupportedTokenConfig {
 }
 
 export interface ConfigInterface {
+  RSNTokenId: string;
   minimumFeeNFT: string;
   minimumFeeAddress: string;
   feeAddress: string;
@@ -153,8 +159,10 @@ export interface ConfigInterface {
   bitcoinTxVSize: number;
   bitcoinMinUtxo: number;
   dogeTxSize: number;
+  firoTxSize: number;
   bitcoinRunesTxVSize: number;
   dogeMinUtxo: number;
+  firoMinUtxo: number;
   ethereumAvgGasPricePeriod: number;
   ethereumNetworkFeeMultiplier: number;
   binanceTxFee: number;
