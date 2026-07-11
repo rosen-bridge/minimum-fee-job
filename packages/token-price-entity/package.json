@@ -1,6 +1,6 @@
 {
   "name": "@rosen-bridge/token-price-entity",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Token price history tracking entity and migrations",
   "repository": {
     "type": "git",
@@ -33,6 +33,6 @@
   },
   "dependencies": {
     "@rosen-bridge/abstract-logger": "^4.0.0",
-    "@rosen-bridge/extended-typeorm": "^1.0.1"
+    "@rosen-bridge/extended-typeorm": "^1.1.0"
   }
 }
