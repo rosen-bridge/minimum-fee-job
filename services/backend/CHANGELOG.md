@@ -1,5 +1,24 @@
 # minimum-fee-job
 
+## 1.1.0
+
+### Minor Changes
+
+- Integrate Firo
+- Improve script to throw Error if a token is supported on a chain that is not integrated into the service
+- Add RSN token Id to config
+
+### Patch Changes
+
+- Improve Axios error handling while fetching asset prices
+- Remove `rosen` from the default value of `tokensPath` config in `default.yaml`
+- Fix Minswap default URL
+- Fix fetching price from Minswap backend
+- Fix transaction generation to use the configured minimum Erg even updating minimum fee config box
+- Update dependencies
+  - @rosen-bridge/extended-typeorm@1.1.0
+  - @rosen-bridge/token-price-entity@0.2.2
+
 ## 1.0.0
 
 ### Major Changes
