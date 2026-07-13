@@ -101,12 +101,12 @@ export const getRsnTokenId = async (): Promise<string> => {
   const client = await connectRedisClient();
 
   try {
-    const rsnTokenId = await client.get<Record<string, string>>('rsn-token-id');
+    const rsnTokenId = await client.get<string>('rsn-token-id');
 
     if (!rsnTokenId) {
       throw new EmptyTxError();
     }
-    return JSON.stringify(rsnTokenId);
+    return rsnTokenId;
   } catch (error) {
     throw new RedisDataFetchingError(error);
   }
