@@ -236,25 +236,31 @@ export const pricesToTables = (
       })),
     ]);
 
+    let currentColorOnNetworkFees = rsnRatioDifference.color; // latest color before network fee characters is rsn ratio color
     const briefNetworkFee =
       colorizeText(
         bridgeFeeDifference.value.charAt(0),
         bridgeFeeDifference.color,
+        AnsiColor.NONE,
         false,
       ) +
       colorizeText(
         rsnRatioDifference.value.charAt(0),
         rsnRatioDifference.color,
+        bridgeFeeDifference.color,
         false,
       ) +
       networkFeeDifferences
-        .map((networkFeeDifference) =>
-          colorizeText(
+        .map((networkFeeDifference) => {
+          const char = colorizeText(
             networkFeeDifference.difference.value.charAt(0),
             networkFeeDifference.difference.color,
+            currentColorOnNetworkFees,
             false,
-          ),
-        )
+          );
+          currentColorOnNetworkFees = networkFeeDifference.difference.color;
+          return char;
+        })
         .join('');
 
     briefTableData.push([
@@ -286,8 +292,13 @@ export const pricesToTables = (
 
 const appendResetColor = (text: string) => text + `[0m`;
 
-const colorizeText = (text: string, color: AnsiColor, resetColor = true) => {
-  if (color === AnsiColor.NONE) return text;
+const colorizeText = (
+  text: string,
+  color: AnsiColor,
+  currentColor = AnsiColor.NONE,
+  resetColor = true,
+) => {
+  if (color === currentColor) return text;
   const result = `[2;${color}m${text}`;
   if (resetColor) return appendResetColor(result);
   return result;
