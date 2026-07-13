@@ -77,6 +77,10 @@ logs:
     maxSize: '20m'
     maxFiles: '14d'
     level: 'debug'
+    # format: 'plain' # format of log file lines [plain or json]
+    # createSymlink: false # create tailable file symlink to last log file
+    # symlinkName: 'current.log' # name of tailable file
+    # serviceName: '' # service name for each log line
   - type: 'console'
     level: 'info'
 triggerPercent:
