@@ -1,7 +1,7 @@
 {
   "name": "minfee-app",
   "private": "true",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Minimum fee app",
   "repository": {
     "type": "git",

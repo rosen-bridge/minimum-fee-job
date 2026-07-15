@@ -1,5 +1,11 @@
 # minfee-app
 
+## 1.0.2
+
+### Patch Changes
+
+- Fix reading the `rsnTokenId` value from Redis
+
 ## 1.0.1
 
 ### Patch Changes

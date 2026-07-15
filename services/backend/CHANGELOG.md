@@ -1,5 +1,18 @@
 # minimum-fee-job
 
+## 1.2.0
+
+### Minor Changes
+
+- Add format, serviceName, createSymlink, and symlinkName options to the file log configuration
+
+### Patch Changes
+
+- Improve Ascii table generator to use less color characters
+- Reduce TABLE_CHUNK_SIZE to 10
+- Update dependencies
+  - @rosen-bridge/winston-logger@3.1.0
+
 ## 1.1.0
 
 ### Minor Changes
