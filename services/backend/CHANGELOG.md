@@ -1,5 +1,11 @@
 # minimum-fee-job
 
+## 1.3.0
+
+### Minor Changes
+
+- Update contract version to v7.1.0
+
 ## 1.2.0
 
 ### Minor Changes
