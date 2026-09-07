@@ -1,5 +1,11 @@
 # minimum-fee-job
 
+## 1.3.1
+
+### Patch Changes
+
+- Change RSN token on binance, ethereum and cardano
+
 ## 1.3.0
 
 ### Minor Changes
