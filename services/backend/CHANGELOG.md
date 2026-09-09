@@ -1,5 +1,11 @@
 # minimum-fee-job
 
+## 1.3.2
+
+### Patch Changes
+
+- Fix missing third argument in the 'eth_feeHistory' API
+
 ## 1.3.1
 
 ### Patch Changes
