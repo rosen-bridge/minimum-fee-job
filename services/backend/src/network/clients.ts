@@ -157,5 +157,6 @@ export const getEthereumFeeHistory =
     return ethereumRpcClient.send('eth_feeHistory', [
       minimumFeeConfigs.ethereumAvgGasPricePeriod,
       'latest',
+      [0, 100],
     ]);
   };
