@@ -3,6 +3,9 @@
   "workspaces": {
     "packages/**": {
       "entry": ["lib/{index,cli,main}.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"]
+    },
+    "services/*": {
+      "entry": ["{lib,src,tests}/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"]
     }
   }
 }
