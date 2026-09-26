@@ -20,8 +20,12 @@
     "lint:check": "eslint . && npm run prettify:check"
   },
   "dependencies": {
+    "@fleet-sdk/core": "^0.12.0",
+    "@fleet-sdk/crypto": "^0.11.0",
+    "@fleet-sdk/serializer": "^0.11.0",
     "@rosen-bridge/abstract-logger": "^4.0.0",
     "@rosen-bridge/extended-tokens": "^0.1.4",
+    "@rosen-clients/ergo-node": "^3.2.0",
     "@rosen-clients/rate-limited-axios": "^2.0.1",
     "ergo-lib-wasm-browser": "^0.28.0",
     "next": "^16.3.6",

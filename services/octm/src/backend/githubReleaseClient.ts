@@ -2,11 +2,17 @@ import { AbstractLogger, DummyLogger } from '@rosen-bridge/abstract-logger';
 import { RosenTokens, TokenMap } from '@rosen-bridge/extended-tokens';
 import RateLimitedAxios from '@rosen-clients/rate-limited-axios';
 
-import { RELEASES_PAGE_SIZE } from '@/constants';
+import {
+  CONTRACTS_PREFIX,
+  RELEASES_PAGE_SIZE,
+  TOKENS_MAP_PREFIX,
+} from '@/constants';
 import {
   GithubRelease,
   GithubReleaseAsset,
   GithubReleaseClientOptions,
+  prefixPattern,
+  RosenContract,
 } from '@/types';
 
 export class GithubReleaseClient {
@@ -17,7 +23,7 @@ export class GithubReleaseClient {
 
   constructor(configs: GithubReleaseClientOptions) {
     this.githubRepo = configs.githubRepo;
-    this.logger = configs.logger ? configs.logger : new DummyLogger();
+    this.logger = configs.logger ?? new DummyLogger();
 
     this.client = RateLimitedAxios.create({
       baseURL: configs.githubApiUrl,
@@ -94,13 +100,14 @@ export class GithubReleaseClient {
   };
 
   /**
-   * builds the asset-name pattern for a network
+   * builds the asset-name pattern for a network and prefix
    *
    * @param network - network to build the pattern for
+   * @param prefix  - asset prefix, e.g. "tokensMap" or "contracts"
    * @returns regex matching e.g. "tokensMap-pandora-7.1.1.json"
    */
-  protected pattern = (network: string) =>
-    new RegExp(`^tokensMap-${network}-(.+)\\.json$`);
+  protected pattern = (network: string, prefix: prefixPattern) =>
+    new RegExp(`^${prefix}-${network}-(.+)\\.json$`);
 
   /**
    * extracts the network name from a tokensMap asset name
@@ -116,32 +123,102 @@ export class GithubReleaseClient {
   };
 
   /**
-   * extracts the version string from a tokensMap asset name
+   * extracts the version string from an asset name for a network and prefix
    *
-   * @param assetName - asset file name, e.g. "tokensMap-pandora-7.1.1.json"
-   * @param network - network the asset belongs to
+   * @param assetName - asset file name
+   * @param network   - network the asset belongs to
+   * @param prefix    - asset prefix, e.g. "tokensMap" or "contracts"
    * @returns the version substring, or null if the name does not match
    */
   protected parseVersionFromAssetName = (
     assetName: string,
     network: string,
+    prefix: prefixPattern,
   ): string | null => {
-    const match = this.pattern(network).exec(assetName);
+    const match = this.pattern(network, prefix).exec(assetName);
     return match?.[1] ?? null;
   };
 
   /**
-   * finds the tokensMap asset in a release for a network
+   * finds the asset in a release for a network and prefix
    *
    * @param release - release to search
    * @param network - network whose asset is wanted
+   * @param prefix  - asset prefix, e.g. "tokensMap" or "contracts"
    * @returns the matching asset, or undefined
    */
   protected assetOf = (
     release: GithubRelease,
     network: string,
+    prefix: prefixPattern,
   ): GithubReleaseAsset | undefined =>
-    release.assets.find((asset) => this.pattern(network).test(asset.name));
+    release.assets.find((asset) =>
+      this.pattern(network, prefix).test(asset.name),
+    );
+
+  /**
+   * resolves the release that contains the asset for a network and version
+   *
+   * for "latest", the newest non-prerelease release is used; otherwise the
+   * exact version is matched against the release assets
+   *
+   * @param network - network whose release is wanted
+   * @param version - version to match, or "latest" for the newest stable
+   * @param prefix  - asset prefix, e.g. "tokensMap" or "contracts"
+   * @returns the matching release
+   * @throws if no release matches
+   */
+  protected findRelease = (
+    network: string,
+    version: string,
+    prefix: prefixPattern,
+  ): GithubRelease => {
+    const pattern = this.pattern(network, prefix);
+    const releases = this.getReleases();
+
+    const release =
+      version === 'latest'
+        ? releases.find((r) => !r.prerelease)
+        : releases.find((r) =>
+            r.assets.some((a) => pattern.exec(a.name)?.[1] === version),
+          );
+
+    if (!release) {
+      throw new Error(
+        `Version [${version}] not found for network [${network}]`,
+      );
+    }
+
+    return release;
+  };
+
+  /**
+   * downloads the asset for a network and version
+   *
+   * @param network - network whose asset is wanted
+   * @param version - version to fetch, or "latest" for the newest stable
+   * @param prefix  - asset prefix, e.g. "tokensMap" or "contracts"
+   * @returns the parsed asset payload
+   */
+  protected downloadAsset = async <T>(
+    network: string,
+    version: string,
+    prefix: prefixPattern,
+  ): Promise<T> => {
+    const release = this.findRelease(network, version, prefix);
+
+    const asset = this.assetOf(release, network, prefix);
+    if (!asset) {
+      throw new Error(
+        `Network [${network}] is not available in release [${release.tag_name}]`,
+      );
+    }
+
+    this.logger.debug(`downloading ${asset.name}`);
+
+    const response = await this.client.get<T>(asset.browser_download_url);
+    return response.data;
+  };
 
   /**
    * returns the list of all networks that have at least one tokensMap asset
@@ -175,8 +252,9 @@ export class GithubReleaseClient {
     const versions = this.getReleases()
       .map((release) =>
         this.parseVersionFromAssetName(
-          this.assetOf(release, network)?.name ?? '',
+          this.assetOf(release, network, TOKENS_MAP_PREFIX)?.name ?? '',
           network,
+          TOKENS_MAP_PREFIX,
         ),
       )
       .filter((version): version is string => !!version);
@@ -187,9 +265,6 @@ export class GithubReleaseClient {
   /**
    * downloads and parses the token map for a network and version
    *
-   * when version is "latest", the newest non-prerelease release is used;
-   * otherwise the exact version is matched against the release assets
-   *
    * @param network - network the token map belongs to
    * @param version - version to fetch, or "latest" for the newest stable
    * @returns the token map payload
@@ -198,34 +273,31 @@ export class GithubReleaseClient {
     network: string,
     version: string,
   ): Promise<RosenTokens> => {
-    const pattern = this.pattern(network);
-    const releases = this.getReleases();
+    const data = await this.downloadAsset<{
+      version: string;
+      tokens: RosenTokens;
+    }>(network, version, TOKENS_MAP_PREFIX);
 
-    const release =
-      version === 'latest'
-        ? releases.find((r) => !r.prerelease)
-        : releases.find((r) =>
-            r.assets.some((a) => pattern.exec(a.name)?.[1] === version),
-          );
-
-    if (!release) {
-      throw new Error(
-        `Version [${version}] not found for network [${network}]`,
-      );
-    }
-
-    const asset = this.assetOf(release, network);
-    if (!asset) {
-      throw new Error(
-        `Network [${network}] is not available in release [${release.tag_name}]`,
-      );
-    }
-
-    this.logger.debug(`downloading ${asset.name}`);
-
-    const response = await this.client.get(asset.browser_download_url);
     const tokenMap = new TokenMap();
-    await tokenMap.updateConfigByJson(response.data.tokens);
+    await tokenMap.updateConfigByJson(data.tokens);
     return tokenMap.getRawConfig();
+  };
+
+  /**
+   * downloads and parses the contract for a network and version
+   *
+   * @param network - network the contract belongs to
+   * @param version - version to fetch, or "latest" for the newest stable
+   * @returns the contract payload
+   */
+  getContract = async (
+    network: string,
+    version: string,
+  ): Promise<RosenContract> => {
+    return this.downloadAsset<RosenContract>(
+      network,
+      version,
+      CONTRACTS_PREFIX,
+    );
   };
 }

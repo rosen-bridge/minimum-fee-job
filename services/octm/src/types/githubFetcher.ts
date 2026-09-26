@@ -1,5 +1,7 @@
 import { AbstractLogger } from '@rosen-bridge/abstract-logger';
 
+import { CONTRACTS_PREFIX, TOKENS_MAP_PREFIX } from '@/constants';
+
 export type GithubReleaseClientOptions = {
   githubApiUrl: string;
   githubRepo: string;
@@ -19,3 +21,5 @@ export type GithubRelease = {
   published_at: string;
   assets: GithubReleaseAsset[];
 };
+
+export type prefixPattern = typeof CONTRACTS_PREFIX | typeof TOKENS_MAP_PREFIX;
