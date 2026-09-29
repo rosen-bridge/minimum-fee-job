@@ -1,9 +1,10 @@
 import axios from 'axios';
 
-import { urls } from '../configs';
+import { auth, urls } from '../configs';
 
 const axiosCoingecko = axios.create({
   baseURL: `${urls.coingecko}/api/v3/simple/price`,
+  headers: { 'x-cg-demo-api-key': auth.coingecko },
   timeout: 8000,
 });
 
