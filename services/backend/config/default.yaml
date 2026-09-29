@@ -16,6 +16,7 @@ urls:
     reconnectDelay: 5
 auth:
   koios: ''
+  coingecko: ''
 minimumFee:
   RSN: '8b08cdd5449a9592a9e79711d7d79249d7a03c535d17efaee83e216e80a44c4b'
   NFT: '1ce1ea41ceaed94a6976a047645ffb3f3da3916685268c8f2d8f80f892147caa'
