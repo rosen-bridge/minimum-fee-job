@@ -28,6 +28,7 @@
     "@rosen-clients/ergo-node": "^3.2.0",
     "@rosen-clients/rate-limited-axios": "^2.0.1",
     "ergo-lib-wasm-browser": "^0.28.0",
+    "json-diff-ts": "^4.10.4",
     "next": "^16.3.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
