@@ -25,6 +25,7 @@ import {
   getErgoHeight,
   getEthereumHeight,
   getFiroHeight,
+  getHandshakeHeight,
 } from './network/clients';
 import { Notification } from './network/notification';
 import {
@@ -70,6 +71,7 @@ const main = async () => {
   chainHeights.set(Chains.DOGE, await getDogeHeight());
   chainHeights.set(Chains.BITCOIN_RUNES, chainHeights.get(Chains.BITCOIN)!);
   chainHeights.set(Chains.FIRO, await getFiroHeight());
+  chainHeights.set(Chains.HANDSHAKE, await getHandshakeHeight());
 
   // new config
   logger.info(`Generating new config`);
