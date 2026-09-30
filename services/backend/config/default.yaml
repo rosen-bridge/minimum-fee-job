@@ -14,6 +14,7 @@ urls:
     host: 'electrumx.firo.org'
     port: 50002
     reconnectDelay: 5
+  handshakeRpc: 'https://hns-rsn.spaghettinode.com' # hsd node JSON-RPC endpoint
 auth:
   koios: ''
   coingecko: ''
@@ -29,9 +30,11 @@ minimumFee:
   bitcoinMinUtxo: 0.00000546
   dogeTxSize: 226
   firoTxSize: 226
+  handshakeTxSize: 226
   bitcoinRunesTxVSize: 383 # 3 NS inputs -> 3 NS, 1 OP_RETURN of size 23 and 1 Taproot outputs
   dogeMinUtxo: 0.01
   firoMinUtxo: 0.005
+  handshakeMinUtxo: 0.001
   ethereumAvgGasPricePeriod: 7200 # blocks (1 day long)
   ethereumNetworkFeeMultiplier: 1.5
   binanceTxFee: 0.00002
@@ -44,6 +47,7 @@ minimumFee:
       ethereum: 50
       binance: 200
       firo: 4
+      handshake: 2
     bridgeFeeUSD: 10
     ergNetworkFee: 0.0013
     adaNetworkFee: 3.4
@@ -64,6 +68,7 @@ minimumFee:
           ethereum: 50
           binance: 200
           firo: 4
+          handshake: 2
         bridgeFeeUSD: 10
         ergNetworkFee: 0.0013
         adaNetworkFee: 3.4
@@ -71,6 +76,7 @@ minimumFee:
         bitcoinConfirmation: 6
         dogeConfirmation: 10
         firoConfirmation: 6
+        handshakeConfirmation: 6
 tokensPath: './config/tokens.json' # path to supported tokens of bridge
 logs:
   - type: 'file'
@@ -96,6 +102,7 @@ triggerPercent:
     doge: 100
     bitcoin-runes: 100
     firo: 100
+    handshake: 100
 discordWebHookUrl: '' # Discord webhook url for sending notifications
 interval: 14400 # every 4 hours
 kv:
