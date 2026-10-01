@@ -62,7 +62,7 @@ export default [
 
   // Frontend (Browser) - Next.js specific
   {
-    files: ['**/services/frontend/**/*.{js,ts,jsx,tsx}'],
+    files: ['**/services/{frontend,octm}/**/*.{js,ts,jsx,tsx}'],
     languageOptions: {
       globals: {
         ...globals.browser,

@@ -1,0 +1,35 @@
+{
+  "name": "octm",
+  "private": true,
+  "version": "0.0.0",
+  "description": "OCTM app",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rosen-bridge/minimum-fee-job.git"
+  },
+  "license": "MIT",
+  "author": "Rosen Team",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "type-check": "tsc --noEmit",
+    "prettify": "prettier --write . --ignore-path ../../.gitignore",
+    "prettify:check": "prettier --check . --ignore-path ../../.gitignore",
+    "lint": "eslint . --fix && npm run prettify",
+    "lint:check": "eslint . && npm run prettify:check"
+  },
+  "dependencies": {
+    "next": "^16.3.6",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0"
+  },
+  "engines": {
+    "node": ">=22.18.0",
+    "npm": "11.6.2"
+  }
+}
