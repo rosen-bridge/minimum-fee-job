@@ -1,13 +1,13 @@
 import { AbstractLogger, DummyLogger } from '@rosen-bridge/abstract-logger';
-import { RosenTokens, TokenMap } from '@rosen-bridge/extended-tokens';
+import type { RosenTokens } from '@rosen-bridge/extended-tokens';
 import RateLimitedAxios from '@rosen-clients/rate-limited-axios';
 
-import { RELEASES_PAGE_SIZE } from '@/constants';
+import { RELEASES_PAGE_SIZE } from './constants';
 import {
   GithubRelease,
   GithubReleaseAsset,
   GithubReleaseClientOptions,
-} from '@/types';
+} from './types';
 
 export class GithubReleaseClient {
   protected client;
@@ -38,13 +38,30 @@ export class GithubReleaseClient {
   getReleases = (): GithubRelease[] => [...this.releasesCache.values()];
 
   /**
-   * replaces the locally cached releases
+   * sets the provided releases as the local cache, then fetches any
+   * remaining pages from the GitHub API and appends them
    *
-   * @param releases - releases to store in the cache
+   * @param releases - optional releases to seed the cache with
+   * @returns Promise<void>
    */
-  setReleases = (releases: GithubRelease[]): void => {
+  loadReleases = async (releases: GithubRelease[] = []): Promise<void> => {
     this.releasesCache = new Map(releases.map((r) => [r.tag_name, r]));
-    this.logger.debug(`cache set with ${this.releasesCache.size} releases`);
+    this.logger.debug(`cache seeded with ${this.releasesCache.size} releases`);
+    await this.fetchReleases();
+    this.sortReleasesByDateDesc();
+  };
+
+  /**
+   * sorts the local cache of releases by published date, newest first
+   *
+   * @returns void
+   */
+  protected sortReleasesByDateDesc = (): void => {
+    const sorted = [...this.releasesCache.values()].sort(
+      (a, b) =>
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime(),
+    );
+    this.releasesCache = new Map(sorted.map((r) => [r.tag_name, r]));
   };
 
   /**
@@ -53,7 +70,7 @@ export class GithubReleaseClient {
    *
    * @returns Promise<void>
    */
-  fetchReleases = async (): Promise<void> => {
+  protected fetchReleases = async (): Promise<void> => {
     const alreadyFetched = this.releasesCache.size;
     let page = Math.floor(alreadyFetched / RELEASES_PAGE_SIZE) + 1;
 
@@ -109,9 +126,10 @@ export class GithubReleaseClient {
    * @returns the network name, or null if it does not match any tokensMap asset
    */
   protected parseNetworkFromAssetName = (assetName: string): string | null => {
-    const match = /^tokensMap-(.+?)-\d+\.\d+\.\d+(?:-[0-9a-f]+)?\.json$/.exec(
-      assetName,
-    );
+    const match =
+      /^tokensMap-(.+?)-\d+(?:\.\d+)*(?:-[0-9a-f]+(?:\.[0-9]+)?)?\.json$/.exec(
+        assetName,
+      );
     return match?.[1] ?? null;
   };
 
@@ -187,7 +205,8 @@ export class GithubReleaseClient {
   /**
    * downloads and parses the token map for a network and version
    *
-   * when version is "latest", the newest non-prerelease release is used;
+   * when version is "latest", the newest non-prerelease release that
+   * actually contains an asset for the requested network is used;
    * otherwise the exact version is matched against the release assets
    *
    * @param network - network the token map belongs to
@@ -201,12 +220,16 @@ export class GithubReleaseClient {
     const pattern = this.pattern(network);
     const releases = this.getReleases();
 
-    const release =
-      version === 'latest'
-        ? releases.find((r) => !r.prerelease)
-        : releases.find((r) =>
-            r.assets.some((a) => pattern.exec(a.name)?.[1] === version),
-          );
+    let release: GithubRelease | undefined;
+    if (version === 'latest') {
+      release = releases.find(
+        (r) => !r.prerelease && this.assetOf(r, network) !== undefined,
+      );
+    } else {
+      release = releases.find((r) =>
+        r.assets.some((a) => pattern.exec(a.name)?.[1] === version),
+      );
+    }
 
     if (!release) {
       throw new Error(
@@ -224,8 +247,6 @@ export class GithubReleaseClient {
     this.logger.debug(`downloading ${asset.name}`);
 
     const response = await this.client.get(asset.browser_download_url);
-    const tokenMap = new TokenMap();
-    await tokenMap.updateConfigByJson(response.data.tokens);
-    return tokenMap.getRawConfig();
+    return response.data.tokens as RosenTokens;
   };
 }

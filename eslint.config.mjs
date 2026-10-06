@@ -43,12 +43,10 @@ export default [
     languageOptions: {
       globals: {
         ...globals.node,
-        ...vitestPlugin.environments.env.globals,
       },
     },
     plugins: {
       'check-file': pluginCheckFile,
-      'vitest': vitestPlugin,
     },
     rules: {
       'check-file/filename-naming-convention': [
@@ -56,6 +54,27 @@ export default [
         { '**/!(*-migration).{js,ts,jsx,tsx}': 'CAMEL_CASE' },
         { ignoreMiddleExtensions: true },
       ],
+    },
+  },
+
+  // Test files (any package/service)
+  {
+    files: [
+      '**/tests/**/*.{js,ts,jsx,tsx}',
+      '**/*.spec.{js,ts,jsx,tsx}',
+      '**/*.test.{js,ts,jsx,tsx}',
+      '**/*.mock.{js,ts,jsx,tsx}',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        ...vitestPlugin.environments.env.globals,
+      },
+    },
+    plugins: {
+      vitest: vitestPlugin,
+    },
+    rules: {
       ...vitestPlugin.configs.recommended.rules,
     },
   },

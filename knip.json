@@ -8,5 +8,5 @@
       "entry": ["{lib,src,tests}/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}"]
     }
   },
-  "ignoreDependencies": ["ergo-lib-wasm-browser"]
+  "ignoreDependencies": ["ergo-lib-wasm-browser", "@rosen-bridge/github-client"]
 }
