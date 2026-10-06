@@ -2,7 +2,7 @@ import { ErgoBox } from '@fleet-sdk/core';
 
 import ergoNodeClientFactory from '@rosen-clients/ergo-node';
 
-import { BOX_FETCHING_PAGE_SIZE } from '@/constants';
+import { BOX_FETCHING_PAGE_SIZE } from './constants';
 
 let nodeClient: ReturnType<typeof ergoNodeClientFactory> | null = null;
 
