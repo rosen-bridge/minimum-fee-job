@@ -20,6 +20,10 @@
     "lint:check": "eslint . && npm run prettify:check"
   },
   "dependencies": {
+    "@rosen-bridge/abstract-logger": "^4.0.0",
+    "@rosen-bridge/extended-tokens": "^0.1.4",
+    "@rosen-clients/rate-limited-axios": "^2.0.1",
+    "ergo-lib-wasm-browser": "^0.28.0",
     "next": "^16.3.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
