@@ -6,14 +6,14 @@ import {
   CONTRACTS_PREFIX,
   RELEASES_PAGE_SIZE,
   TOKENS_MAP_PREFIX,
-} from '@/constants';
+} from './constants';
 import {
   GithubRelease,
   GithubReleaseAsset,
   GithubReleaseClientOptions,
-  prefixPattern,
+  PrefixPattern,
   RosenContract,
-} from '@/types';
+} from './types';
 
 export class GithubReleaseClient {
   protected client;
@@ -44,13 +44,30 @@ export class GithubReleaseClient {
   getReleases = (): GithubRelease[] => [...this.releasesCache.values()];
 
   /**
-   * replaces the locally cached releases
+   * sets the provided releases as the local cache, then fetches any
+   * remaining pages from the GitHub API and appends them
    *
-   * @param releases - releases to store in the cache
+   * @param releases - optional releases to seed the cache with
+   * @returns Promise<void>
    */
-  setReleases = (releases: GithubRelease[]): void => {
+  loadReleases = async (releases: GithubRelease[] = []): Promise<void> => {
     this.releasesCache = new Map(releases.map((r) => [r.tag_name, r]));
-    this.logger.debug(`cache set with ${this.releasesCache.size} releases`);
+    this.logger.debug(`cache seeded with ${this.releasesCache.size} releases`);
+    await this.fetchReleases();
+    this.sortReleasesByDateDesc();
+  };
+
+  /**
+   * sorts the local cache of releases by published date, newest first
+   *
+   * @returns void
+   */
+  protected sortReleasesByDateDesc = (): void => {
+    const sorted = [...this.releasesCache.values()].sort(
+      (a, b) =>
+        new Date(b.published_at).getTime() - new Date(a.published_at).getTime(),
+    );
+    this.releasesCache = new Map(sorted.map((r) => [r.tag_name, r]));
   };
 
   /**
@@ -59,7 +76,7 @@ export class GithubReleaseClient {
    *
    * @returns Promise<void>
    */
-  fetchReleases = async (): Promise<void> => {
+  protected fetchReleases = async (): Promise<void> => {
     const alreadyFetched = this.releasesCache.size;
     let page = Math.floor(alreadyFetched / RELEASES_PAGE_SIZE) + 1;
 
@@ -106,19 +123,23 @@ export class GithubReleaseClient {
    * @param prefix  - asset prefix, e.g. "tokensMap" or "contracts"
    * @returns regex matching e.g. "tokensMap-pandora-7.1.1.json"
    */
-  protected pattern = (network: string, prefix: prefixPattern) =>
+  protected pattern = (network: string, prefix: PrefixPattern) =>
     new RegExp(`^${prefix}-${network}-(.+)\\.json$`);
 
   /**
    * extracts the network name from a tokensMap asset name
    *
    * @param assetName - asset file name
-   * @returns the network name, or null if it does not match any tokensMap asset
+   * @param prefix    - asset prefix, e.g. "tokensMap" or "contracts"
+   * @returns the network name, or null if it does not match any asset
    */
-  protected parseNetworkFromAssetName = (assetName: string): string | null => {
-    const match = /^tokensMap-(.+?)-\d+\.\d+\.\d+(?:-[0-9a-f]+)?\.json$/.exec(
-      assetName,
-    );
+  protected parseNetworkFromAssetName = (
+    assetName: string,
+    prefix: PrefixPattern,
+  ): string | null => {
+    const match = new RegExp(
+      `^${prefix}-(.+?)-\\d+(?:\\.\\d+)*(?:-[0-9a-f]+(?:\\.[0-9]+)?)?\\.json$`,
+    ).exec(assetName);
     return match?.[1] ?? null;
   };
 
@@ -133,7 +154,7 @@ export class GithubReleaseClient {
   protected parseVersionFromAssetName = (
     assetName: string,
     network: string,
-    prefix: prefixPattern,
+    prefix: PrefixPattern,
   ): string | null => {
     const match = this.pattern(network, prefix).exec(assetName);
     return match?.[1] ?? null;
@@ -150,7 +171,7 @@ export class GithubReleaseClient {
   protected assetOf = (
     release: GithubRelease,
     network: string,
-    prefix: prefixPattern,
+    prefix: PrefixPattern,
   ): GithubReleaseAsset | undefined =>
     release.assets.find((asset) =>
       this.pattern(network, prefix).test(asset.name),
@@ -159,8 +180,9 @@ export class GithubReleaseClient {
   /**
    * resolves the release that contains the asset for a network and version
    *
-   * for "latest", the newest non-prerelease release is used; otherwise the
-   * exact version is matched against the release assets
+   * for "latest", the newest non-prerelease release that has a matching
+   * asset for the network is used; otherwise the exact version is matched
+   * against the release assets
    *
    * @param network - network whose release is wanted
    * @param version - version to match, or "latest" for the newest stable
@@ -171,14 +193,17 @@ export class GithubReleaseClient {
   protected findRelease = (
     network: string,
     version: string,
-    prefix: prefixPattern,
+    prefix: PrefixPattern,
   ): GithubRelease => {
     const pattern = this.pattern(network, prefix);
     const releases = this.getReleases();
 
     const release =
       version === 'latest'
-        ? releases.find((r) => !r.prerelease)
+        ? releases.find(
+            (r) =>
+              !r.prerelease && this.assetOf(r, network, prefix) !== undefined,
+          )
         : releases.find((r) =>
             r.assets.some((a) => pattern.exec(a.name)?.[1] === version),
           );
@@ -203,7 +228,7 @@ export class GithubReleaseClient {
   protected downloadAsset = async <T>(
     network: string,
     version: string,
-    prefix: prefixPattern,
+    prefix: PrefixPattern,
   ): Promise<T> => {
     const release = this.findRelease(network, version, prefix);
 
@@ -231,7 +256,10 @@ export class GithubReleaseClient {
 
     for (const release of this.getReleases()) {
       for (const asset of release.assets) {
-        const network = this.parseNetworkFromAssetName(asset.name);
+        const network = this.parseNetworkFromAssetName(
+          asset.name,
+          TOKENS_MAP_PREFIX,
+        );
         if (network) networks.add(network);
       }
     }
@@ -242,8 +270,8 @@ export class GithubReleaseClient {
   };
 
   /**
-   * returns all available versions for a network across all published
-   * releases, newest first, always prefixed by "latest"
+   * returns all available token map versions for a network across all
+   * published releases, newest first, always prefixed by "latest"
    *
    * @param network - network to list versions for
    * @returns array of version strings prefixed by "latest"

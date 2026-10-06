@@ -1,6 +1,6 @@
 import { AbstractLogger } from '@rosen-bridge/abstract-logger';
 
-import { CONTRACTS_PREFIX, TOKENS_MAP_PREFIX } from '@/constants';
+import { CONTRACTS_PREFIX, TOKENS_MAP_PREFIX } from '../constants';
 
 export type GithubReleaseClientOptions = {
   githubApiUrl: string;
@@ -22,4 +22,13 @@ export type GithubRelease = {
   assets: GithubReleaseAsset[];
 };
 
-export type prefixPattern = typeof CONTRACTS_PREFIX | typeof TOKENS_MAP_PREFIX;
+export type RosenContract = {
+  tokens: {
+    OctmNFT: string;
+  };
+  addresses: {
+    OctmAddress: string;
+  };
+};
+
+export type PrefixPattern = typeof TOKENS_MAP_PREFIX | typeof CONTRACTS_PREFIX;
