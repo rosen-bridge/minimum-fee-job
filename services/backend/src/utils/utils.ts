@@ -110,15 +110,17 @@ export const getConfigDifferencePercent = (
   const bridgeFeeDifference = differencePercent(currentBridgeFee, newBridgeFee);
 
   // rsn ratio difference
-  const rsnRatioDivisorQuotient =
-    currentConfig.configs[anyChain].rsnRatioDivisor !==
-    newConfig.configs[anyChain].rsnRatioDivisor
-      ? currentConfig.configs[anyChain].rsnRatioDivisor /
-        newConfig.configs[anyChain].rsnRatioDivisor
-      : 1n;
-  const currentRatio = currentConfig.configs[anyChain].rsnRatio;
+  // scale both ratios to a common denominator before comparing them: the
+  // divisor is recomputed from the ratio's magnitude, so the two configs
+  // can carry different divisors, and scaling only the new ratio by
+  // `currentDivisor / newDivisor` truncates to 0n whenever the new divisor
+  // is larger, reporting a spurious 100% change
+  const currentRatio =
+    currentConfig.configs[anyChain].rsnRatio *
+    newConfig.configs[anyChain].rsnRatioDivisor;
   const newRatio =
-    newConfig.configs[anyChain].rsnRatio * rsnRatioDivisorQuotient;
+    newConfig.configs[anyChain].rsnRatio *
+    currentConfig.configs[anyChain].rsnRatioDivisor;
 
   const rsnRatioDifference = differencePercent(currentRatio, newRatio);
 
