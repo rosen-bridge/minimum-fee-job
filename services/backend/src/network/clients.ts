@@ -164,11 +164,74 @@ export const getFiroFeeRatio = async (): Promise<number> => {
 export const getHandshakeFeeRatio = async (): Promise<number> =>
   await handshakeClient.getFeeRatio();
 
+/**
+ * the maximum number of blocks most Ethereum clients return for a single
+ * `eth_feeHistory` call: geth, erigon, reth and Nethermind silently cap the
+ * request at this many blocks, and Besu rejects larger counts outright
+ */
+export const ETHEREUM_FEE_HISTORY_MAX_BLOCKS = 1024;
+
 export const getEthereumFeeHistory =
   async (): Promise<EvmJsonRpcFeeHistoryResponse> => {
-    return ethereumRpcClient.send('eth_feeHistory', [
-      minimumFeeConfigs.ethereumAvgGasPricePeriod,
-      'latest',
-      [0, 100],
-    ]);
+    // a single call cannot cover the configured period (7200 blocks by
+    // default): most clients silently return at most 1024 blocks, so the
+    // average would cover only ~3.4 hours instead of a day. Fetch the
+    // period in chunks, walking backwards from the latest block, and merge
+    // the chunks into the same shape one uncapped call would return.
+    const chunks: Array<EvmJsonRpcFeeHistoryResponse> = [];
+    let remaining = minimumFeeConfigs.ethereumAvgGasPricePeriod;
+    let newestBlock = 'latest';
+    while (remaining > 0) {
+      const blockCount = Math.min(remaining, ETHEREUM_FEE_HISTORY_MAX_BLOCKS);
+      const chunk: EvmJsonRpcFeeHistoryResponse = await ethereumRpcClient.send(
+        'eth_feeHistory',
+        [
+          // the block count is a JSON-RPC QUANTITY and must be sent as a
+          // hex string; strict clients (e.g. Nethermind) reject plain
+          // JSON numbers here
+          `0x${blockCount.toString(16)}`,
+          newestBlock,
+          [0, 100],
+        ],
+      );
+      chunks.push(chunk);
+      // a client may return fewer blocks than requested (a lower cap of
+      // its own, or the start of the chain); the response itself says how
+      // many blocks actually came back
+      const fetchedBlocks = chunk.gasUsedRatio.length;
+      if (fetchedBlocks === 0) break;
+      remaining -= fetchedBlocks;
+      const oldestBlock = Number(BigInt(chunk.oldestBlock));
+      if (oldestBlock === 0) break;
+      newestBlock = `0x${(oldestBlock - 1).toString(16)}`;
+    }
+
+    // merge the chunks oldest-first. Each chunk's baseFeePerGas (and
+    // baseFeePerBlobGas) holds one extra entry — the fee of the block
+    // after its newest block — which is the first entry of the next
+    // chunk, so it is dropped from every chunk except the newest one to
+    // avoid counting the boundary block twice.
+    const chronological = [...chunks].reverse();
+    const merged: EvmJsonRpcFeeHistoryResponse = {
+      baseFeePerGas: [],
+      gasUsedRatio: [],
+      baseFeePerBlobGas: [],
+      blobGasUsedRatio: [],
+      oldestBlock: chronological[0]?.oldestBlock ?? '0x0',
+    };
+    chronological.forEach((chunk, index) => {
+      const isNewestChunk = index === chronological.length - 1;
+      merged.baseFeePerGas.push(
+        ...(isNewestChunk
+          ? chunk.baseFeePerGas
+          : chunk.baseFeePerGas.slice(0, -1)),
+      );
+      merged.gasUsedRatio.push(...chunk.gasUsedRatio);
+      const blobFees = chunk.baseFeePerBlobGas ?? [];
+      merged.baseFeePerBlobGas.push(
+        ...(isNewestChunk ? blobFees : blobFees.slice(0, -1)),
+      );
+      merged.blobGasUsedRatio.push(...(chunk.blobGasUsedRatio ?? []));
+    });
+    return merged;
   };
