@@ -23,6 +23,7 @@
     "start": "tsx ./src/index.ts",
     "start:dev": "tsx watch ./src/index.ts",
     "threshold": "tsx ./src/threshold.ts",
+    "test": "NODE_OPTIONS='--import tsx' vitest",
     "type-check": "tsc --noEmit",
     "postinstall": "patch-package",
     "typeorm:generate:sqlite": "npm run typeorm migration:generate src/database/migrations/sqlite/migration  -- -p -d src/database/dataSource.ts",

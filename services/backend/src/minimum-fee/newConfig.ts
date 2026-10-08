@@ -184,7 +184,10 @@ export const feeConfigFromPrice = async (
   const rsnRatio = BigInt(parts[0] + parts1);
 
   // calculating fee ratio
-  const feeRatio = BigInt(configs.feeRatioFloat * feeRatioDivisor);
+  // round the product: floating-point residue makes it non-integer for
+  // some ratios (e.g. 0.0003 * 10000 = 2.9999999999999996), and BigInt
+  // throws on non-integer numbers
+  const feeRatio = BigInt(Math.round(configs.feeRatioFloat * feeRatioDivisor));
 
   // calculate chain-specific configs
   const newFeeConfig = new MinimumFeeConfig();
