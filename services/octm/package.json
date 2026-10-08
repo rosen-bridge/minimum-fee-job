@@ -20,6 +20,8 @@
     "lint:check": "eslint . && npm run prettify:check"
   },
   "dependencies": {
+    "@rosen-bridge/github-client": "^0.0.0",
+    "ergo-lib-wasm-browser": "^0.24.1",
     "next": "^16.3.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
