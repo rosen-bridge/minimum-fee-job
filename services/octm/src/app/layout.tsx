@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { PropsWithChildren } from 'react';
 
+import { Providers } from '@/components/providers/providers';
+
 export const metadata: Metadata = {
   title: 'Rosen OCTM',
   description: 'Rosen Bridge OCTM App',
@@ -9,7 +11,9 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: PropsWithChildren) => {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 };
