@@ -44,6 +44,23 @@ export const QrDisplay = ({ tx }: { tx: string }) => {
 
   const [showConfig, setShowConfig] = useState<boolean>(false);
 
+  const download = () => {
+    const blob = new Blob([clone()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const timestamp = new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace('T', '_')
+      .replace(/:/g, '-');
+    link.download = `qrcode_${timestamp}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const renderToolbar = () => {
     return (
       <Stack direction="row" justifyContent="center" spacing={1}>
@@ -52,7 +69,7 @@ export const QrDisplay = ({ tx }: { tx: string }) => {
             <ContentCopyOutlined />
           </IconButton>
         </CopyToClipboard>
-        <IconButton disabled={true}>
+        <IconButton onClick={download}>
           <DownloadOutlined />
         </IconButton>
         <ToggleIconButton
