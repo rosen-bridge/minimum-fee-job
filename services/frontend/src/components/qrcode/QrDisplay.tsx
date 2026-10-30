@@ -54,7 +54,7 @@ export const QrDisplay = ({ tx }: { tx: string }) => {
       .slice(0, 19)
       .replace('T', '_')
       .replace(/:/g, '-');
-    link.download = `tx_${timestamp}.json`;
+    link.download = `qrcode_${timestamp}.json`;
     document.body.appendChild(link);
     link.click();
     link.remove();
