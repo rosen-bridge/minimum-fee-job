@@ -88,8 +88,12 @@ export const urls = {
 };
 
 export const auth = {
-  koios: config.get<string | undefined>('auth.koios'),
-  coingecko: config.get<string | undefined>('auth.coingecko'),
+  koios: config.has('auth.koios')
+    ? config.get<string>('auth.koios')
+    : undefined,
+  coingecko: config.has('auth.coingecko')
+    ? config.get<string>('auth.coingecko')
+    : undefined,
 };
 
 export const spectrumPoolTimeLength = 7 * 24 * 60 * 60 * 1000; // 7 days,
