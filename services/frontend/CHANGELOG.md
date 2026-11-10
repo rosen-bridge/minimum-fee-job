@@ -1,5 +1,11 @@
 # minfee-app
 
+## 1.0.3
+
+### Patch Changes
+
+- Fix the QR code download button to save the tx as a timestamped JSON file
+
 ## 1.0.2
 
 ### Patch Changes
