@@ -15,6 +15,7 @@ import ergoExplorerClientFactory from '@rosen-clients/ergo-explorer';
 
 import { auth, minimumFeeConfigs, urls } from '../configs';
 import { EvmJsonRpcFeeHistoryResponse } from '../types';
+import { HandshakeRpcClient } from './handshakeRpcClient';
 
 const logger = DefaultLogger.getInstance().child(import.meta.url);
 
@@ -34,6 +35,11 @@ export const firoClient = new ElectrumXSocket(
   urls.firoElectrumX.reconnectDelay,
   undefined,
   logger.child('electrumXSocket'),
+);
+
+const handshakeClient = new HandshakeRpcClient(
+  urls.handshakeRpc,
+  logger.child('handshakeRpcClient'),
 );
 
 export const getErgoHeight = async (): Promise<number> =>
@@ -61,6 +67,9 @@ export const getFiroHeight = async (): Promise<number> => {
   );
   return result.height;
 };
+
+export const getHandshakeHeight = async (): Promise<number> =>
+  await handshakeClient.getHeight();
 
 export const getAddressBoxes = async (
   address: string,
@@ -151,6 +160,9 @@ export const getFiroFeeRatio = async (): Promise<number> => {
   const feePerByte = Math.ceil(feeSatoshis / 1000);
   return feePerByte;
 };
+
+export const getHandshakeFeeRatio = async (): Promise<number> =>
+  await handshakeClient.getFeeRatio();
 
 export const getEthereumFeeHistory =
   async (): Promise<EvmJsonRpcFeeHistoryResponse> => {

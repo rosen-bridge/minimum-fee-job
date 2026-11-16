@@ -1,7 +1,7 @@
 {
   "name": "minfee-app",
   "private": "true",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Minimum fee app",
   "repository": {
     "type": "git",
@@ -49,6 +49,6 @@
   },
   "engines": {
     "node": ">=22.18.0",
-    "npm": ">=11.6.2"
+    "npm": "11.6.2"
   }
 }

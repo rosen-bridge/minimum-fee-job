@@ -1,5 +1,12 @@
 # minimum-fee-job
 
+## 1.4.0
+
+### Minor Changes
+
+- Add Coingecko API key config under `auth.coingecko`
+- Integrate Handshake
+
 ## 1.3.2
 
 ### Patch Changes

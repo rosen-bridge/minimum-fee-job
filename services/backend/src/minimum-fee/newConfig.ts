@@ -11,6 +11,7 @@ import {
   ERG,
   ETH,
   FIRO,
+  HNS,
   minimumFeeConfigs,
 } from '../configs';
 import {
@@ -18,6 +19,7 @@ import {
   getDogeFeeRatio,
   getEthereumFeeHistory,
   getFiroFeeRatio,
+  getHandshakeFeeRatio,
 } from '../network/clients';
 import { TokenHandler } from '../tokenMap/tokenHandler';
 import { Chains, SUPPORTED_CHAINS, SupportedTokenConfig } from '../types';
@@ -48,6 +50,9 @@ export const generateNewFeeConfig = async (
 
   logger.debug(`Fetching Firo fee ratio`);
   const firoFeeRatio = await getFiroFeeRatio();
+
+  logger.debug(`Fetching Handshake fee ratio`);
+  const handshakeFeeRatio = await getHandshakeFeeRatio();
 
   logger.debug(
     `Fetching Ethereum fee history (for [${minimumFeeConfigs.ethereumAvgGasPricePeriod}] latest blocks)`,
@@ -81,6 +86,7 @@ export const generateNewFeeConfig = async (
       bitcoinFeeRatioMap,
       dogeFeeRatio,
       firoFeeRatio,
+      handshakeFeeRatio,
       ethereumNetworkFeeInEther,
     );
     newFeeConfigs.set(token.tokenId, feeConfig);
@@ -99,6 +105,7 @@ export const feeConfigFromPrice = async (
   bitcoinFeeRatioMap: Record<string, number>,
   dogeFeeRatio: number,
   firoFeeRatio: number,
+  handshakeFeeRatio: number,
   ethereumNetworkFeeInEther: number,
 ): Promise<MinimumFeeConfig> => {
   const getCurrentHeight = (chain: Chains) => {
@@ -362,6 +369,32 @@ export const feeConfigFromPrice = async (
     newFeeConfig.setChainConfig(Chains.FIRO, firoHeight, undefined);
   }
 
+  //  HANDSHAKE
+  const handshakeHeight =
+    getCurrentHeight(Chains.HANDSHAKE) + configs.delays.handshake;
+  if (chains.includes(Chains.HANDSHAKE)) {
+    const handshakeNetworkFee = getHandshakeNetworkFee(
+      prices,
+      tokenPrice,
+      tokenDecimal,
+      handshakeFeeRatio,
+    );
+    const handshakeFee: ChainFee = {
+      bridgeFee: bridgeFee,
+      networkFee: handshakeNetworkFee,
+      rsnRatio: rsnRatio,
+      feeRatio: feeRatio,
+      rsnRatioDivisor,
+    };
+    newFeeConfig.setChainConfig(
+      Chains.HANDSHAKE,
+      handshakeHeight,
+      handshakeFee,
+    );
+  } else {
+    newFeeConfig.setChainConfig(Chains.HANDSHAKE, handshakeHeight, undefined);
+  }
+
   return newFeeConfig;
 };
 
@@ -515,6 +548,27 @@ const getFiroNetworkFee = (
   return BigInt(
     Math.ceil(
       (firoValue * firoPrice * 10 ** tokenDecimal) / (tokenPrice * 10 ** 8),
+    ),
+  );
+};
+
+const getHandshakeNetworkFee = (
+  prices: Map<string, number>,
+  tokenPrice: number,
+  tokenDecimal: number,
+  handshakeFeeRatio: number,
+) => {
+  const handshakePrice = prices.get(HNS);
+  if (!handshakePrice) throw Error(`Handshake price is required`);
+
+  // calculating network fee on Handshake (1 HNS = 10^6 dollarydoos)
+  const handshakeValue =
+    handshakeFeeRatio * minimumFeeConfigs.handshakeTxSize +
+    minimumFeeConfigs.handshakeMinUtxo * 10 ** 6;
+  return BigInt(
+    Math.ceil(
+      (handshakeValue * handshakePrice * 10 ** tokenDecimal) /
+        (tokenPrice * 10 ** 6),
     ),
   );
 };
